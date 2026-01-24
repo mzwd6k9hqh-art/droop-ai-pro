@@ -165,13 +165,13 @@ export default function Pricing() {
               className={cn(
                 'relative rounded-2xl p-6 transition-all',
                 plan.highlight
-                  ? 'bg-primary text-primary-foreground ring-2 ring-primary shadow-lg scale-105'
+                  ? 'gradient-button ring-2 ring-primary shadow-xl scale-105'
                   : 'elevated-card'
               )}
             >
               {plan.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-warning text-warning-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                  <span className="bg-warning text-warning-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-md">
                     {plan.badge}
                   </span>
                 </div>
@@ -182,23 +182,26 @@ export default function Pricing() {
                   className={cn(
                     'inline-flex p-2.5 rounded-xl mb-4',
                     plan.highlight
-                      ? 'bg-primary-foreground/20'
-                      : 'bg-primary/10'
+                      ? 'bg-white/20'
+                      : 'icon-container icon-primary'
                   )}
                 >
                   <Icon
                     className={cn(
                       'h-6 w-6',
-                      plan.highlight ? 'text-primary-foreground' : 'text-primary'
+                      plan.highlight ? 'text-white' : ''
                     )}
                   />
                 </div>
-                <h3 className="text-xl font-semibold">{plan.name}</h3>
+                <h3 className={cn(
+                  'text-xl font-semibold',
+                  plan.highlight && 'text-white'
+                )}>{plan.name}</h3>
                 <p
                   className={cn(
                     'text-sm mt-1',
                     plan.highlight
-                      ? 'text-primary-foreground/80'
+                      ? 'text-white/80'
                       : 'text-muted-foreground'
                   )}
                 >
@@ -207,12 +210,15 @@ export default function Pricing() {
               </div>
 
               <div className="mb-6">
-                <span className="text-4xl font-bold">{plan.price}</span>
+                <span className={cn(
+                  'text-4xl font-bold',
+                  plan.highlight && 'text-white'
+                )}>{plan.price}</span>
                 <span
                   className={cn(
                     'text-sm',
                     plan.highlight
-                      ? 'text-primary-foreground/80'
+                      ? 'text-white/80'
                       : 'text-muted-foreground'
                   )}
                 >
@@ -222,7 +228,10 @@ export default function Pricing() {
 
               <ul className="space-y-3 mb-6">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
+                  <li key={i} className={cn(
+                    'flex items-start gap-2 text-sm',
+                    plan.highlight && 'text-white'
+                  )}>
                     {feature.included ? (
                       <Check
                         className={cn(
@@ -230,7 +239,7 @@ export default function Pricing() {
                           feature.highlight
                             ? plan.highlight
                               ? 'text-warning'
-                              : 'text-primary'
+                              : 'text-secondary'
                             : ''
                         )}
                       />
@@ -239,7 +248,7 @@ export default function Pricing() {
                         className={cn(
                           'h-4 w-4 mt-0.5 flex-shrink-0 opacity-40',
                           plan.highlight
-                            ? 'text-primary-foreground/50'
+                            ? 'text-white/50'
                             : 'text-muted-foreground'
                         )}
                       />
@@ -262,7 +271,8 @@ export default function Pricing() {
                 variant={plan.highlight ? 'secondary' : 'default'}
                 className={cn(
                   'w-full',
-                  isCurrent && 'opacity-50 cursor-not-allowed'
+                  isCurrent && 'opacity-50 cursor-not-allowed',
+                  !plan.highlight && 'gradient-button'
                 )}
               >
                 {isCurrent ? t('pricing.current') : t('pricing.upgrade')}
@@ -277,20 +287,22 @@ export default function Pricing() {
         <h2 className="text-2xl font-bold text-center mb-8">All Features</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Bot, label: 'DROOP AI Assistant' },
-            { icon: BarChart3, label: 'Business Analytics' },
-            { icon: Globe, label: 'Global Market Data' },
-            { icon: Rocket, label: 'Growth Insights' },
-            { icon: Users, label: 'Team Collaboration' },
-            { icon: Shield, label: 'Secure & Private' },
-            { icon: HeadphonesIcon, label: 'Expert Support' },
-            { icon: Infinity, label: 'Unlimited Potential' },
+            { icon: Bot, label: 'DROOP AI Assistant', color: 'icon-primary' },
+            { icon: BarChart3, label: 'Business Analytics', color: 'icon-info' },
+            { icon: Globe, label: 'Global Market Data', color: 'icon-secondary' },
+            { icon: Rocket, label: 'Growth Insights', color: 'icon-warning' },
+            { icon: Users, label: 'Team Collaboration', color: 'icon-accent' },
+            { icon: Shield, label: 'Secure & Private', color: 'icon-success' },
+            { icon: HeadphonesIcon, label: 'Expert Support', color: 'icon-info' },
+            { icon: Infinity, label: 'Unlimited Potential', color: 'icon-primary' },
           ].map((item, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 p-4 rounded-xl bg-muted/50"
+              className="flex items-center gap-3 p-4 rounded-xl elevated-card"
             >
-              <item.icon className="h-5 w-5 text-primary" />
+              <div className={cn('icon-container', item.color)}>
+                <item.icon className="h-5 w-5" />
+              </div>
               <span className="text-sm font-medium">{item.label}</span>
             </div>
           ))}
