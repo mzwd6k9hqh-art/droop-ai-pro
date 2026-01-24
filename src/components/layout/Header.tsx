@@ -51,37 +51,37 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-surface border-b border-border/50">
+    <header className="sticky top-0 z-50 w-full gradient-header shadow-md">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
+              <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight">Sales Booster</span>
+            <span className="text-xl font-bold tracking-tight text-white">Sales Booster</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
             <Link to="/">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
                 <BarChart3 className="h-4 w-4" />
                 {t('nav.dashboard')}
               </Button>
             </Link>
             <Link to="/analytics">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
                 <BarChart3 className="h-4 w-4" />
                 {t('nav.analytics')}
               </Button>
             </Link>
             <Link to="/ai">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
                 <Bot className="h-4 w-4" />
                 {t('nav.droopai')}
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button variant="ghost" size="sm" className="gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
                 <CreditCard className="h-4 w-4" />
                 {t('nav.pricing')}
               </Button>
@@ -105,7 +105,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="h-9 w-9"
+            className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10"
           >
             {theme === 'light' ? (
               <Moon className="h-4 w-4" />
@@ -116,7 +116,7 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10">
                 <User className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -144,7 +144,7 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10">
                 <Menu className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

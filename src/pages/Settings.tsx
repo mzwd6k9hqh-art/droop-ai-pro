@@ -3,6 +3,7 @@ import { useAuth, PlanType } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -21,6 +22,8 @@ import {
   Shield,
   Bell,
   Palette,
+  Store,
+  Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -56,8 +59,8 @@ export default function Settings() {
       {/* Account Section */}
       <section className="elevated-card p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <User className="h-5 w-5 text-primary" />
+          <div className="icon-container icon-primary">
+            <User className="h-5 w-5" />
           </div>
           <h2 className="text-lg font-semibold">{t('settings.account')}</h2>
         </div>
@@ -97,11 +100,40 @@ export default function Settings() {
         </div>
       </section>
 
+      {/* Store Information Section */}
+      <section className="elevated-card p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="icon-container icon-secondary">
+            <Store className="h-5 w-5" />
+          </div>
+          <h2 className="text-lg font-semibold">Store Information</h2>
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="storeUrl" className="flex items-center gap-2">
+              Store URL
+              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+            </Label>
+            <Input
+              id="storeUrl"
+              type="text"
+              value={user?.storeUrl || ''}
+              disabled
+              className="bg-muted/50 cursor-not-allowed"
+            />
+            <p className="text-xs text-muted-foreground">
+              Your store URL is used for personalized analytics and AI insights. Contact support to change it.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Appearance Section */}
       <section className="elevated-card p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Palette className="h-5 w-5 text-primary" />
+          <div className="icon-container icon-accent">
+            <Palette className="h-5 w-5" />
           </div>
           <h2 className="text-lg font-semibold">{t('settings.theme')}</h2>
         </div>
@@ -132,8 +164,8 @@ export default function Settings() {
       {/* Language Section */}
       <section className="elevated-card p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Globe className="h-5 w-5 text-primary" />
+          <div className="icon-container icon-info">
+            <Globe className="h-5 w-5" />
           </div>
           <h2 className="text-lg font-semibold">{t('settings.language')}</h2>
         </div>
@@ -166,8 +198,8 @@ export default function Settings() {
       {/* Notifications Section */}
       <section className="elevated-card p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Bell className="h-5 w-5 text-primary" />
+          <div className="icon-container icon-warning">
+            <Bell className="h-5 w-5" />
           </div>
           <h2 className="text-lg font-semibold">Notifications</h2>
         </div>
@@ -198,8 +230,8 @@ export default function Settings() {
       {/* Security Section */}
       <section className="elevated-card p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Shield className="h-5 w-5 text-primary" />
+          <div className="icon-container icon-success">
+            <Shield className="h-5 w-5" />
           </div>
           <h2 className="text-lg font-semibold">Security</h2>
         </div>

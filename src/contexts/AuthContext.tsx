@@ -5,6 +5,7 @@ export type PlanType = 'free' | 'starter' | 'pro' | 'premium';
 interface User {
   email: string;
   name: string;
+  storeUrl: string;
   plan: PlanType;
   aiMessagesUsed: number;
   createdAt: string;
@@ -15,7 +16,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, name: string, password: string) => Promise<boolean>;
+  register: (email: string, name: string, password: string, storeUrl: string) => Promise<boolean>;
   logout: () => void;
   updatePlan: (plan: PlanType) => void;
   incrementAiMessages: () => boolean;
@@ -66,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const register = async (email: string, name: string, password: string): Promise<boolean> => {
+  const register = async (email: string, name: string, password: string, storeUrl: string): Promise<boolean> => {
     const users = getUsers();
     const emailLower = email.toLowerCase();
     
@@ -77,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const newUser: User & { password: string } = {
       email: emailLower,
       name,
+      storeUrl,
       password,
       plan: 'free',
       aiMessagesUsed: 0,

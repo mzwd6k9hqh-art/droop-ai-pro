@@ -263,18 +263,36 @@ The goal is maximizing revenue while maintaining competitive positioning.`,
 Would you like detailed analysis on any specific market or sector?`,
 };
 
-export function getAIResponse(query: string): string {
+export function getAIResponse(query: string, storeUrl?: string): string {
   const lowerQuery = query.toLowerCase();
   
+  // Add store context prefix if available
+  const storeContext = storeUrl 
+    ? `Based on my analysis of your store at **${storeUrl}**, `
+    : '';
+  
+  let response = '';
+  
   if (lowerQuery.includes('price') || lowerQuery.includes('pricing') || lowerQuery.includes('cost')) {
-    return aiResponses.pricing;
-  }
-  if (lowerQuery.includes('grow') || lowerQuery.includes('scale') || lowerQuery.includes('marketing')) {
-    return aiResponses.growth;
-  }
-  if (lowerQuery.includes('market') || lowerQuery.includes('opportunity') || lowerQuery.includes('expansion')) {
-    return aiResponses.market;
+    response = aiResponses.pricing;
+  } else if (lowerQuery.includes('grow') || lowerQuery.includes('scale') || lowerQuery.includes('marketing')) {
+    response = aiResponses.growth;
+  } else if (lowerQuery.includes('market') || lowerQuery.includes('opportunity') || lowerQuery.includes('expansion')) {
+    response = aiResponses.market;
+  } else {
+    response = aiResponses.default;
   }
   
-  return aiResponses.default;
+  // Inject store context into the response
+  if (storeUrl) {
+    // Replace the first sentence to include store context
+    const firstLineEnd = response.indexOf('\n');
+    if (firstLineEnd > 0) {
+      const firstLine = response.substring(0, firstLineEnd);
+      const rest = response.substring(firstLineEnd);
+      response = storeContext + firstLine.charAt(0).toLowerCase() + firstLine.slice(1) + rest;
+    }
+  }
+  
+  return response;
 }
