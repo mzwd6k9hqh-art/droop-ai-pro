@@ -88,8 +88,10 @@ export default function Analytics() {
 
       {/* Sales Performance */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="icon-feature icon-primary">
+            <TrendingUp className="h-5 w-5" />
+          </div>
           <h2 className="text-xl font-semibold">{t('analytics.performance')}</h2>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -116,8 +118,10 @@ export default function Analytics() {
 
       {/* Market Opportunities */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Lightbulb className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="icon-feature icon-warning">
+            <Lightbulb className="h-5 w-5" />
+          </div>
           <h2 className="text-xl font-semibold">{t('analytics.opportunities')}</h2>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -141,8 +145,10 @@ export default function Analytics() {
 
       {/* Conversion Suggestions */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Target className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="icon-feature icon-success">
+            <Target className="h-5 w-5" />
+          </div>
           <h2 className="text-xl font-semibold">{t('analytics.conversions')}</h2>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
