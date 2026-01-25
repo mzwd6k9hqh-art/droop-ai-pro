@@ -27,15 +27,18 @@ interface Message {
 }
 
 export default function AIChat() {
-  const { user, incrementAiMessages, getAiMessagesRemaining } = useAuth();
+  const { user, incrementAiMessages, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
   const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const unlimited = isUnlimitedPlan();
   const remaining = getAiMessagesRemaining();
-  const isLimitReached = remaining <= 0;
+  const dailyLimit = getDailyLimit();
+  const messagesUsedToday = unlimited ? 0 : dailyLimit - remaining;
+  const isLimitReached = !unlimited && remaining <= 0;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -89,21 +92,29 @@ export default function AIChat() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className={cn(
-            'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm',
-            isLimitReached
-              ? 'bg-destructive/10 text-destructive'
-              : 'bg-muted text-muted-foreground'
-          )}>
-            <MessageCircle className="h-4 w-4" />
-            {remaining === Infinity ? (
-              <span>Unlimited</span>
-            ) : (
-              <span>{remaining} {t('ai.remaining')}</span>
-            )}
+        {!unlimited && (
+          <div className="flex items-center gap-4">
+            <div className={cn(
+              'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium',
+              isLimitReached
+                ? 'bg-destructive/10 text-destructive border border-destructive/20'
+                : remaining <= 2
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                : 'bg-muted text-muted-foreground border border-border/50'
+            )}>
+              <MessageCircle className="h-4 w-4" />
+              <span>{messagesUsedToday} / {dailyLimit} messages used today</span>
+            </div>
           </div>
-        </div>
+        )}
+        {unlimited && (
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+              <Sparkles className="h-4 w-4" />
+              <span>Unlimited Messages</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Store Context */}
@@ -238,21 +249,21 @@ export default function AIChat() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Limit Reached Banner */}
+      {/* Daily Limit Reached Banner */}
       {isLimitReached && (
         <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl mb-4">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-medium text-destructive">{t('ai.limit')}</p>
+              <p className="font-medium text-destructive">Daily message limit reached</p>
               <p className="text-sm text-muted-foreground mt-1">
-                {t('ai.upgrade')}
+                You've used all {dailyLimit} messages for today. Your limit will reset tomorrow, or upgrade to a paid plan for unlimited messages.
               </p>
             </div>
             <Link to="/pricing">
               <Button size="sm" className="gap-2 gradient-button">
                 <Crown className="h-4 w-4" />
-                Upgrade
+                Upgrade Now
               </Button>
             </Link>
           </div>

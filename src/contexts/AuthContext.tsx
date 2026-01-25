@@ -7,7 +7,8 @@ interface User {
   name: string;
   storeUrl: string;
   plan: PlanType;
-  aiMessagesUsed: number;
+  dailyAiMessagesUsed: number;
+  lastMessageDate: string;
   createdAt: string;
 }
 
@@ -21,12 +22,18 @@ interface AuthContextType {
   updatePlan: (plan: PlanType) => void;
   incrementAiMessages: () => boolean;
   getAiMessagesRemaining: () => number;
+  getDailyLimit: () => number;
+  isUnlimitedPlan: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'salesbooster_users';
 const CURRENT_USER_KEY = 'salesbooster_current_user';
+
+const getTodayDate = (): string => {
+  return new Date().toISOString().split('T')[0];
+};
 
 const getUsers = (): Record<string, User & { password: string }> => {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -41,12 +48,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const checkAndResetDailyLimit = (userData: User & { password: string }): User & { password: string } => {
+    const today = getTodayDate();
+    if (userData.lastMessageDate !== today) {
+      userData.dailyAiMessagesUsed = 0;
+      userData.lastMessageDate = today;
+    }
+    return userData;
+  };
+
   useEffect(() => {
     const currentUserEmail = localStorage.getItem(CURRENT_USER_KEY);
     if (currentUserEmail) {
       const users = getUsers();
-      const userData = users[currentUserEmail];
+      let userData = users[currentUserEmail];
       if (userData) {
+        // Check and reset daily limit on load
+        userData = checkAndResetDailyLimit(userData);
+        users[currentUserEmail] = userData;
+        saveUsers(users);
+        
         const { password, ...userWithoutPassword } = userData;
         setUser(userWithoutPassword);
       }
@@ -56,9 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     const users = getUsers();
-    const userData = users[email.toLowerCase()];
+    let userData = users[email.toLowerCase()];
     
     if (userData && userData.password === password) {
+      // Check and reset daily limit on login
+      userData = checkAndResetDailyLimit(userData);
+      users[email.toLowerCase()] = userData;
+      saveUsers(users);
+      
       const { password: _, ...userWithoutPassword } = userData;
       setUser(userWithoutPassword);
       localStorage.setItem(CURRENT_USER_KEY, email.toLowerCase());
@@ -81,7 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       storeUrl,
       password,
       plan: 'free',
-      aiMessagesUsed: 0,
+      dailyAiMessagesUsed: 0,
+      lastMessageDate: getTodayDate(),
       createdAt: new Date().toISOString(),
     };
 
@@ -105,37 +132,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const users = getUsers();
     if (users[user.email]) {
       users[user.email].plan = plan;
-      users[user.email].aiMessagesUsed = 0; // Reset on upgrade
       saveUsers(users);
-      setUser({ ...user, plan, aiMessagesUsed: 0 });
+      setUser({ ...user, plan });
     }
+  };
+
+  const isUnlimitedPlan = (): boolean => {
+    if (!user) return false;
+    return user.plan !== 'free';
+  };
+
+  const getDailyLimit = (): number => {
+    return 5; // Free plan daily limit
   };
 
   const getAiMessagesRemaining = (): number => {
     if (!user) return 0;
     
-    const limits: Record<PlanType, number> = {
-      free: 5,
-      starter: 50,
-      pro: 200,
-      premium: Infinity,
-    };
+    // Paid plans have unlimited messages
+    if (isUnlimitedPlan()) return Infinity;
     
-    return Math.max(0, limits[user.plan] - user.aiMessagesUsed);
+    // Check if we need to reset for a new day
+    const today = getTodayDate();
+    if (user.lastMessageDate !== today) {
+      return getDailyLimit();
+    }
+    
+    return Math.max(0, getDailyLimit() - user.dailyAiMessagesUsed);
   };
 
   const incrementAiMessages = (): boolean => {
     if (!user) return false;
     
-    const remaining = getAiMessagesRemaining();
-    if (remaining <= 0) return false;
-
+    // Paid plans can always send
+    if (isUnlimitedPlan()) return true;
+    
+    const today = getTodayDate();
     const users = getUsers();
-    if (users[user.email]) {
-      users[user.email].aiMessagesUsed += 1;
-      saveUsers(users);
-      setUser({ ...user, aiMessagesUsed: user.aiMessagesUsed + 1 });
+    
+    if (!users[user.email]) return false;
+    
+    // Reset counter if it's a new day
+    if (user.lastMessageDate !== today) {
+      users[user.email].dailyAiMessagesUsed = 0;
+      users[user.email].lastMessageDate = today;
     }
+    
+    // Check if limit reached
+    if (users[user.email].dailyAiMessagesUsed >= getDailyLimit()) {
+      return false;
+    }
+    
+    // Increment counter
+    users[user.email].dailyAiMessagesUsed += 1;
+    users[user.email].lastMessageDate = today;
+    saveUsers(users);
+    
+    setUser({
+      ...user,
+      dailyAiMessagesUsed: users[user.email].dailyAiMessagesUsed,
+      lastMessageDate: today,
+    });
+    
     return true;
   };
 
@@ -151,6 +209,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updatePlan,
         incrementAiMessages,
         getAiMessagesRemaining,
+        getDailyLimit,
+        isUnlimitedPlan,
       }}
     >
       {children}
