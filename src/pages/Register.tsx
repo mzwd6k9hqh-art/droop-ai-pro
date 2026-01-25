@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Zap, Mail, Lock, User, ArrowRight, Store, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { SplashScreen } from '@/components/SplashScreen';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -15,6 +16,7 @@ export default function Register() {
   const [storeUrl, setStoreUrl] = useState('');
   const [storeUrlError, setStoreUrlError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
   const { register } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -62,13 +64,17 @@ export default function Register() {
     
     if (success) {
       toast.success('Account created successfully!');
-      navigate('/');
+      setShowSplash(true);
     } else {
       toast.error('Email already registered');
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
+
+  // Show splash screen after successful registration
+  if (showSplash) {
+    return <SplashScreen onComplete={() => navigate('/')} />;
+  }
 
   return (
     <div className="flex min-h-screen">

@@ -180,15 +180,15 @@ export default function Pricing() {
               <div className="mb-6">
                 <div
                   className={cn(
-                    'inline-flex p-2.5 rounded-xl mb-4',
+                    'inline-flex rounded-2xl mb-4',
                     plan.highlight
-                      ? 'bg-white/20'
-                      : 'icon-container icon-primary'
+                      ? 'p-3 bg-white/20'
+                      : 'icon-action icon-primary'
                   )}
                 >
                   <Icon
                     className={cn(
-                      'h-6 w-6',
+                      'h-7 w-7',
                       plan.highlight ? 'text-white' : ''
                     )}
                   />
@@ -300,7 +300,7 @@ export default function Pricing() {
               key={i}
               className="flex items-center gap-3 p-4 rounded-xl elevated-card"
             >
-              <div className={cn('icon-container', item.color)}>
+              <div className={cn('icon-feature', item.color)}>
                 <item.icon className="h-5 w-5" />
               </div>
               <span className="text-sm font-medium">{item.label}</span>

@@ -59,7 +59,7 @@ export default function Dashboard() {
         <div className="elevated-card p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="icon-container icon-primary">
+              <div className="icon-feature icon-primary">
                 <Store className="h-5 w-5" />
               </div>
               <div>
@@ -80,15 +80,15 @@ export default function Dashboard() {
       )}
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Link to="/ai" className="action-card group">
           <div className="flex items-start justify-between">
-            <div className="icon-container icon-primary">
-              <Bot className="h-6 w-6" />
+            <div className="icon-action icon-solid-primary">
+              <Bot className="h-7 w-7" />
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <h3 className="font-semibold mt-4">DROOP AI Assistant</h3>
+          <h3 className="font-semibold mt-4 text-lg">DROOP AI Assistant</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Get AI-powered business insights for {user?.storeUrl ? 'your store' : 'your business'}
           </p>
@@ -96,12 +96,12 @@ export default function Dashboard() {
 
         <Link to="/analytics" className="action-card group">
           <div className="flex items-start justify-between">
-            <div className="icon-container icon-info">
-              <BarChart3 className="h-6 w-6" />
+            <div className="icon-action icon-solid-secondary">
+              <BarChart3 className="h-7 w-7" />
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <h3 className="font-semibold mt-4">Business Analytics</h3>
+          <h3 className="font-semibold mt-4 text-lg">Business Analytics</h3>
           <p className="text-sm text-muted-foreground mt-1">
             View detailed performance metrics and insights
           </p>
@@ -109,12 +109,12 @@ export default function Dashboard() {
 
         <Link to="/pricing" className="action-card group">
           <div className="flex items-start justify-between">
-            <div className="icon-container icon-warning">
-              <Crown className="h-6 w-6" />
+            <div className="icon-action icon-solid-accent">
+              <Crown className="h-7 w-7" />
             </div>
             <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
           </div>
-          <h3 className="font-semibold mt-4">Upgrade Plan</h3>
+          <h3 className="font-semibold mt-4 text-lg">Upgrade Plan</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Unlock more features and AI capabilities
           </p>
@@ -194,7 +194,7 @@ export default function Dashboard() {
           {trendingNiches.slice(0, 3).map((niche) => (
             <div key={niche.id} className="stat-card">
               <div className="flex items-start justify-between mb-3">
-                <div className="icon-container icon-accent">
+                <div className="icon-feature icon-accent">
                   <Lightbulb className="h-5 w-5" />
                 </div>
                 <div className="flex items-center gap-1.5">
