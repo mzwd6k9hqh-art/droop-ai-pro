@@ -145,11 +145,15 @@ export default function Pricing() {
     <div className="py-4 animate-slide-up">
       {/* Header */}
       <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+          <Crown className="h-4 w-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Choose Your Plan</span>
+        </div>
         <h1 className="text-4xl font-bold tracking-tight mb-4">
           {t('pricing.title')}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Scale your business with AI-powered insights. Choose the plan that fits your needs.
+          Scale your business with AI-powered insights. Start free and upgrade as you grow.
         </p>
       </div>
 

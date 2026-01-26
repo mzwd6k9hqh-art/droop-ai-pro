@@ -80,14 +80,20 @@ export default function AIChat() {
     <div className="flex flex-col h-[calc(100vh-8rem)] animate-slide-up">
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="icon-action icon-solid-primary">
-            <Bot className="h-7 w-7" />
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <div className="icon-action icon-solid-primary">
+              <Bot className="h-7 w-7" />
+            </div>
+            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-accent" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">{t('ai.title')}</h1>
+            <h1 className="text-xl font-bold flex items-center gap-2">
+              DROOP AI
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">Assistant</span>
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Get intelligent business insights and recommendations
+              Your AI-powered sales & business intelligence companion
             </p>
           </div>
         </div>
@@ -119,7 +125,7 @@ export default function AIChat() {
 
       {/* Store Context */}
       {user?.storeUrl && (
-        <div className="py-3 px-4 mt-4 rounded-lg bg-muted/50 border border-border/50">
+        <div className="py-3 px-4 mt-4 rounded-xl bg-muted/50 border border-border/50">
           <div className="flex items-center gap-2 text-sm">
             <Store className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Analyzing:</span>
@@ -127,7 +133,7 @@ export default function AIChat() {
               href={user.storeUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-primary hover:underline flex items-center gap-1"
+              className="text-primary hover:underline flex items-center gap-1 font-medium"
             >
               {user.storeUrl}
               <ExternalLink className="h-3 w-3" />
@@ -140,15 +146,18 @@ export default function AIChat() {
       <div className="flex-1 overflow-y-auto py-6 space-y-6">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 mb-4">
-              <Sparkles className="h-8 w-8 text-primary" />
+            <div className="relative mb-6">
+              <div className="p-5 rounded-2xl gradient-button shadow-xl">
+                <Bot className="h-10 w-10 text-white" />
+              </div>
+              <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-accent" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">Start a Conversation</h2>
-            <p className="text-muted-foreground max-w-md mb-6">
-              Ask DROOP AI about business strategies, market analysis, pricing, growth tactics, and more
+            <h2 className="text-2xl font-bold mb-2">Hey! I'm DROOP AI</h2>
+            <p className="text-muted-foreground max-w-md mb-8 text-lg">
+              Your AI sales assistant. Ask me about business strategies, market analysis, pricing, and growth tactics
               {user?.storeUrl && ` for ${user.storeUrl}`}.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
               {[
                 'What are the best markets to enter in 2024?',
                 'How should I price my products?',
@@ -158,7 +167,7 @@ export default function AIChat() {
                 <button
                   key={i}
                   onClick={() => setInput(suggestion)}
-                  className="text-left text-sm p-3 rounded-xl bg-muted hover:bg-muted/80 transition-colors border border-border/50"
+                  className="text-left text-sm p-4 rounded-xl bg-muted hover:bg-muted/80 transition-all border border-border/50 hover:border-primary/30 hover:shadow-md"
                   disabled={isLimitReached}
                 >
                   {suggestion}

@@ -5,8 +5,15 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Bot, Mail, Lock, ArrowRight, Sparkles, TrendingUp, Globe, BarChart3 } from 'lucide-react';
 import { toast } from 'sonner';
+
+const features = [
+  { icon: Bot, text: 'AI-Powered Business Insights' },
+  { icon: TrendingUp, text: 'Growth Strategies & Analytics' },
+  { icon: Globe, text: 'Global Market Intelligence' },
+  { icon: BarChart3, text: 'Real-Time Performance Data' },
+];
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,7 +31,7 @@ export default function Login() {
     
     if (success) {
       toast.success('Welcome back!');
-      navigate('/');
+      navigate('/dashboard');
     } else {
       toast.error('Invalid email or password');
     }
@@ -38,12 +45,18 @@ export default function Login() {
       <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-8">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-                <Zap className="h-5 w-5 text-primary-foreground" />
+            <Link to="/" className="flex items-center gap-2.5 mb-8">
+              <div className="relative">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl gradient-button shadow-lg">
+                  <Bot className="h-6 w-6 text-white" />
+                </div>
+                <Sparkles className="absolute -top-1 -right-1 h-3.5 w-3.5 text-accent" />
               </div>
-              <span className="text-2xl font-bold">Sales Booster</span>
-            </div>
+              <div className="flex flex-col">
+                <span className="text-xl font-bold tracking-tight">DROOP AI</span>
+                <span className="text-xs text-muted-foreground">Sales Booster</span>
+              </div>
+            </Link>
             <h2 className="text-2xl font-bold tracking-tight">{t('auth.login')}</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Don't have an account?{' '}
@@ -64,7 +77,7 @@ export default function Login() {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 input-focus"
+                  className="pl-10 h-12 input-focus"
                   required
                 />
               </div>
@@ -80,13 +93,13 @@ export default function Login() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 input-focus"
+                  className="pl-10 h-12 input-focus"
                   required
                 />
               </div>
             </div>
 
-            <Button type="submit" className="w-full gap-2" disabled={isLoading}>
+            <Button type="submit" className="w-full h-12 gap-2 gradient-button text-base" disabled={isLoading}>
               {isLoading ? 'Signing in...' : t('auth.login')}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -96,14 +109,29 @@ export default function Login() {
 
       {/* Right side - Visual */}
       <div className="relative hidden w-0 flex-1 lg:block">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-info">
+        <div className="absolute inset-0 gradient-header">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-          <div className="flex h-full flex-col items-center justify-center p-12 text-primary-foreground">
+          <div className="flex h-full flex-col items-center justify-center p-12 text-white">
             <div className="max-w-md text-center">
-              <h1 className="text-4xl font-bold mb-4">Boost Your Sales with AI</h1>
-              <p className="text-lg opacity-90">
-                Get intelligent insights, market analysis, and business recommendations powered by DROOP AI.
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur mb-8">
+                <Sparkles className="h-4 w-4" />
+                <span className="text-sm font-medium">AI-Powered Platform</span>
+              </div>
+              <h1 className="text-4xl font-bold mb-4">Welcome Back to DROOP AI</h1>
+              <p className="text-lg opacity-90 mb-10">
+                Continue growing your business with intelligent insights and data-driven recommendations.
               </p>
+              
+              <div className="space-y-4">
+                {features.map((feature, i) => (
+                  <div key={i} className="flex items-center gap-3 text-left bg-white/10 backdrop-blur rounded-xl p-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20">
+                      <feature.icon className="h-5 w-5" />
+                    </div>
+                    <span className="font-medium">{feature.text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

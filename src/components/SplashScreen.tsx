@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import { Bot, Sparkles } from 'lucide-react';
 
 interface SplashScreenProps {
   onComplete?: () => void;
@@ -11,9 +11,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
     const duration = prefersReducedMotion ? 500 : 2500;
     
     const timer = setTimeout(() => {
@@ -22,9 +20,9 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         if (onComplete) {
           onComplete();
         } else {
-          navigate('/');
+          navigate('/dashboard');
         }
-      }, 300); // Wait for fade-out
+      }, 300);
     }, duration);
 
     return () => clearTimeout(timer);
@@ -37,18 +35,17 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       }`}
     >
       <div className="flex flex-col items-center gap-6 splash-content">
-        {/* Logo Container with Glow */}
-        <div className="splash-logo">
+        <div className="splash-logo relative">
           <div className="splash-logo-inner">
-            <Zap className="h-12 w-12 text-white" />
+            <Bot className="h-12 w-12 text-white" />
           </div>
+          <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-accent" />
           <div className="splash-glow" />
         </div>
         
-        {/* Brand Name */}
         <div className="splash-text">
-          <h1 className="text-3xl font-bold tracking-tight">Sales Booster</h1>
-          <p className="text-muted-foreground mt-2">Powered by DROOP AI</p>
+          <h1 className="text-3xl font-bold tracking-tight">DROOP AI</h1>
+          <p className="text-muted-foreground mt-2">Sales Booster Platform</p>
         </div>
       </div>
     </div>
