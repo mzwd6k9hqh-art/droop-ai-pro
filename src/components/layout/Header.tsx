@@ -22,6 +22,8 @@ import {
   Sun,
   Moon,
   Menu,
+  LayoutDashboard,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -51,20 +53,26 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full gradient-header shadow-md">
+    <header className="sticky top-0 z-50 w-full gradient-header shadow-lg">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm">
-              <Zap className="h-5 w-5 text-white" />
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="relative">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-transform group-hover:scale-105">
+                <Bot className="h-5 w-5 text-white" />
+              </div>
+              <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-white/80" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">Sales Booster</span>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight text-white leading-tight">DROOP AI</span>
+              <span className="text-[10px] text-white/60 leading-none">Sales Booster</span>
+            </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            <Link to="/">
+            <Link to="/dashboard">
               <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
-                <BarChart3 className="h-4 w-4" />
+                <LayoutDashboard className="h-4 w-4" />
                 {t('nav.dashboard')}
               </Button>
             </Link>
@@ -149,8 +157,8 @@ export function Header() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => navigate('/')}>
-                <BarChart3 className="mr-2 h-4 w-4" />
+              <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                <LayoutDashboard className="mr-2 h-4 w-4" />
                 {t('nav.dashboard')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/analytics')}>

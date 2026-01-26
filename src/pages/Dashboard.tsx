@@ -19,6 +19,8 @@ import {
   Lightbulb,
   Store,
   ExternalLink,
+  Rocket,
+  LineChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,29 +30,41 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-slide-up">
-      {/* Welcome Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t('dashboard.welcome')}, {user?.name?.split(' ')[0]} 👋
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {t('dashboard.insights')}
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Link to="/ai">
-            <Button className="gap-2 gradient-button">
-              <Bot className="h-4 w-4" />
-              Ask DROOP AI
-            </Button>
-          </Link>
-          <Link to="/analytics">
-            <Button variant="outline" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              View Analytics
-            </Button>
-          </Link>
+      {/* Welcome Hero Section */}
+      <div className="relative rounded-2xl overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-secondary/10" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl" />
+        
+        <div className="relative p-8">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium text-primary">Welcome back</span>
+              </div>
+              <h1 className="text-3xl lg:text-4xl font-bold tracking-tight mb-2">
+                {t('dashboard.welcome')}, {user?.name?.split(' ')[0]}!
+              </h1>
+              <p className="text-muted-foreground text-lg max-w-xl">
+                {t('dashboard.insights')} Let's grow your business together.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link to="/ai">
+                <Button size="lg" className="gap-2 gradient-button shadow-lg hover:shadow-xl transition-shadow">
+                  <Bot className="h-5 w-5" />
+                  Ask DROOP AI
+                </Button>
+              </Link>
+              <Link to="/analytics">
+                <Button size="lg" variant="outline" className="gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Analytics
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -81,55 +95,66 @@ export default function Dashboard() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/ai" className="action-card group">
-          <div className="flex items-start justify-between">
-            <div className="icon-action icon-solid-primary">
-              <Bot className="h-7 w-7" />
+        <Link to="/ai" className="group">
+          <div className="elevated-card p-6 h-full border-transparent hover:border-primary/30 transition-all">
+            <div className="flex items-start justify-between mb-4">
+              <div className="icon-action icon-solid-primary">
+                <Bot className="h-7 w-7" />
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <h3 className="font-semibold text-lg mb-2">DROOP AI Assistant</h3>
+            <p className="text-sm text-muted-foreground">
+              Get AI-powered business insights for {user?.storeUrl ? 'your store' : 'your business'}
+            </p>
           </div>
-          <h3 className="font-semibold mt-4 text-lg">DROOP AI Assistant</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Get AI-powered business insights for {user?.storeUrl ? 'your store' : 'your business'}
-          </p>
         </Link>
 
-        <Link to="/analytics" className="action-card group">
-          <div className="flex items-start justify-between">
-            <div className="icon-action icon-solid-secondary">
-              <BarChart3 className="h-7 w-7" />
+        <Link to="/analytics" className="group">
+          <div className="elevated-card p-6 h-full border-transparent hover:border-secondary/30 transition-all">
+            <div className="flex items-start justify-between mb-4">
+              <div className="icon-action icon-solid-secondary">
+                <LineChart className="h-7 w-7" />
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
             </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <h3 className="font-semibold text-lg mb-2">Smart Analytics</h3>
+            <p className="text-sm text-muted-foreground">
+              View detailed performance metrics and actionable insights
+            </p>
           </div>
-          <h3 className="font-semibold mt-4 text-lg">Business Analytics</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            View detailed performance metrics and insights
-          </p>
         </Link>
 
-        <Link to="/pricing" className="action-card group">
-          <div className="flex items-start justify-between">
-            <div className="icon-action icon-solid-accent">
-              <Crown className="h-7 w-7" />
+        <Link to="/pricing" className="group">
+          <div className="elevated-card p-6 h-full border-transparent hover:border-accent/30 transition-all">
+            <div className="flex items-start justify-between mb-4">
+              <div className="icon-action icon-solid-accent">
+                <Rocket className="h-7 w-7" />
+              </div>
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
             </div>
-            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            <h3 className="font-semibold text-lg mb-2">Upgrade Plan</h3>
+            <p className="text-sm text-muted-foreground">
+              Unlock more features and unlimited AI capabilities
+            </p>
           </div>
-          <h3 className="font-semibold mt-4 text-lg">Upgrade Plan</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Unlock more features and AI capabilities
-          </p>
         </Link>
       </div>
 
       {/* Global Markets */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Globe className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">{t('dashboard.markets')}</h2>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="icon-feature icon-primary">
+            <Globe className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">{t('dashboard.markets')}</h2>
+            <p className="text-sm text-muted-foreground">Global e-commerce market insights</p>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {globalMarkets.map((market) => (
-            <div key={market.id} className="stat-card">
+            <div key={market.id} className="elevated-card p-5">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                   {market.name}
@@ -148,34 +173,41 @@ export default function Dashboard() {
 
       {/* Best Countries */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <MapPin className="h-5 w-5 text-secondary" />
-          <h2 className="text-xl font-semibold">{t('dashboard.countries')}</h2>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="icon-feature icon-secondary">
+            <MapPin className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">{t('dashboard.countries')}</h2>
+            <p className="text-sm text-muted-foreground">Top performing markets for e-commerce</p>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {bestCountries.map((country, index) => (
-            <div key={country.id} className="stat-card relative overflow-hidden">
+            <div key={country.id} className="elevated-card p-4 relative overflow-hidden">
               {index === 0 && (
-                <div className="absolute top-2 right-2">
-                  <Crown className="h-4 w-4 text-warning" />
+                <div className="absolute top-3 right-3">
+                  <div className="p-1.5 rounded-full bg-warning/10">
+                    <Crown className="h-4 w-4 text-warning" />
+                  </div>
                 </div>
               )}
-              <div className="text-3xl mb-2">{country.flag}</div>
-              <h3 className="font-semibold text-sm">{country.name}</h3>
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+              <div className="text-3xl mb-3">{country.flag}</div>
+              <h3 className="font-semibold text-sm mb-2">{country.name}</h3>
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-secondary rounded-full"
+                    className="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all"
                     style={{ width: `${country.score}%` }}
                   />
                 </div>
-                <span className="text-xs font-medium">{country.score}</span>
+                <span className="text-xs font-semibold">{country.score}</span>
               </div>
-              <div className="mt-3 space-y-1">
+              <div className="space-y-1">
                 {country.highlights.slice(0, 2).map((highlight, i) => (
-                  <p key={i} className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Zap className="h-3 w-3 text-secondary" />
-                    {highlight}
+                  <p key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Zap className="h-3 w-3 text-secondary flex-shrink-0" />
+                    <span className="truncate">{highlight}</span>
                   </p>
                 ))}
               </div>
@@ -186,27 +218,32 @@ export default function Dashboard() {
 
       {/* Trending Niches */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="h-5 w-5 text-accent" />
-          <h2 className="text-xl font-semibold">{t('dashboard.trending')}</h2>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="icon-feature icon-accent">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">{t('dashboard.trending')}</h2>
+            <p className="text-sm text-muted-foreground">Hot market opportunities right now</p>
+          </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {trendingNiches.slice(0, 3).map((niche) => (
-            <div key={niche.id} className="stat-card">
-              <div className="flex items-start justify-between mb-3">
+            <div key={niche.id} className="elevated-card p-5">
+              <div className="flex items-start justify-between mb-4">
                 <div className="icon-feature icon-accent">
                   <Lightbulb className="h-5 w-5" />
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Target className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">{niche.interest}%</span>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-muted">
+                  <Target className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-xs font-medium">{niche.interest}% interest</span>
                 </div>
               </div>
-              <h3 className="font-semibold">{niche.name}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{niche.description}</p>
-              <div className="flex items-center gap-3 mt-4 text-xs">
+              <h3 className="font-semibold text-lg mb-2">{niche.name}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{niche.description}</p>
+              <div className="flex items-center gap-3 text-xs">
                 <span className={cn(
-                  'px-2 py-0.5 rounded-full',
+                  'px-2.5 py-1 rounded-full font-medium',
                   niche.competition === 'Low' && 'bg-success/10 text-success',
                   niche.competition === 'Medium' && 'bg-warning/10 text-warning',
                   niche.competition === 'High' && 'bg-destructive/10 text-destructive'
