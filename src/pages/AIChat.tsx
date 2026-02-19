@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import StoreOnboarding, { OnboardingResult } from '@/components/StoreOnboarding';
 import {
   Bot,
   Send,
@@ -26,12 +27,21 @@ interface Message {
   timestamp: Date;
 }
 
+const ONBOARDING_KEY = 'droop_onboarding_complete';
+
 export default function AIChat() {
   const { user, incrementAiMessages, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
   const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [onboardingDone, setOnboardingDone] = useState(() => {
+    return localStorage.getItem(ONBOARDING_KEY) === 'true';
+  });
+  const [storeContext, setStoreContext] = useState<OnboardingResult | null>(() => {
+    const saved = localStorage.getItem('droop_store_context');
+    return saved ? JSON.parse(saved) : null;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const unlimited = isUnlimitedPlan();
@@ -43,6 +53,70 @@ export default function AIChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleOnboardingComplete = async (result: OnboardingResult) => {
+    setStoreContext(result);
+    setOnboardingDone(true);
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    localStorage.setItem('droop_store_context', JSON.stringify(result));
+
+    // Send initial AI message based on onboarding
+    setIsTyping(true);
+    try {
+      let initialPrompt: string;
+      if (result.hasStore && result.storeUrl) {
+        initialPrompt = `The user just connected their store at ${result.storeUrl}. Analyze this store URL and give them a warm welcome with initial insights and suggestions for improvement. Be specific and helpful.`;
+      } else {
+        const typeLabel = result.storeType || 'general';
+        const interestsList = result.interests?.join(', ') || 'general e-commerce';
+        const name = result.storeName || 'their new store';
+        const desc = result.description || '';
+        initialPrompt = `The user wants to create a new online store. Here are their preferences:
+- Store type: ${typeLabel}
+- Interests: ${interestsList}
+- Store name idea: ${name}
+${desc ? `- Description: ${desc}` : ''}
+
+Welcome them warmly and present a store design concept based on their preferences. Include suggestions for:
+1. Store layout and design direction
+2. Product categories to start with
+3. Color scheme and branding ideas
+4. First steps to get started
+
+Be creative, specific, and encouraging!`;
+      }
+
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: {
+          messages: [{ role: 'user', content: initialPrompt }],
+          storeUrl: result.storeUrl || '',
+        },
+      });
+
+      if (error) throw error;
+
+      const assistantMessage: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: data.content,
+        timestamp: new Date(),
+      };
+      setMessages([assistantMessage]);
+    } catch (err) {
+      console.error('AI initial message error:', err);
+      const welcomeMsg: Message = {
+        id: Date.now().toString(),
+        role: 'assistant',
+        content: result.hasStore
+          ? `Welcome! I'll help you optimize your store at **${result.storeUrl}**. What would you like to improve first?`
+          : `Welcome! Let's build your dream **${result.storeType || ''}** store together! What would you like to start with?`,
+        timestamp: new Date(),
+      };
+      setMessages([welcomeMsg]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +145,7 @@ export default function AIChat() {
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           messages: conversationHistory,
-          storeUrl: user?.storeUrl,
+          storeUrl: storeContext?.storeUrl || user?.storeUrl || '',
         },
       });
 
@@ -97,6 +171,15 @@ export default function AIChat() {
       setIsTyping(false);
     }
   };
+
+  // Show onboarding if not completed
+  if (!onboardingDone) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-8rem)] animate-slide-up">
+        <StoreOnboarding onComplete={handleOnboardingComplete} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] animate-slide-up">
@@ -146,18 +229,18 @@ export default function AIChat() {
       </div>
 
       {/* Store Context */}
-      {user?.storeUrl && (
+      {storeContext?.storeUrl && (
         <div className="py-3 px-4 mt-4 rounded-xl bg-muted/50 border border-border/50">
           <div className="flex items-center gap-2 text-sm">
             <Store className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Analyzing:</span>
-            <a 
-              href={user.storeUrl} 
-              target="_blank" 
+            <a
+              href={storeContext.storeUrl}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline flex items-center gap-1 font-medium"
             >
-              {user.storeUrl}
+              {storeContext.storeUrl}
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
@@ -166,18 +249,17 @@ export default function AIChat() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto py-6 space-y-6">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !isTyping ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             <div className="relative mb-6">
               <div className="p-5 rounded-2xl gradient-button shadow-xl">
-                <Bot className="h-10 w-10 text-white" />
+                <Bot className="h-10 w-10 text-primary-foreground" />
               </div>
               <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-accent" />
             </div>
             <h2 className="text-2xl font-bold mb-2">Hey! I'm DROOP AI</h2>
             <p className="text-muted-foreground max-w-md mb-8 text-lg">
-              Your AI sales assistant. Ask me about business strategies, market analysis, pricing, and growth tactics
-              {user?.storeUrl && ` for ${user.storeUrl}`}.
+              Your AI sales assistant. Ask me about business strategies, market analysis, pricing, and growth tactics.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
               {[
@@ -215,7 +297,7 @@ export default function AIChat() {
                 )}
               >
                 {message.role === 'user' ? (
-                  <User className="h-5 w-5 text-white" />
+                  <User className="h-5 w-5 text-primary-foreground" />
                 ) : (
                   <Bot className="h-5 w-5" />
                 )}
@@ -230,7 +312,7 @@ export default function AIChat() {
               >
                 <div className={cn(
                   'text-sm whitespace-pre-wrap leading-relaxed',
-                  message.role === 'user' && 'text-white'
+                  message.role === 'user' && 'text-primary-foreground'
                 )}>
                   {message.content.split('\n').map((line, i) => {
                     if (line.startsWith('**') && line.endsWith('**')) {
