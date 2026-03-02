@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,12 @@ export default function Register() {
   const { register } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+
+  // Redirect to onboarding if not completed
+  const onboardingDone = localStorage.getItem('droop_onboarding_complete') === 'true';
+  if (!onboardingDone) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   const validateStoreUrl = (url: string): boolean => {
     if (!url.trim()) {
