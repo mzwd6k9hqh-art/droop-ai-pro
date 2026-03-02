@@ -28,11 +28,7 @@ export default function Register() {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  // Redirect to onboarding if not completed
-  const onboardingDone = localStorage.getItem('droop_onboarding_complete') === 'true';
-  if (!onboardingDone) {
-    return <Navigate to="/onboarding" replace />;
-  }
+  // No onboarding redirect needed anymore
 
   const validateStoreUrl = (url: string): boolean => {
     if (!url.trim()) {

@@ -1,20 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import StoreOnboarding, { OnboardingResult } from '@/components/StoreOnboarding';
+import { OnboardingResult } from '@/components/StoreOnboarding';
 import {
   Bot,
   Send,
   User,
   Sparkles,
-  Lock,
-  Crown,
-  MessageCircle,
-  AlertCircle,
   Store,
   ExternalLink,
 } from 'lucide-react';
@@ -30,22 +24,16 @@ interface Message {
 const STORE_CONTEXT_KEY = 'droop_store_context';
 
 export default function AIChat() {
-  const { user, incrementAiMessages, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
-  const { t } = useLanguage();
+  const onboardingDone = localStorage.getItem('droop_onboarding_complete') === 'true';
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [storeContext, setStoreContext] = useState<OnboardingResult | null>(() => {
+  const [storeContext] = useState<OnboardingResult | null>(() => {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const unlimited = isUnlimitedPlan();
-  const remaining = getAiMessagesRemaining();
-  const dailyLimit = getDailyLimit();
-  const messagesUsedToday = unlimited ? 0 : dailyLimit - remaining;
-  const isLimitReached = !unlimited && remaining <= 0;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,12 +81,13 @@ Welcome them and present a store design concept with layout, categories, colors,
     sendInitial();
   }, [storeContext, initialSent, messages.length]);
 
+  if (!onboardingDone) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isTyping || isLimitReached) return;
-
-    const canSend = incrementAiMessages();
-    if (!canSend) return;
+    if (!input.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -120,7 +109,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           messages: conversationHistory,
-          storeUrl: storeContext?.storeUrl || user?.storeUrl || '',
+          storeUrl: storeContext?.storeUrl || '',
         },
       });
 
@@ -147,15 +136,14 @@ Welcome them and present a store design concept with layout, categories, colors,
     }
   };
 
-
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] animate-slide-up">
+    <div className="flex flex-col h-screen animate-slide-up p-4">
       {/* Header */}
       <div className="flex items-center justify-between pb-4 border-b border-border">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="icon-action icon-solid-primary">
-              <Bot className="h-7 w-7" />
+            <div className="p-3 rounded-xl gradient-button shadow-lg">
+              <Bot className="h-7 w-7 text-primary-foreground" />
             </div>
             <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-accent" />
           </div>
@@ -169,30 +157,6 @@ Welcome them and present a store design concept with layout, categories, colors,
             </p>
           </div>
         </div>
-
-        {!unlimited && (
-          <div className="flex items-center gap-4">
-            <div className={cn(
-              'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium',
-              isLimitReached
-                ? 'bg-destructive/10 text-destructive border border-destructive/20'
-                : remaining <= 2
-                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                : 'bg-muted text-muted-foreground border border-border/50'
-            )}>
-              <MessageCircle className="h-4 w-4" />
-              <span>{messagesUsedToday} / {dailyLimit} messages used today</span>
-            </div>
-          </div>
-        )}
-        {unlimited && (
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
-              <Sparkles className="h-4 w-4" />
-              <span>Unlimited Messages</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Store Context */}
@@ -239,7 +203,6 @@ Welcome them and present a store design concept with layout, categories, colors,
                   key={i}
                   onClick={() => setInput(suggestion)}
                   className="text-left text-sm p-4 rounded-xl bg-muted hover:bg-muted/80 transition-all border border-border/50 hover:border-primary/30 hover:shadow-md"
-                  disabled={isLimitReached}
                 >
                   {suggestion}
                 </button>
@@ -329,45 +292,21 @@ Welcome them and present a store design concept with layout, categories, colors,
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Daily Limit Reached Banner */}
-      {isLimitReached && (
-        <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-xl mb-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-destructive">Daily message limit reached</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                You've used all {dailyLimit} messages for today. Your limit will reset tomorrow, or upgrade to a paid plan for unlimited messages.
-              </p>
-            </div>
-            <Link to="/pricing">
-              <Button size="sm" className="gap-2 gradient-button">
-                <Crown className="h-4 w-4" />
-                Upgrade Now
-              </Button>
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Input */}
       <form onSubmit={handleSubmit} className="flex gap-3 pt-4 border-t border-border">
         <div className="relative flex-1">
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isLimitReached ? 'Upgrade to continue chatting...' : t('ai.placeholder')}
-            disabled={isTyping || isLimitReached}
+            placeholder="Ask me anything about your store..."
+            disabled={isTyping}
             className="pr-12 h-12 input-focus rounded-xl"
           />
-          {isLimitReached && (
-            <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          )}
         </div>
         <Button
           type="submit"
           size="lg"
-          disabled={!input.trim() || isTyping || isLimitReached}
+          disabled={!input.trim() || isTyping}
           className="h-12 px-6 gradient-button rounded-xl"
         >
           <Send className="h-4 w-4" />
