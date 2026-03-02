@@ -16,6 +16,7 @@ import AIChat from "@/pages/AIChat";
 import Pricing from "@/pages/Pricing";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import Onboarding from "@/pages/Onboarding";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
+                <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/landing" element={<Landing />} />

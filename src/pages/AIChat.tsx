@@ -27,7 +27,7 @@ interface Message {
   timestamp: Date;
 }
 
-const ONBOARDING_KEY = 'droop_onboarding_complete';
+const STORE_CONTEXT_KEY = 'droop_store_context';
 
 export default function AIChat() {
   const { user, incrementAiMessages, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
@@ -35,11 +35,8 @@ export default function AIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [onboardingDone, setOnboardingDone] = useState(() => {
-    return localStorage.getItem(ONBOARDING_KEY) === 'true';
-  });
   const [storeContext, setStoreContext] = useState<OnboardingResult | null>(() => {
-    const saved = localStorage.getItem('droop_store_context');
+    const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,69 +51,47 @@ export default function AIChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleOnboardingComplete = async (result: OnboardingResult) => {
-    setStoreContext(result);
-    setOnboardingDone(true);
-    localStorage.setItem(ONBOARDING_KEY, 'true');
-    localStorage.setItem('droop_store_context', JSON.stringify(result));
-
-    // Send initial AI message based on onboarding
+  // Auto-send initial AI message based on store context on first load
+  const [initialSent, setInitialSent] = useState(false);
+  useEffect(() => {
+    if (initialSent || !storeContext || messages.length > 0) return;
+    setInitialSent(true);
     setIsTyping(true);
-    try {
-      let initialPrompt: string;
-      if (result.hasStore && result.storeUrl) {
-        initialPrompt = `The user just connected their store at ${result.storeUrl}. Analyze this store URL and give them a warm welcome with initial insights and suggestions for improvement. Be specific and helpful.`;
-      } else {
-        const typeLabel = result.storeType || 'general';
-        const interestsList = result.interests?.join(', ') || 'general e-commerce';
-        const name = result.storeName || 'their new store';
-        const desc = result.description || '';
-        initialPrompt = `The user wants to create a new online store. Here are their preferences:
-- Store type: ${typeLabel}
-- Interests: ${interestsList}
-- Store name idea: ${name}
-${desc ? `- Description: ${desc}` : ''}
 
-Welcome them warmly and present a store design concept based on their preferences. Include suggestions for:
-1. Store layout and design direction
-2. Product categories to start with
-3. Color scheme and branding ideas
-4. First steps to get started
+    const sendInitial = async () => {
+      try {
+        let initialPrompt: string;
+        if (storeContext.hasStore && storeContext.storeUrl) {
+          initialPrompt = `The user just connected their store at ${storeContext.storeUrl}. Analyze this store URL and give them a warm welcome with initial insights and suggestions for improvement.`;
+        } else {
+          initialPrompt = `The user wants to create a new online store. Preferences:
+- Store type: ${storeContext.storeType || 'general'}
+- Interests: ${storeContext.interests?.join(', ') || 'general'}
+- Store name: ${storeContext.storeName || 'TBD'}
+${storeContext.description ? `- Description: ${storeContext.description}` : ''}
 
-Be creative, specific, and encouraging!`;
+Welcome them and present a store design concept with layout, categories, colors, and first steps.`;
+        }
+
+        const { data, error } = await supabase.functions.invoke('ai-chat', {
+          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '' },
+        });
+        if (error) throw error;
+        setMessages([{ id: Date.now().toString(), role: 'assistant', content: data.content, timestamp: new Date() }]);
+      } catch {
+        setMessages([{
+          id: Date.now().toString(), role: 'assistant',
+          content: storeContext.hasStore
+            ? `Welcome! I'll help you optimize your store at **${storeContext.storeUrl}**. What would you like to improve?`
+            : `Welcome! Let's build your **${storeContext.storeType || ''}** store together!`,
+          timestamp: new Date(),
+        }]);
+      } finally {
+        setIsTyping(false);
       }
-
-      const { data, error } = await supabase.functions.invoke('ai-chat', {
-        body: {
-          messages: [{ role: 'user', content: initialPrompt }],
-          storeUrl: result.storeUrl || '',
-        },
-      });
-
-      if (error) throw error;
-
-      const assistantMessage: Message = {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: data.content,
-        timestamp: new Date(),
-      };
-      setMessages([assistantMessage]);
-    } catch (err) {
-      console.error('AI initial message error:', err);
-      const welcomeMsg: Message = {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: result.hasStore
-          ? `Welcome! I'll help you optimize your store at **${result.storeUrl}**. What would you like to improve first?`
-          : `Welcome! Let's build your dream **${result.storeType || ''}** store together! What would you like to start with?`,
-        timestamp: new Date(),
-      };
-      setMessages([welcomeMsg]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+    };
+    sendInitial();
+  }, [storeContext, initialSent, messages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,14 +147,6 @@ Be creative, specific, and encouraging!`;
     }
   };
 
-  // Show onboarding if not completed
-  if (!onboardingDone) {
-    return (
-      <div className="flex flex-col h-[calc(100vh-8rem)] animate-slide-up">
-        <StoreOnboarding onComplete={handleOnboardingComplete} />
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] animate-slide-up">
