@@ -49,15 +49,15 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/landing" element={<Landing />} />
+                <Route path="/ai" element={<AIChat />} />
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<LandingRoute />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/ai" element={<AIChat />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/settings" element={<Settings />} />
                 </Route>

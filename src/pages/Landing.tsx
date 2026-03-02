@@ -79,10 +79,7 @@ export default function Landing() {
             <span className="text-xl font-bold tracking-tight">DROOP AI</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">Sign In</Button>
-            </Link>
-            <Link to="/register">
+            <Link to="/onboarding">
               <Button size="sm" className="gradient-button gap-2">
                 Get Started <ArrowRight className="h-4 w-4" />
               </Button>
@@ -121,13 +118,13 @@ export default function Landing() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Link to="/register">
+              <Link to="/onboarding">
                 <Button size="lg" className="gradient-button gap-2 h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-shadow">
                   <Rocket className="h-5 w-5" />
                   Start Free Trial
                 </Button>
               </Link>
-              <Link to="/login">
+              <Link to="/onboarding">
                 <Button size="lg" variant="outline" className="gap-2 h-14 px-8 text-lg">
                   <Bot className="h-5 w-5" />
                   Try DROOP AI
@@ -214,7 +211,7 @@ export default function Landing() {
                 ))}
               </div>
 
-              <Link to="/register">
+              <Link to="/onboarding">
                 <Button size="lg" className="gradient-button gap-2">
                   Get Started Now <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -285,7 +282,7 @@ export default function Landing() {
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link to="/register">
+                <Link to="/onboarding">
                   <Button size="lg" variant="secondary" className="gap-2 h-12 px-8 shadow-lg">
                     <Rocket className="h-5 w-5" />
                     Start Your Free Trial
