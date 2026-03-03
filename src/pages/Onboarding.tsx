@@ -10,7 +10,7 @@ export default function Onboarding() {
   const handleComplete = (result: OnboardingResult) => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
     localStorage.setItem('droop_store_context', JSON.stringify(result));
-    navigate('/ai');
+    navigate('/register');
   };
 
   return (
