@@ -23,7 +23,10 @@ export default function Login() {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  // No onboarding redirect needed anymore
+  const onboardingComplete = localStorage.getItem('droop_onboarding_complete');
+  if (!onboardingComplete) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
