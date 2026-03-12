@@ -200,9 +200,13 @@ Welcome them and present a store design concept with layout, categories, colors,
         });
         if (error) throw error;
 
-        // Handle initial store modification
-        if (data.type === 'modify_store' && data.functionCall) {
-          handleStoreModification(data.functionCall);
+        // Handle initial store modifications (single or multiple)
+        if (data.type === 'modify_store') {
+          if (data.functionCalls && Array.isArray(data.functionCalls)) {
+            data.functionCalls.forEach((fc: any) => handleStoreModification(fc));
+          } else if (data.functionCall) {
+            handleStoreModification(data.functionCall);
+          }
         }
 
         setMessages([{ id: Date.now().toString(), role: 'assistant', content: data.content, timestamp: new Date() }]);
