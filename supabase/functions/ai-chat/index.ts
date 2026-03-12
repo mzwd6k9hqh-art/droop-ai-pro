@@ -6,51 +6,56 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are an intelligent assistant inside an online store-building application. You can directly modify the user's store design in real-time.
+const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء متاجر إلكترونية. يمكنك تعديل تصميم متجر المستخدم مباشرة وفي الوقت الحقيقي.
 
-Your responsibilities are:
+## القواعد الأساسية:
 
-1. When a user asks to modify their store, ALWAYS call the "modify_store" function with the exact details.
-2. You must respond with correct information, avoiding incorrect or random data.
-3. If the user's request is unclear, ask for clarification before calling the function.
-4. Be kind, polite, friendly, and encourage users.
-5. Never perform harmful actions. Only modify as explicitly requested.
+1. عندما يطلب المستخدم أي تعديل على المتجر، يجب أن تستدعي أداة "modify_store" فوراً. لا تكتفِ بالرد النصي أبداً عندما يُطلب تعديل.
+2. يمكنك استدعاء الأداة عدة مرات في نفس الرد لتنفيذ تعديلات متعددة.
+3. إذا طلب المستخدم شيئاً غير واضح، اطلب توضيحاً قبل التنفيذ.
+4. كن لطيفاً وودوداً ومشجعاً.
+5. لا تنفذ أي شيء ضار. عدّل فقط ما يُطلب صراحةً.
+6. نفّذ كل أمر يعطيك إياه المستخدم بدقة وبدون تردد.
 
-SUPPORTED ACTIONS for modify_store:
-- "change_color" - Change store colors. Target: "store". Details: { "primary": "from-COLOR-500 to-COLOR-600" } where COLOR can be: pink, rose, blue, indigo, orange, amber, purple, fuchsia, green, emerald, cyan, teal, slate, stone, red, violet, sky, lime, yellow
-- "update_name" / "update_store_name" - Change store name. Target: the new name. Details: { "name": "New Name" }
-- "update_description" - Update store description/hero text. Details: { "description": "...", "heroText": "...", "heroSubtext": "..." }
-- "add_product" - Add a new product. Target: product name. Details: { "name": "...", "price": "$XX.XX", "image": "emoji" }
-- "remove_product" - Remove a product. Target: product name to remove.
-- "update_product" - Update existing product. Target: product name to find. Details: { "name": "...", "price": "...", "image": "..." }
-- "update_price" - Change a product's price. Target: product name. Details: { "price": "$XX.XX" }
-- "update_layout" - Change product layout. Details: { "layout": "grid" } or { "layout": "list" }
-- "update_hero" - Modify hero banner. Details: { "text": "...", "subtext": "...", "show": true/false }
-- "update_features" - Change store features/badges. Details: { "features": ["feature1", "feature2", "feature3"] }
-- "update_store_type" - Change entire store category. Details: { "type": "fashion|electronics|food|beauty|sports|books|kids|home" }
-- "update_image" - Change product emoji/image. Target: product name. Details: { "image": "new emoji" }
+## الإجراءات المدعومة لـ modify_store:
 
-When modifying, ALWAYS use modify_store function. You can call it multiple times for complex changes.
-Use emojis for product images (e.g., 👕, 📱, 🍕, 💄, ⚽, 📚, 🧸, 🏠).
+- "change_color" / "update_color" - تغيير ألوان المتجر. Details: { "primary": "from-COLOR-500 to-COLOR-600", "accent": "...", "background": "..." }
+  الألوان المتاحة: pink, rose, blue, indigo, orange, amber, purple, fuchsia, green, emerald, cyan, teal, slate, stone, red, violet, sky, lime, yellow
+- "update_name" / "update_store_name" - تغيير اسم المتجر. Details: { "name": "الاسم الجديد" }
+- "update_description" - تحديث وصف المتجر. Details: { "description": "...", "heroText": "...", "heroSubtext": "..." }
+- "add_product" - إضافة منتج جديد. Target: اسم المنتج. Details: { "name": "...", "price": "$XX.XX", "image": "emoji" }
+- "remove_product" - حذف منتج. Target: اسم المنتج المراد حذفه.
+- "update_product" - تحديث منتج موجود. Target: اسم المنتج. Details: { "name": "...", "price": "...", "image": "..." }
+- "update_price" - تغيير سعر منتج. Target: اسم المنتج. Details: { "price": "$XX.XX" }
+- "update_layout" - تغيير تنسيق المنتجات. Details: { "layout": "grid" | "list" }
+- "update_hero" - تعديل البانر الرئيسي. Details: { "text": "...", "subtext": "...", "show": true/false }
+- "update_features" - تغيير مميزات المتجر. Details: { "features": ["ميزة1", "ميزة2", "ميزة3"] }
+- "update_store_type" - تغيير نوع المتجر بالكامل. Details: { "type": "fashion|electronics|food|beauty|sports|books|kids|home" }
+- "update_image" - تغيير إيموجي المنتج. Target: اسم المنتج. Details: { "image": "emoji جديد" }
+- "update_currency" - تغيير العملة. Details: { "currency": "SAR|USD|EUR|..." }
 
-You also have expertise in business strategy, market analysis, pricing, sales, and e-commerce best practices.`;
+## تعليمات مهمة:
+- استخدم إيموجي للمنتجات (مثل: 👕, 📱, 🍕, 💄, ⚽, 📚, 🧸, 🏠).
+- عند طلب تعديلات متعددة، استدعِ الأداة لكل تعديل على حدة.
+- أنت خبير أيضاً في استراتيجيات الأعمال والتسويق والتسعير والمبيعات والتجارة الإلكترونية.
+- تحدث بالعربية دائماً إلا إذا تحدث المستخدم بلغة أخرى.`;
 
 const tools = [
   {
     type: "function",
     function: {
       name: "modify_store",
-      description: "Modify aspects of the user's online store such as product details, layout, colors, descriptions, images, or categories.",
+      description: "Modify aspects of the user's online store such as product details, layout, colors, descriptions, images, or categories. Call this for EVERY store modification request.",
       parameters: {
         type: "object",
         properties: {
           action: {
             type: "string",
-            description: "The type of modification to make (e.g., 'update_product', 'change_color', 'update_layout', 'update_description', 'add_category', 'remove_category', 'update_image', 'update_price')",
+            description: "The type of modification (e.g., 'update_product', 'change_color', 'update_layout', 'add_product', 'remove_product', 'update_name', 'update_hero', 'update_features', 'update_store_type', 'update_price', 'update_image', 'update_currency', 'update_description')",
           },
           target: {
             type: "string",
-            description: "The specific element to modify (e.g., product name, section name, page name)",
+            description: "The specific element to modify (e.g., product name, section name)",
           },
           details: {
             type: "object",
@@ -58,7 +63,7 @@ const tools = [
             additionalProperties: true,
           },
         },
-        required: ["action", "target"],
+        required: ["action"],
       },
     },
   },
@@ -73,7 +78,7 @@ serve(async (req) => {
     const { messages, storeUrl } = await req.json();
 
     const systemWithContext = storeUrl
-      ? `${SYSTEM_PROMPT}\n\nThe user's store URL is: ${storeUrl}. Use this context when providing advice or making modifications.`
+      ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}. استخدم هذا السياق عند تقديم النصائح أو التعديلات.`
       : SYSTEM_PROMPT;
 
     const apiMessages = [
@@ -84,6 +89,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    // First API call
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -100,12 +106,12 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded, please try again later." }), {
+        return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات، يرجى المحاولة لاحقاً." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required, please add credits." }), {
+        return new Response(JSON.stringify({ error: "يرجى إضافة رصيد للمتابعة." }), {
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -121,16 +127,64 @@ serve(async (req) => {
       throw new Error("No response from AI model");
     }
 
-    // Check if the model wants to call modify_store
+    // Handle tool calls (possibly multiple)
     if (choice.tool_calls && choice.tool_calls.length > 0) {
-      const toolCall = choice.tool_calls[0];
-      const args = JSON.parse(toolCall.function.arguments);
-      
+      const functionCalls = [];
+      const toolResultMessages = [];
+
+      for (const toolCall of choice.tool_calls) {
+        if (toolCall.function.name === "modify_store") {
+          const args = JSON.parse(toolCall.function.arguments);
+          functionCalls.push(args);
+          toolResultMessages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify({ success: true, action: args.action, target: args.target }),
+          });
+        }
+      }
+
+      // Second API call to get the text response after tool execution
+      let textContent = "";
+      if (toolResultMessages.length > 0) {
+        try {
+          const followUpMessages = [
+            ...apiMessages,
+            choice, // assistant message with tool_calls
+            ...toolResultMessages,
+          ];
+
+          const followUpResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-3-flash-preview",
+              messages: followUpMessages,
+            }),
+          });
+
+          if (followUpResponse.ok) {
+            const followUpData = await followUpResponse.json();
+            textContent = followUpData.choices?.[0]?.message?.content || "";
+          }
+        } catch (e) {
+          console.error("Follow-up call error:", e);
+        }
+      }
+
+      if (!textContent) {
+        const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');
+        textContent = `تم تنفيذ التعديلات:\n${actionSummary}\n\nانتقل لتبويب "تصميم المتجر" لرؤية التغييرات!`;
+      }
+
       return new Response(
         JSON.stringify({
           type: "modify_store",
-          content: `🔧 **Store Modification Requested**\n\n**Action:** ${args.action}\n**Target:** ${args.target}\n${args.details ? `**Details:** ${JSON.stringify(args.details, null, 2)}` : ""}\n\n_This modification has been queued for your store._`,
-          functionCall: args,
+          content: textContent,
+          functionCalls: functionCalls,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
