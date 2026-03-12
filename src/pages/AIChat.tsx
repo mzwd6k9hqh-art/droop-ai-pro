@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OnboardingResult } from '@/components/StoreOnboarding';
-import StorePreview from '@/components/StorePreview';
+import StorePreview, { StoreConfig } from '@/components/StorePreview';
 import {
   Bot,
   Send,
@@ -17,6 +17,7 @@ import {
   Palette,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface Message {
   id: string;
@@ -26,6 +27,113 @@ interface Message {
 }
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
+const STORE_CONFIG_KEY = 'droop_store_config';
+
+function applyModification(current: StoreConfig, functionCall: any): StoreConfig {
+  const { action, target, details } = functionCall;
+  const updated = { ...current };
+
+  switch (action) {
+    case 'update_product': {
+      if (updated.products) {
+        updated.products = updated.products.map(p =>
+          p.name.toLowerCase().includes((target || '').toLowerCase())
+            ? { ...p, ...details }
+            : p
+        );
+      }
+      break;
+    }
+    case 'add_product': {
+      const newProduct = {
+        name: details?.name || target || 'New Product',
+        price: details?.price || '$0.00',
+        image: details?.image || '📦',
+      };
+      updated.products = [...(updated.products || []), newProduct];
+      break;
+    }
+    case 'remove_product': {
+      if (updated.products) {
+        updated.products = updated.products.filter(
+          p => !p.name.toLowerCase().includes((target || '').toLowerCase())
+        );
+      }
+      break;
+    }
+    case 'change_color':
+    case 'update_color': {
+      if (details?.primary) updated.primaryColor = details.primary;
+      if (details?.accent) updated.accentColor = details.accent;
+      if (details?.background || details?.bg) updated.bgColor = details.background || details.bg;
+      break;
+    }
+    case 'update_layout': {
+      if (details?.layout) updated.layout = details.layout;
+      break;
+    }
+    case 'update_description': {
+      if (details?.description) updated.description = details.description;
+      if (details?.heroText) updated.heroText = details.heroText;
+      if (details?.heroSubtext) updated.heroSubtext = details.heroSubtext;
+      break;
+    }
+    case 'update_name':
+    case 'update_store_name': {
+      updated.storeName = details?.name || target;
+      break;
+    }
+    case 'update_hero': {
+      if (details?.text) updated.heroText = details.text;
+      if (details?.subtext) updated.heroSubtext = details.subtext;
+      if (details?.show !== undefined) updated.showHero = details.show;
+      break;
+    }
+    case 'update_features': {
+      if (details?.features) updated.features = details.features;
+      break;
+    }
+    case 'update_price': {
+      if (updated.products) {
+        updated.products = updated.products.map(p =>
+          p.name.toLowerCase().includes((target || '').toLowerCase())
+            ? { ...p, price: details?.price || p.price }
+            : p
+        );
+      }
+      break;
+    }
+    case 'update_image': {
+      if (updated.products) {
+        updated.products = updated.products.map(p =>
+          p.name.toLowerCase().includes((target || '').toLowerCase())
+            ? { ...p, image: details?.image || p.image }
+            : p
+        );
+      }
+      break;
+    }
+    case 'update_currency': {
+      updated.currency = details?.currency || target;
+      break;
+    }
+    case 'update_store_type': {
+      updated.storeType = details?.type || target;
+      // Reset products to match new type
+      updated.products = undefined;
+      break;
+    }
+    default: {
+      // Generic: merge details into config
+      if (details) {
+        Object.assign(updated, details);
+      }
+      break;
+    }
+  }
+
+  return updated;
+}
 
 export default function AIChat() {
   const onboardingDone = localStorage.getItem('droop_onboarding_complete') === 'true';
@@ -33,15 +141,38 @@ export default function AIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const [storeContext] = useState<OnboardingResult | null>(() => {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
+  });
+  const [storeConfig, setStoreConfig] = useState<StoreConfig>(() => {
+    const saved = localStorage.getItem(STORE_CONFIG_KEY);
+    return saved ? JSON.parse(saved) : {};
   });
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Persist store config
+  useEffect(() => {
+    localStorage.setItem(STORE_CONFIG_KEY, JSON.stringify(storeConfig));
+  }, [storeConfig]);
+
+  const handleStoreModification = useCallback((functionCall: any) => {
+    setStoreConfig(prev => {
+      const updated = applyModification(prev, functionCall);
+      return updated;
+    });
+    toast.success('تم تحديث تصميم المتجر! انتقل لتبويب "تصميم المتجر" لرؤية التغييرات', {
+      action: {
+        label: 'عرض التصميم',
+        onClick: () => setActiveTab('preview'),
+      },
+    });
+  }, []);
 
   const [initialSent, setInitialSent] = useState(false);
   useEffect(() => {
@@ -61,20 +192,26 @@ export default function AIChat() {
 - Store name: ${storeContext.storeName || 'TBD'}
 ${storeContext.description ? `- Description: ${storeContext.description}` : ''}
 
-Welcome them and present a store design concept with layout, categories, colors, and first steps.`;
+Welcome them and present a store design concept with layout, categories, colors, and first steps. IMPORTANT: Call the modify_store function to set up the initial store design with appropriate products, colors, and layout based on their preferences.`;
         }
 
         const { data, error } = await supabase.functions.invoke('ai-chat', {
           body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '' },
         });
         if (error) throw error;
+
+        // Handle initial store modification
+        if (data.type === 'modify_store' && data.functionCall) {
+          handleStoreModification(data.functionCall);
+        }
+
         setMessages([{ id: Date.now().toString(), role: 'assistant', content: data.content, timestamp: new Date() }]);
       } catch {
         setMessages([{
           id: Date.now().toString(), role: 'assistant',
           content: storeContext.hasStore
             ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
-            : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! يمكنك رؤية التصميم الأولي في تبويب "تصميم المتجر".`,
+            : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! يمكنك رؤية التصميم الأولي في تبويب "تصميم المتجر". اطلب مني أي تعديل!`,
           timestamp: new Date(),
         }]);
       } finally {
@@ -82,7 +219,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       }
     };
     sendInitial();
-  }, [storeContext, initialSent, messages.length]);
+  }, [storeContext, initialSent, messages.length, handleStoreModification]);
 
   if (!onboardingDone) {
     return <Navigate to="/onboarding" replace />;
@@ -117,6 +254,11 @@ Welcome them and present a store design concept with layout, categories, colors,
       });
 
       if (error) throw error;
+
+      // Handle store modification
+      if (data.type === 'modify_store' && data.functionCall) {
+        handleStoreModification(data.functionCall);
+      }
 
       setMessages((prev) => [...prev, {
         id: (Date.now() + 1).toString(),
@@ -161,7 +303,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="chat" className="flex-1 flex flex-col min-h-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
         <TabsList className="mx-4 mt-3 grid w-auto grid-cols-2 max-w-sm">
           <TabsTrigger value="chat" className="gap-2">
             <MessageCircle className="h-4 w-4" />
@@ -206,14 +348,14 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </div>
                 <h2 className="text-2xl font-bold mb-2">مرحباً! أنا DROOP AI</h2>
                 <p className="text-muted-foreground max-w-md mb-8 text-lg">
-                  مساعدك الذكي للمبيعات. اسألني عن استراتيجيات الأعمال وتحليل السوق والتسعير.
+                  مساعدك الذكي لبناء متجرك. اطلب مني تعديل التصميم، الألوان، المنتجات، أو أي شيء آخر!
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
                   {[
-                    'ما أفضل الأسواق للدخول فيها؟',
-                    'كيف أسعّر منتجاتي؟',
-                    'أعطني استراتيجيات نمو لمتجري',
-                    'حلل فرص السوق لتخصصي',
+                    'غيّر ألوان المتجر إلى الأزرق',
+                    'أضف منتج جديد للمتجر',
+                    'غيّر اسم المتجر',
+                    'غيّر تصميم المنتجات إلى قائمة',
                   ].map((suggestion, i) => (
                     <button
                       key={i}
@@ -298,7 +440,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="اسألني أي شيء عن متجرك..."
+                placeholder="اطلب تعديل على متجرك... مثل: غيّر الألوان، أضف منتج، عدّل الاسم"
                 disabled={isTyping}
                 className="pr-12 h-12 input-focus rounded-xl"
               />
@@ -316,7 +458,7 @@ Welcome them and present a store design concept with layout, categories, colors,
 
         {/* Store Preview Tab */}
         <TabsContent value="preview" className="flex-1 min-h-0 overflow-hidden mt-0">
-          <StorePreview storeContext={storeContext} />
+          <StorePreview storeContext={storeContext} storeConfig={storeConfig} />
         </TabsContent>
       </Tabs>
     </div>

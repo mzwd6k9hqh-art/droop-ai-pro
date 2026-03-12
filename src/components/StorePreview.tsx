@@ -3,8 +3,25 @@ import { OnboardingResult } from '@/components/StoreOnboarding';
 import { Store, ShoppingBag, Search, Heart, ShoppingCart, Menu, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+export interface StoreConfig {
+  storeName?: string;
+  description?: string;
+  storeType?: string;
+  primaryColor?: string;
+  accentColor?: string;
+  bgColor?: string;
+  products?: { name: string; price: string; image: string }[];
+  heroText?: string;
+  heroSubtext?: string;
+  features?: string[];
+  layout?: 'grid' | 'list';
+  showHero?: boolean;
+  currency?: string;
+}
+
 interface StorePreviewProps {
   storeContext: OnboardingResult | null;
+  storeConfig?: StoreConfig;
 }
 
 const STORE_TYPE_COLORS: Record<string, { primary: string; accent: string; bg: string }> = {
@@ -69,7 +86,7 @@ const SAMPLE_PRODUCTS: Record<string, { name: string; price: string; image: stri
   ],
 };
 
-export default function StorePreview({ storeContext }: StorePreviewProps) {
+export default function StorePreview({ storeContext, storeConfig }: StorePreviewProps) {
   if (!storeContext) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -84,30 +101,38 @@ export default function StorePreview({ storeContext }: StorePreviewProps) {
         <Store className="h-16 w-16 text-primary mb-4" />
         <h2 className="text-xl font-bold mb-2">متجرك قيد التحليل</h2>
         <p className="text-muted-foreground mb-4">جاري تحليل متجرك وتقديم التحسينات</p>
-        <a
-          href={storeContext.storeUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline font-medium"
-        >
+        <a href={storeContext.storeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
           {storeContext.storeUrl}
         </a>
       </div>
     );
   }
 
-  const type = storeContext.storeType || 'fashion';
-  const colors = STORE_TYPE_COLORS[type] || STORE_TYPE_COLORS.fashion;
-  const products = SAMPLE_PRODUCTS[type] || SAMPLE_PRODUCTS.fashion;
-  const storeName = storeContext.storeName || 'My Store';
+  const type = storeConfig?.storeType || storeContext.storeType || 'fashion';
+  const defaultColors = STORE_TYPE_COLORS[type] || STORE_TYPE_COLORS.fashion;
+  
+  const primaryGradient = storeConfig?.primaryColor || defaultColors.primary;
+  const accentClasses = storeConfig?.accentColor || defaultColors.accent;
+  const bgClasses = storeConfig?.bgColor || defaultColors.bg;
+  
+  const products = storeConfig?.products || SAMPLE_PRODUCTS[type] || SAMPLE_PRODUCTS.fashion;
+  const storeName = storeConfig?.storeName || storeContext.storeName || 'My Store';
+  const description = storeConfig?.description || storeContext.description || 'اكتشف أفضل المنتجات المختارة بعناية لك';
+  const heroText = storeConfig?.heroText || storeName;
+  const heroSubtext = storeConfig?.heroSubtext || description;
+  const showHero = storeConfig?.showHero !== false;
+  const layout = storeConfig?.layout || 'grid';
+
+  const featuresList = storeConfig?.features || ['شحن مجاني', 'دفع آمن', 'إرجاع سهل'];
+  const featureIcons = [Truck, Shield, RotateCcw];
 
   return (
-    <div className={cn('h-full overflow-y-auto', colors.bg)}>
+    <div className={cn('h-full overflow-y-auto', bgClasses)}>
       {/* Store Navbar */}
       <div className="bg-white/80 backdrop-blur border-b px-4 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <Menu className="h-5 w-5 text-gray-600" />
-          <h1 className={cn('text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent', colors.primary)}>
+          <h1 className={cn('text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent', primaryGradient)}>
             {storeName}
           </h1>
         </div>
@@ -116,7 +141,7 @@ export default function StorePreview({ storeContext }: StorePreviewProps) {
           <Heart className="h-5 w-5 text-gray-500" />
           <div className="relative">
             <ShoppingCart className="h-5 w-5 text-gray-500" />
-            <span className={cn('absolute -top-2 -right-2 text-[10px] text-white rounded-full w-4 h-4 flex items-center justify-center bg-gradient-to-r', colors.primary)}>
+            <span className={cn('absolute -top-2 -right-2 text-[10px] text-white rounded-full w-4 h-4 flex items-center justify-center bg-gradient-to-r', primaryGradient)}>
               0
             </span>
           </div>
@@ -124,46 +149,51 @@ export default function StorePreview({ storeContext }: StorePreviewProps) {
       </div>
 
       {/* Hero Banner */}
-      <div className={cn('mx-4 mt-4 rounded-2xl p-8 text-white bg-gradient-to-r', colors.primary)}>
-        <p className="text-sm font-medium opacity-90 mb-1">مرحباً بك في</p>
-        <h2 className="text-2xl font-bold mb-2">{storeName}</h2>
-        <p className="text-sm opacity-80 mb-4">
-          {storeContext.description || 'اكتشف أفضل المنتجات المختارة بعناية لك'}
-        </p>
-        <button className="bg-white/20 backdrop-blur px-5 py-2 rounded-full text-sm font-medium hover:bg-white/30 transition">
-          تسوّق الآن
-        </button>
-      </div>
+      {showHero && (
+        <div className={cn('mx-4 mt-4 rounded-2xl p-8 text-white bg-gradient-to-r', primaryGradient)}>
+          <p className="text-sm font-medium opacity-90 mb-1">مرحباً بك في</p>
+          <h2 className="text-2xl font-bold mb-2">{heroText}</h2>
+          <p className="text-sm opacity-80 mb-4">{heroSubtext}</p>
+          <button className="bg-white/20 backdrop-blur px-5 py-2 rounded-full text-sm font-medium hover:bg-white/30 transition">
+            تسوّق الآن
+          </button>
+        </div>
+      )}
 
       {/* Features */}
       <div className="flex gap-2 mx-4 mt-4 overflow-x-auto pb-2">
-        {[
-          { icon: Truck, text: 'شحن مجاني' },
-          { icon: Shield, text: 'دفع آمن' },
-          { icon: RotateCcw, text: 'إرجاع سهل' },
-        ].map((f, i) => (
-          <div key={i} className="flex items-center gap-1.5 bg-white/70 backdrop-blur rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 whitespace-nowrap border border-gray-100">
-            <f.icon className="h-3.5 w-3.5" />
-            {f.text}
-          </div>
-        ))}
+        {featuresList.map((text, i) => {
+          const Icon = featureIcons[i % featureIcons.length];
+          return (
+            <div key={i} className="flex items-center gap-1.5 bg-white/70 backdrop-blur rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 whitespace-nowrap border border-gray-100">
+              <Icon className="h-3.5 w-3.5" />
+              {text}
+            </div>
+          );
+        })}
       </div>
 
       {/* Products */}
       <div className="px-4 mt-6 mb-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-gray-800">المنتجات المميزة</h3>
-          <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', colors.accent)}>
+          <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', accentClasses)}>
             جديد
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className={cn(layout === 'list' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3')}>
           {products.map((product, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition">
-              <div className="h-28 flex items-center justify-center bg-gray-50 text-4xl">
+            <div key={i} className={cn(
+              'bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition',
+              layout === 'list' && 'flex flex-row'
+            )}>
+              <div className={cn(
+                'flex items-center justify-center bg-gray-50 text-4xl',
+                layout === 'list' ? 'w-24 h-24' : 'h-28'
+              )}>
                 {product.image}
               </div>
-              <div className="p-3">
+              <div className="p-3 flex-1">
                 <p className="text-xs font-medium text-gray-800 truncate">{product.name}</p>
                 <div className="flex items-center gap-1 mt-1">
                   {[...Array(5)].map((_, j) => (
@@ -172,7 +202,7 @@ export default function StorePreview({ storeContext }: StorePreviewProps) {
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-sm font-bold text-gray-900">{product.price}</span>
-                  <button className={cn('p-1.5 rounded-lg text-white bg-gradient-to-r', colors.primary)}>
+                  <button className={cn('p-1.5 rounded-lg text-white bg-gradient-to-r', primaryGradient)}>
                     <ShoppingBag className="h-3.5 w-3.5" />
                   </button>
                 </div>
