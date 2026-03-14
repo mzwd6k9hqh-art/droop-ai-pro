@@ -7,15 +7,17 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء متاجر إلكترونية. يمكنك تعديل تصميم متجر المستخدم مباشرة وفي الوقت الحقيقي.
+لديك أيضاً قدرة البحث في الإنترنت للإجابة على أي سؤال بمعلومات محدثة ودقيقة.
 
 ## القواعد الأساسية:
 
 1. عندما يطلب المستخدم أي تعديل على المتجر، يجب أن تستدعي أداة "modify_store" فوراً. لا تكتفِ بالرد النصي أبداً عندما يُطلب تعديل.
 2. يمكنك استدعاء الأداة عدة مرات في نفس الرد لتنفيذ تعديلات متعددة.
-3. إذا طلب المستخدم شيئاً غير واضح، اطلب توضيحاً قبل التنفيذ.
-4. كن لطيفاً وودوداً ومشجعاً.
-5. لا تنفذ أي شيء ضار. عدّل فقط ما يُطلب صراحةً.
-6. نفّذ كل أمر يعطيك إياه المستخدم بدقة وبدون تردد.
+3. عندما يسأل المستخدم سؤالاً يحتاج لمعلومات محدثة أو بحث في الإنترنت، استخدم أداة "web_search" للبحث ثم أجب بناءً على النتائج.
+4. إذا طلب المستخدم شيئاً غير واضح، اطلب توضيحاً قبل التنفيذ.
+5. كن لطيفاً وودوداً ومشجعاً.
+6. لا تنفذ أي شيء ضار. عدّل فقط ما يُطلب صراحةً.
+7. نفّذ كل أمر يعطيك إياه المستخدم بدقة وبدون تردد.
 
 ## الإجراءات المدعومة لـ modify_store:
 
@@ -38,7 +40,8 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء م�
 - استخدم إيموجي للمنتجات (مثل: 👕, 📱, 🍕, 💄, ⚽, 📚, 🧸, 🏠).
 - عند طلب تعديلات متعددة، استدعِ الأداة لكل تعديل على حدة.
 - أنت خبير أيضاً في استراتيجيات الأعمال والتسويق والتسعير والمبيعات والتجارة الإلكترونية.
-- تحدث بالعربية دائماً إلا إذا تحدث المستخدم بلغة أخرى.`;
+- تحدث بالعربية دائماً إلا إذا تحدث المستخدم بلغة أخرى.
+- عند البحث في الإنترنت، قدّم النتائج بشكل منظم مع ذكر المصادر.`;
 
 const tools = [
   {
@@ -67,7 +70,68 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "web_search",
+      description: "Search the internet for up-to-date information. Use this when the user asks questions that need current data, news, prices, trends, or any factual information.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: {
+            type: "string",
+            description: "The search query to look up on the internet",
+          },
+          search_depth: {
+            type: "string",
+            enum: ["basic", "advanced"],
+            description: "Search depth - 'basic' for quick answers, 'advanced' for detailed research",
+          },
+        },
+        required: ["query"],
+      },
+    },
+  },
 ];
+
+async function tavilySearch(query: string, searchDepth: string = "basic"): Promise<string> {
+  const TAVILY_API_KEY = Deno.env.get("TAVILY_API_KEY");
+  if (!TAVILY_API_KEY) {
+    throw new Error("TAVILY_API_KEY is not configured");
+  }
+
+  const response = await fetch("https://api.tavily.com/search", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      api_key: TAVILY_API_KEY,
+      query,
+      search_depth: searchDepth,
+      include_answer: true,
+      max_results: 5,
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error("Tavily API error:", response.status, errText);
+    throw new Error(`Tavily search failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  let searchResult = "";
+  if (data.answer) {
+    searchResult += `**ملخص:** ${data.answer}\n\n`;
+  }
+  if (data.results && data.results.length > 0) {
+    searchResult += "**المصادر:**\n";
+    for (const result of data.results) {
+      searchResult += `- [${result.title}](${result.url}): ${result.content?.substring(0, 200) || ''}\n`;
+    }
+  }
+  return searchResult || "لم يتم العثور على نتائج.";
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -131,6 +195,7 @@ serve(async (req) => {
     if (choice.tool_calls && choice.tool_calls.length > 0) {
       const functionCalls = [];
       const toolResultMessages = [];
+      let hasWebSearch = false;
 
       for (const toolCall of choice.tool_calls) {
         if (toolCall.function.name === "modify_store") {
@@ -141,6 +206,24 @@ serve(async (req) => {
             tool_call_id: toolCall.id,
             content: JSON.stringify({ success: true, action: args.action, target: args.target }),
           });
+        } else if (toolCall.function.name === "web_search") {
+          hasWebSearch = true;
+          const args = JSON.parse(toolCall.function.arguments);
+          try {
+            const searchResults = await tavilySearch(args.query, args.search_depth || "basic");
+            toolResultMessages.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: searchResults,
+            });
+          } catch (e) {
+            console.error("Web search error:", e);
+            toolResultMessages.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: "عذراً، فشل البحث في الإنترنت. يرجى المحاولة مرة أخرى.",
+            });
+          }
         }
       }
 
@@ -176,15 +259,19 @@ serve(async (req) => {
       }
 
       if (!textContent) {
-        const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');
-        textContent = `تم تنفيذ التعديلات:\n${actionSummary}\n\nانتقل لتبويب "تصميم المتجر" لرؤية التغييرات!`;
+        if (hasWebSearch) {
+          textContent = "عذراً، لم أتمكن من معالجة نتائج البحث. يرجى المحاولة مرة أخرى.";
+        } else {
+          const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');
+          textContent = `تم تنفيذ التعديلات:\n${actionSummary}\n\nانتقل لتبويب "تصميم المتجر" لرؤية التغييرات!`;
+        }
       }
 
       return new Response(
         JSON.stringify({
-          type: "modify_store",
+          type: functionCalls.length > 0 ? "modify_store" : "text",
           content: textContent,
-          functionCalls: functionCalls,
+          ...(functionCalls.length > 0 ? { functionCalls } : {}),
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
