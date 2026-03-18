@@ -1,21 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { OnboardingResult } from '@/components/StoreOnboarding';
-import StorePreview, { StoreConfig } from '@/components/StorePreview';
-import {
-  Bot,
-  Send,
-  User,
-  Sparkles,
-  Store,
-  ExternalLink,
-  MessageCircle,
-  Palette,
-} from 'lucide-react';
+import { StoreConfig } from '@/components/StorePreview';
+import StorePreview from '@/components/StorePreview';
+import { ChatMessage } from '@/components/chat/ChatMessage';
+import { ChatInput } from '@/components/chat/ChatInput';
+import { ChatWelcome } from '@/components/chat/ChatWelcome';
+import { TypingIndicator } from '@/components/chat/TypingIndicator';
+import { Sparkles, PanelRight, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -119,12 +113,10 @@ function applyModification(current: StoreConfig, functionCall: any): StoreConfig
     }
     case 'update_store_type': {
       updated.storeType = details?.type || target;
-      // Reset products to match new type
       updated.products = undefined;
       break;
     }
     default: {
-      // Generic: merge details into config
       if (details) {
         Object.assign(updated, details);
       }
@@ -141,7 +133,7 @@ export default function AIChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [activeTab, setActiveTab] = useState('chat');
+  const [showPreview, setShowPreview] = useState(false);
   const [storeContext] = useState<OnboardingResult | null>(() => {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
@@ -156,20 +148,16 @@ export default function AIChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Persist store config
   useEffect(() => {
     localStorage.setItem(STORE_CONFIG_KEY, JSON.stringify(storeConfig));
   }, [storeConfig]);
 
   const handleStoreModification = useCallback((functionCall: any) => {
-    setStoreConfig(prev => {
-      const updated = applyModification(prev, functionCall);
-      return updated;
-    });
-    toast.success('تم تحديث تصميم المتجر! انتقل لتبويب "تصميم المتجر" لرؤية التغييرات', {
+    setStoreConfig(prev => applyModification(prev, functionCall));
+    toast.success('تم تحديث تصميم المتجر!', {
       action: {
-        label: 'عرض التصميم',
-        onClick: () => setActiveTab('preview'),
+        label: 'عرض المتجر',
+        onClick: () => setShowPreview(true),
       },
     });
   }, []);
@@ -200,7 +188,6 @@ Welcome them and present a store design concept with layout, categories, colors,
         });
         if (error) throw error;
 
-        // Handle initial store modifications (single or multiple)
         if (data.type === 'modify_store') {
           if (data.functionCalls && Array.isArray(data.functionCalls)) {
             data.functionCalls.forEach((fc: any) => handleStoreModification(fc));
@@ -215,7 +202,7 @@ Welcome them and present a store design concept with layout, categories, colors,
           id: Date.now().toString(), role: 'assistant',
           content: storeContext.hasStore
             ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
-            : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! يمكنك رؤية التصميم الأولي في تبويب "تصميم المتجر". اطلب مني أي تعديل!`,
+            : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! اطلب مني أي تعديل!`,
           timestamp: new Date(),
         }]);
       } finally {
@@ -229,8 +216,7 @@ Welcome them and present a store design concept with layout, categories, colors,
     return <Navigate to="/onboarding" replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!input.trim() || isTyping) return;
 
     const userMessage: Message = {
@@ -240,12 +226,12 @@ Welcome them and present a store design concept with layout, categories, colors,
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
 
     try {
-      const conversationHistory = [...messages, userMessage].map((m) => ({
+      const conversationHistory = [...messages, userMessage].map(m => ({
         role: m.role,
         content: m.content,
       }));
@@ -259,7 +245,6 @@ Welcome them and present a store design concept with layout, categories, colors,
 
       if (error) throw error;
 
-      // Handle store modifications (single or multiple)
       if (data.type === 'modify_store') {
         if (data.functionCalls && Array.isArray(data.functionCalls)) {
           data.functionCalls.forEach((fc: any) => handleStoreModification(fc));
@@ -268,7 +253,7 @@ Welcome them and present a store design concept with layout, categories, colors,
         }
       }
 
-      setMessages((prev) => [...prev, {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: data.content,
@@ -276,7 +261,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       }]);
     } catch (err) {
       console.error('AI Chat error:', err);
-      setMessages((prev) => [...prev, {
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.',
@@ -287,188 +272,96 @@ Welcome them and present a store design concept with layout, categories, colors,
     }
   };
 
+  const hasMessages = messages.length > 0 || isTyping;
+
   return (
-    <div className="flex flex-col h-screen animate-slide-up">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <div className="p-3 rounded-xl gradient-button shadow-lg">
-              <Bot className="h-7 w-7 text-primary-foreground" />
+    <div className="flex h-screen bg-background">
+      {/* Main Chat Area */}
+      <div className={cn(
+        'flex flex-col flex-1 min-w-0 transition-all duration-300',
+        showPreview && 'lg:mr-[420px]'
+      )}>
+        {/* Top Bar */}
+        <div className="flex items-center justify-between h-14 px-4 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
-            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-accent" />
+            <div>
+              <h1 className="text-sm font-semibold text-foreground leading-none">DROOP AI</h1>
+              <p className="text-[11px] text-muted-foreground">مساعدك الذكي</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              DROOP AI
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary">Assistant</span>
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              مساعدك الذكي لبناء وتحسين متجرك
-            </p>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowPreview(!showPreview)}
+            className={cn(
+              'h-9 w-9 rounded-lg',
+              showPreview && 'bg-primary/10 text-primary'
+            )}
+            title="عرض المتجر"
+          >
+            <PanelRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Messages / Welcome */}
+        <div className="flex-1 overflow-y-auto">
+          {!hasMessages ? (
+            <ChatWelcome onSuggestionClick={setInput} />
+          ) : (
+            <div className="pb-4">
+              {messages.map(msg => (
+                <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+              ))}
+              {isTyping && <TypingIndicator />}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+        <div className="border-t border-border/30 bg-background pt-3">
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSubmit={handleSubmit}
+            disabled={isTyping}
+          />
         </div>
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-        <TabsList className="mx-4 mt-3 grid w-auto grid-cols-2 max-w-sm">
-          <TabsTrigger value="chat" className="gap-2">
-            <MessageCircle className="h-4 w-4" />
-            المحادثة
-          </TabsTrigger>
-          <TabsTrigger value="preview" className="gap-2">
-            <Palette className="h-4 w-4" />
-            تصميم المتجر
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Chat Tab */}
-        <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 px-4 pb-4 mt-0">
-          {/* Store Context */}
-          {storeContext?.storeUrl && (
-            <div className="py-3 px-4 mt-3 rounded-xl bg-muted/50 border border-border/50">
-              <div className="flex items-center gap-2 text-sm">
-                <Store className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">تحليل:</span>
-                <a
-                  href={storeContext.storeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline flex items-center gap-1 font-medium"
-                >
-                  {storeContext.storeUrl}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
+      {/* Store Preview Side Panel */}
+      {showPreview && (
+        <>
+          {/* Mobile overlay */}
+          <div
+            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setShowPreview(false)}
+          />
+          <div className={cn(
+            'fixed top-0 right-0 h-full w-full sm:w-[420px] z-50 lg:z-0',
+            'bg-background border-l border-border',
+            'flex flex-col animate-in slide-in-from-right duration-300'
+          )}>
+            <div className="flex items-center justify-between h-14 px-4 border-b border-border/50">
+              <h2 className="text-sm font-semibold text-foreground">معاينة المتجر</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowPreview(false)}
+                className="h-8 w-8 rounded-lg"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto py-4 space-y-6">
-            {messages.length === 0 && !isTyping ? (
-              <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                <div className="relative mb-6">
-                  <div className="p-5 rounded-2xl gradient-button shadow-xl">
-                    <Bot className="h-10 w-10 text-primary-foreground" />
-                  </div>
-                  <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-accent" />
-                </div>
-                <h2 className="text-2xl font-bold mb-2">مرحباً! أنا DROOP AI</h2>
-                <p className="text-muted-foreground max-w-md mb-8 text-lg">
-                  مساعدك الذكي لبناء متجرك. اطلب مني تعديل التصميم، الألوان، المنتجات، أو أي شيء آخر!
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-                  {[
-                    'غيّر ألوان المتجر إلى الأزرق',
-                    'أضف منتج جديد للمتجر',
-                    'غيّر اسم المتجر',
-                    'غيّر تصميم المنتجات إلى قائمة',
-                  ].map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setInput(suggestion)}
-                      className="text-left text-sm p-4 rounded-xl bg-muted hover:bg-muted/80 transition-all border border-border/50 hover:border-primary/30 hover:shadow-md"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    'flex gap-4 max-w-3xl',
-                    message.role === 'user' ? 'ml-auto flex-row-reverse' : ''
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
-                      message.role === 'user' ? 'gradient-button' : 'bg-muted'
-                    )}
-                  >
-                    {message.role === 'user' ? (
-                      <User className="h-5 w-5 text-primary-foreground" />
-                    ) : (
-                      <Bot className="h-5 w-5" />
-                    )}
-                  </div>
-                  <div
-                    className={cn(
-                      'rounded-2xl px-4 py-3 max-w-xl',
-                      message.role === 'user' ? 'gradient-button' : 'bg-muted'
-                    )}
-                  >
-                    <div className={cn(
-                      'text-sm whitespace-pre-wrap leading-relaxed',
-                      message.role === 'user' && 'text-primary-foreground'
-                    )}>
-                      {message.content.split('\n').map((line, i) => {
-                        if (line.startsWith('**') && line.endsWith('**')) {
-                          return <p key={i} className="font-semibold mt-3 mb-1">{line.replace(/\*\*/g, '')}</p>;
-                        }
-                        if (line.startsWith('- ')) {
-                          return <p key={i} className="ml-4">• {line.slice(2)}</p>;
-                        }
-                        if (line.match(/^\d+\./)) {
-                          return <p key={i} className="ml-4">{line}</p>;
-                        }
-                        return line ? <p key={i}>{line}</p> : <br key={i} />;
-                      })}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-
-            {isTyping && (
-              <div className="flex gap-4 max-w-3xl">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted">
-                  <Bot className="h-5 w-5" />
-                </div>
-                <div className="rounded-2xl px-4 py-3 bg-muted">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div ref={messagesEndRef} />
+            <div className="flex-1 overflow-auto">
+              <StorePreview storeContext={storeContext} storeConfig={storeConfig} />
+            </div>
           </div>
-
-          {/* Input */}
-          <form onSubmit={handleSubmit} className="flex gap-3 pt-4 border-t border-border">
-            <div className="relative flex-1">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="اطلب تعديل على متجرك... مثل: غيّر الألوان، أضف منتج، عدّل الاسم"
-                disabled={isTyping}
-                className="pr-12 h-12 input-focus rounded-xl"
-              />
-            </div>
-            <Button
-              type="submit"
-              size="lg"
-              disabled={!input.trim() || isTyping}
-              className="h-12 px-6 gradient-button rounded-xl"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
-        </TabsContent>
-
-        {/* Store Preview Tab */}
-        <TabsContent value="preview" className="flex-1 min-h-0 overflow-hidden mt-0">
-          <StorePreview storeContext={storeContext} storeConfig={storeConfig} />
-        </TabsContent>
-      </Tabs>
+        </>
+      )}
     </div>
   );
 }
