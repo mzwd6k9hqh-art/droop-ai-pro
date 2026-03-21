@@ -93,6 +93,21 @@ export function applyModification(current: StoreConfig, functionCall: any): Stor
       updated.products = undefined;
       break;
     }
+    case 'update_about_page': {
+      updated.pages = { ...updated.pages };
+      updated.pages.about = { ...(updated.pages?.about || {}), ...details };
+      break;
+    }
+    case 'update_contact_page': {
+      updated.pages = { ...updated.pages };
+      updated.pages.contact = { ...(updated.pages?.contact || {}), ...details };
+      break;
+    }
+    case 'update_offers_page': {
+      updated.pages = { ...updated.pages };
+      updated.pages.offers = { ...(updated.pages?.offers || {}), ...details };
+      break;
+    }
     default: {
       if (details) {
         Object.assign(updated, details);
