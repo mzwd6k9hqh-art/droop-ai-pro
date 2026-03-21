@@ -247,13 +247,40 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
         currentPage={currentPage}
         onNavigate={handleNavigate}
         pages={navPages}
+        config={storeConfig}
       />
       {renderPage()}
       {/* Footer */}
-      <div className="px-4 py-6 mt-4 border-t border-gray-200/50 text-center">
-        <p className="text-xs text-gray-500">
-          تم تصميمه بواسطة DROOP AI • {storeName}
+      <div className="px-4 py-6 mt-4 border-t border-gray-200/50">
+        {/* Social Links */}
+        {storeConfig?.socialLinks && (
+          <div className="flex justify-center gap-4 mb-3">
+            {Object.entries(storeConfig.socialLinks).map(([platform, link]) => (
+              link && <span key={platform} className="text-sm text-gray-500 hover:text-gray-700 cursor-pointer capitalize">{platform}</span>
+            ))}
+          </div>
+        )}
+        {/* Footer Links */}
+        {storeConfig?.footerLinks && storeConfig.footerLinks.length > 0 && (
+          <div className="flex justify-center gap-4 mb-3">
+            {storeConfig.footerLinks.map((link, i) => (
+              <button key={i} onClick={() => handleNavigate(link.page)} className="text-xs text-gray-500 hover:text-gray-700">
+                {link.label}
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="text-xs text-gray-500 text-center">
+          {storeConfig?.footerText || `تم تصميمه بواسطة DROOP AI • ${storeName}`}
         </p>
+        {/* Policies */}
+        {storeConfig?.policies && (
+          <div className="flex justify-center gap-3 mt-2">
+            {storeConfig.policies.shipping && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">سياسة الشحن</span>}
+            {storeConfig.policies.returns && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">الاسترجاع</span>}
+            {storeConfig.policies.privacy && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">الخصوصية</span>}
+          </div>
+        )}
       </div>
     </div>
   );
