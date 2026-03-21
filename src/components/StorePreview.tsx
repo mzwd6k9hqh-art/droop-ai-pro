@@ -17,13 +17,33 @@ export interface StoreConfig {
   primaryColor?: string;
   accentColor?: string;
   bgColor?: string;
-  products?: { name: string; price: string; image: string }[];
+  products?: { name: string; price: string; image: string; description?: string; category?: string; badge?: string; discount?: number; inStock?: boolean }[];
   heroText?: string;
   heroSubtext?: string;
   features?: string[];
   layout?: 'grid' | 'list';
   showHero?: boolean;
   currency?: string;
+  // New expanded fields
+  logo?: string;
+  fontFamily?: string;
+  announcement?: { text: string; show: boolean; bgColor?: string; textColor?: string };
+  socialLinks?: { instagram?: string; twitter?: string; tiktok?: string; whatsapp?: string; facebook?: string; youtube?: string };
+  navbarStyle?: 'default' | 'centered' | 'minimal';
+  footerText?: string;
+  footerLinks?: { label: string; page: string }[];
+  categories?: string[];
+  showSearch?: boolean;
+  showCart?: boolean;
+  showWishlist?: boolean;
+  productColumns?: 2 | 3;
+  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
+  heroButtonText?: string;
+  heroImage?: string;
+  testimonials?: { name: string; text: string; rating: number }[];
+  banners?: { text: string; image?: string; link?: string }[];
+  faq?: { question: string; answer: string }[];
+  policies?: { shipping?: string; returns?: string; privacy?: string };
   pages?: {
     about?: {
       description?: string;
