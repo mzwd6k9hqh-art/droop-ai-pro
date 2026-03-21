@@ -61,7 +61,7 @@ const tools = [
         properties: {
           action: {
             type: "string",
-            description: "The type of modification (e.g., 'update_product', 'change_color', 'update_layout', 'add_product', 'remove_product', 'update_name', 'update_hero', 'update_features', 'update_store_type', 'update_price', 'update_image', 'update_currency', 'update_description')",
+            description: "The type of modification (e.g., 'update_product', 'change_color', 'update_layout', 'add_product', 'remove_product', 'update_name', 'update_hero', 'update_features', 'update_store_type', 'update_price', 'update_image', 'update_currency', 'update_description', 'update_about_page', 'update_contact_page', 'update_offers_page')",
           },
           target: {
             type: "string",
