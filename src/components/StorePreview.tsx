@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { OnboardingResult } from '@/components/StoreOnboarding';
-import { Store, ShoppingBag, Search, Heart, ShoppingCart, Menu, Star, Truck, Shield, RotateCcw } from 'lucide-react';
+import { Store } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { StoreNavbar } from '@/components/store/StoreNavbar';
+import { HomePage } from '@/components/store/pages/HomePage';
+import { ProductDetailPage } from '@/components/store/pages/ProductDetailPage';
+import { AllProductsPage } from '@/components/store/pages/AllProductsPage';
+import { AboutPage } from '@/components/store/pages/AboutPage';
+import { ContactPage } from '@/components/store/pages/ContactPage';
+import { OffersPage } from '@/components/store/pages/OffersPage';
 
 export interface StoreConfig {
   storeName?: string;
@@ -17,6 +24,25 @@ export interface StoreConfig {
   layout?: 'grid' | 'list';
   showHero?: boolean;
   currency?: string;
+  pages?: {
+    about?: {
+      description?: string;
+      subtitle?: string;
+      stat1Label?: string;
+      stat2Label?: string;
+      stat3Label?: string;
+    };
+    contact?: {
+      subtitle?: string;
+      email?: string;
+      phone?: string;
+      address?: string;
+    };
+    offers?: {
+      title?: string;
+      subtitle?: string;
+    };
+  };
 }
 
 interface StorePreviewProps {
@@ -87,6 +113,14 @@ const SAMPLE_PRODUCTS: Record<string, { name: string; price: string; image: stri
 };
 
 export default function StorePreview({ storeContext, storeConfig }: StorePreviewProps) {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [pageData, setPageData] = useState<any>(null);
+
+  const handleNavigate = (page: string, data?: any) => {
+    setCurrentPage(page);
+    setPageData(data || null);
+  };
+
   if (!storeContext) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -110,108 +144,91 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
 
   const type = storeConfig?.storeType || storeContext.storeType || 'fashion';
   const defaultColors = STORE_TYPE_COLORS[type] || STORE_TYPE_COLORS.fashion;
-  
+
   const primaryGradient = storeConfig?.primaryColor || defaultColors.primary;
   const accentClasses = storeConfig?.accentColor || defaultColors.accent;
   const bgClasses = storeConfig?.bgColor || defaultColors.bg;
-  
+
   const products = storeConfig?.products || SAMPLE_PRODUCTS[type] || SAMPLE_PRODUCTS.fashion;
   const storeName = storeConfig?.storeName || storeContext.storeName || 'My Store';
-  const description = storeConfig?.description || storeContext.description || 'اكتشف أفضل المنتجات المختارة بعناية لك';
-  const heroText = storeConfig?.heroText || storeName;
-  const heroSubtext = storeConfig?.heroSubtext || description;
-  const showHero = storeConfig?.showHero !== false;
-  const layout = storeConfig?.layout || 'grid';
 
-  const featuresList = storeConfig?.features || ['شحن مجاني', 'دفع آمن', 'إرجاع سهل'];
-  const featureIcons = [Truck, Shield, RotateCcw];
+  const navPages = [
+    { id: 'home', title: 'الرئيسية' },
+    { id: 'products', title: 'جميع المنتجات' },
+    { id: 'offers', title: 'العروض' },
+    { id: 'about', title: 'من نحن' },
+    { id: 'contact', title: 'تواصل معنا' },
+  ];
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'product-detail':
+        return (
+          <ProductDetailPage
+            product={pageData?.product || products[0]}
+            primaryGradient={primaryGradient}
+            storeName={storeName}
+            onNavigate={handleNavigate}
+          />
+        );
+      case 'products':
+        return (
+          <AllProductsPage
+            products={products}
+            primaryGradient={primaryGradient}
+            accentClasses={accentClasses}
+            layout={storeConfig?.layout || 'grid'}
+            onNavigate={handleNavigate}
+          />
+        );
+      case 'about':
+        return (
+          <AboutPage
+            config={storeConfig || {}}
+            primaryGradient={primaryGradient}
+            onNavigate={handleNavigate}
+          />
+        );
+      case 'contact':
+        return (
+          <ContactPage
+            config={storeConfig || {}}
+            primaryGradient={primaryGradient}
+            onNavigate={handleNavigate}
+          />
+        );
+      case 'offers':
+        return (
+          <OffersPage
+            config={storeConfig || {}}
+            primaryGradient={primaryGradient}
+            products={products}
+            onNavigate={handleNavigate}
+          />
+        );
+      default:
+        return (
+          <HomePage
+            config={storeConfig || { storeName, description: storeContext.description }}
+            primaryGradient={primaryGradient}
+            accentClasses={accentClasses}
+            products={products}
+            onNavigate={handleNavigate}
+          />
+        );
+    }
+  };
 
   return (
-    <div className={cn('h-full overflow-y-auto', bgClasses)}>
-      {/* Store Navbar */}
-      <div className="bg-white/80 backdrop-blur border-b px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <Menu className="h-5 w-5 text-gray-600" />
-          <h1 className={cn('text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent', primaryGradient)}>
-            {storeName}
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Search className="h-5 w-5 text-gray-500" />
-          <Heart className="h-5 w-5 text-gray-500" />
-          <div className="relative">
-            <ShoppingCart className="h-5 w-5 text-gray-500" />
-            <span className={cn('absolute -top-2 -right-2 text-[10px] text-white rounded-full w-4 h-4 flex items-center justify-center bg-gradient-to-r', primaryGradient)}>
-              0
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Hero Banner */}
-      {showHero && (
-        <div className={cn('mx-4 mt-4 rounded-2xl p-8 text-white bg-gradient-to-r', primaryGradient)}>
-          <p className="text-sm font-medium opacity-90 mb-1">مرحباً بك في</p>
-          <h2 className="text-2xl font-bold mb-2">{heroText}</h2>
-          <p className="text-sm opacity-80 mb-4">{heroSubtext}</p>
-          <button className="bg-white/20 backdrop-blur px-5 py-2 rounded-full text-sm font-medium hover:bg-white/30 transition">
-            تسوّق الآن
-          </button>
-        </div>
-      )}
-
-      {/* Features */}
-      <div className="flex gap-2 mx-4 mt-4 overflow-x-auto pb-2">
-        {featuresList.map((text, i) => {
-          const Icon = featureIcons[i % featureIcons.length];
-          return (
-            <div key={i} className="flex items-center gap-1.5 bg-white/70 backdrop-blur rounded-full px-3 py-1.5 text-xs font-medium text-gray-700 whitespace-nowrap border border-gray-100">
-              <Icon className="h-3.5 w-3.5" />
-              {text}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Products */}
-      <div className="px-4 mt-6 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-gray-800">المنتجات المميزة</h3>
-          <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', accentClasses)}>
-            جديد
-          </span>
-        </div>
-        <div className={cn(layout === 'list' ? 'flex flex-col gap-3' : 'grid grid-cols-2 gap-3')}>
-          {products.map((product, i) => (
-            <div key={i} className={cn(
-              'bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-md transition',
-              layout === 'list' && 'flex flex-row'
-            )}>
-              <div className={cn(
-                'flex items-center justify-center bg-gray-50 text-4xl',
-                layout === 'list' ? 'w-24 h-24' : 'h-28'
-              )}>
-                {product.image}
-              </div>
-              <div className="p-3 flex-1">
-                <p className="text-xs font-medium text-gray-800 truncate">{product.name}</p>
-                <div className="flex items-center gap-1 mt-1">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm font-bold text-gray-900">{product.price}</span>
-                  <button className={cn('p-1.5 rounded-lg text-white bg-gradient-to-r', primaryGradient)}>
-                    <ShoppingBag className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
+    <div className={cn('h-full overflow-y-auto relative', bgClasses)}>
+      <StoreNavbar
+        storeName={storeName}
+        primaryGradient={primaryGradient}
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        pages={navPages}
+      />
+      {renderPage()}
       {/* Footer */}
       <div className="px-4 py-6 mt-4 border-t border-gray-200/50 text-center">
         <p className="text-xs text-gray-500">

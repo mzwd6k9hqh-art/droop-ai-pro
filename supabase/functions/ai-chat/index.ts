@@ -35,6 +35,13 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء م�
 - "update_store_type" - تغيير نوع المتجر بالكامل. Details: { "type": "fashion|electronics|food|beauty|sports|books|kids|home" }
 - "update_image" - تغيير إيموجي المنتج. Target: اسم المنتج. Details: { "image": "emoji جديد" }
 - "update_currency" - تغيير العملة. Details: { "currency": "SAR|USD|EUR|..." }
+- "update_about_page" - تعديل صفحة "من نحن". Details: { "description": "...", "subtitle": "...", "stat1Label": "...", "stat2Label": "...", "stat3Label": "..." }
+- "update_contact_page" - تعديل صفحة التواصل. Details: { "email": "...", "phone": "...", "address": "...", "subtitle": "..." }
+- "update_offers_page" - تعديل صفحة العروض. Details: { "title": "...", "subtitle": "..." }
+
+## ملاحظة مهمة عن الصفحات:
+المتجر يحتوي على عدة صفحات: الرئيسية، جميع المنتجات، صفحة منتج فردي، العروض، من نحن، تواصل معنا.
+يمكنك تعديل محتوى أي صفحة باستخدام الأدوات المناسبة أعلاه.
 
 ## تعليمات مهمة:
 - استخدم إيموجي للمنتجات (مثل: 👕, 📱, 🍕, 💄, ⚽, 📚, 🧸, 🏠).
@@ -54,7 +61,7 @@ const tools = [
         properties: {
           action: {
             type: "string",
-            description: "The type of modification (e.g., 'update_product', 'change_color', 'update_layout', 'add_product', 'remove_product', 'update_name', 'update_hero', 'update_features', 'update_store_type', 'update_price', 'update_image', 'update_currency', 'update_description')",
+            description: "The type of modification (e.g., 'update_product', 'change_color', 'update_layout', 'add_product', 'remove_product', 'update_name', 'update_hero', 'update_features', 'update_store_type', 'update_price', 'update_image', 'update_currency', 'update_description', 'update_about_page', 'update_contact_page', 'update_offers_page')",
           },
           target: {
             type: "string",
