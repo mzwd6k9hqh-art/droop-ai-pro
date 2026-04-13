@@ -1,10 +1,16 @@
 import { useState, useCallback } from 'react';
 
+export interface MessageAttachment {
+  url: string;
+  type: 'image' | 'video';
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  attachments?: MessageAttachment[];
 }
 
 export interface StoredConversation {
