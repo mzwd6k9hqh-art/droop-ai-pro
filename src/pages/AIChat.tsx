@@ -125,10 +125,40 @@ Welcome them and present a store design concept with layout, categories, colors,
   const handleNewChat = () => {
     createConversation();
     setShowSidebar(false);
+    setAttachments([]);
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAddAttachments = (files: FileList) => {
+    const newAttachments: ChatAttachment[] = [];
+    Array.from(files).forEach(file => {
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error('حجم الملف كبير جداً (الحد الأقصى 20MB)');
+        return;
+      }
+      const type = file.type.startsWith('video/') ? 'video' as const : 'image' as const;
+      newAttachments.push({ file, preview: URL.createObjectURL(file), type });
+    });
+    setAttachments(prev => [...prev, ...newAttachments]);
+  };
+
+  const handleRemoveAttachment = (index: number) => {
+    setAttachments(prev => {
+      URL.revokeObjectURL(prev[index].preview);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleSubmit = async () => {
-    if (!input.trim() || isTyping) return;
+    if ((!input.trim() && attachments.length === 0) || isTyping) return;
 
     let convId = activeId;
     if (!convId) {
@@ -136,15 +166,52 @@ Welcome them and present a store design concept with layout, categories, colors,
     }
 
     const userContent = input.trim();
-    addMessage(convId, { role: 'user', content: userContent });
+    const currentAttachments = [...attachments];
+    
+    // Save attachment previews for message display
+    const messageAttachments: MessageAttachment[] = currentAttachments.map(a => ({
+      url: a.preview,
+      type: a.type,
+    }));
+
+    addMessage(convId, { role: 'user', content: userContent || '📎 مرفقات', attachments: messageAttachments });
     setInput('');
+    setAttachments([]);
     setIsTyping(true);
 
     try {
+      // Build multimodal content for the current message
+      let currentMessageContent: any = userContent || 'ما هذا؟';
+      
+      if (currentAttachments.length > 0) {
+        const parts: any[] = [];
+        if (userContent) {
+          parts.push({ type: 'text', text: userContent });
+        }
+        for (const att of currentAttachments) {
+          if (att.type === 'image') {
+            const base64 = await fileToBase64(att.file);
+            parts.push({
+              type: 'image_url',
+              image_url: { url: base64 },
+            });
+          } else {
+            // For video, send as text description since most models don't support video inline
+            parts.push({ type: 'text', text: `[فيديو مرفق: ${att.file.name}]` });
+          }
+        }
+        if (parts.length === 0) parts.push({ type: 'text', text: 'ما هذا؟' });
+        currentMessageContent = parts;
+      }
+
+      // Build message history (text only for previous messages)
+      const prevMessages = (conversations.find(c => c.id === convId)?.messages || [])
+        .map(m => ({ role: m.role, content: m.content }));
+      
       const allMessages = [
-        ...(conversations.find(c => c.id === convId)?.messages || []),
-        { role: 'user' as const, content: userContent },
-      ].map(m => ({ role: m.role, content: m.content }));
+        ...prevMessages,
+        { role: 'user' as const, content: currentMessageContent },
+      ];
 
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
@@ -249,7 +316,7 @@ Welcome them and present a store design concept with layout, categories, colors,
           ) : (
             <div className="pb-4">
               {messages.map(msg => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+                <ChatMessage key={msg.id} role={msg.role} content={msg.content} attachments={msg.attachments} />
               ))}
               {isTyping && <TypingIndicator />}
               <div ref={messagesEndRef} />
@@ -264,6 +331,9 @@ Welcome them and present a store design concept with layout, categories, colors,
             onChange={setInput}
             onSubmit={handleSubmit}
             disabled={isTyping}
+            attachments={attachments}
+            onAddAttachments={handleAddAttachments}
+            onRemoveAttachment={handleRemoveAttachment}
           />
         </div>
       </div>
