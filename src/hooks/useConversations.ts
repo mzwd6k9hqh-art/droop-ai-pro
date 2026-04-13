@@ -1,10 +1,16 @@
 import { useState, useCallback } from 'react';
 
+export interface MessageAttachment {
+  url: string;
+  type: 'image' | 'video';
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  attachments?: MessageAttachment[];
 }
 
 export interface StoredConversation {
@@ -73,11 +79,13 @@ export function useConversations() {
     }
   }, [conversations, activeId, persist]);
 
-  const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'>) => {
+  const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'> & { attachments?: MessageAttachment[] }) => {
     const msg: Message = {
-      ...message,
+      role: message.role,
+      content: message.content,
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
+      attachments: message.attachments,
     };
 
     setConversations(prev => {
