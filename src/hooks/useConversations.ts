@@ -79,8 +79,13 @@ export function useConversations() {
     }
   }, [conversations, activeId, persist]);
 
-  const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'>) => {
+  const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'> & { attachments?: MessageAttachment[] }) => {
     const msg: Message = {
+      ...message,
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      attachments: message.attachments,
+    };
       ...message,
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
