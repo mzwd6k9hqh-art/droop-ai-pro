@@ -33,6 +33,7 @@ export default function AIChat() {
   } = useConversations();
 
   const [input, setInput] = useState('');
+  const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
