@@ -81,14 +81,11 @@ export function useConversations() {
 
   const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'> & { attachments?: MessageAttachment[] }) => {
     const msg: Message = {
-      ...message,
+      role: message.role,
+      content: message.content,
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       attachments: message.attachments,
-    };
-      ...message,
-      id: crypto.randomUUID(),
-      timestamp: new Date().toISOString(),
     };
 
     setConversations(prev => {
