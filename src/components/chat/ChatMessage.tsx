@@ -1,14 +1,20 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, User, Sparkles } from 'lucide-react';
+import { User, Sparkles, Film } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+interface MessageAttachment {
+  url: string;
+  type: 'image' | 'video';
+}
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
+  attachments?: MessageAttachment[];
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ role, content, attachments }: ChatMessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -36,6 +42,22 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
           )}>
             {isUser ? 'أنت' : 'DROOP AI'}
           </p>
+
+          {/* Attachments */}
+          {attachments && attachments.length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {attachments.map((att, i) => (
+                <div key={i} className="rounded-lg overflow-hidden border border-border max-w-[200px]">
+                  {att.type === 'image' ? (
+                    <img src={att.url} alt="" className="w-full h-auto max-h-48 object-cover" />
+                  ) : (
+                    <video src={att.url} controls className="w-full h-auto max-h-48" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
