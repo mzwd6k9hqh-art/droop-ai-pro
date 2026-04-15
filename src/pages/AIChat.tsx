@@ -21,6 +21,8 @@ const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
 
 export default function AIChat() {
+  const navigate = useNavigate();
+  const { user, incrementAiMessages, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
   const onboardingDone = localStorage.getItem('droop_onboarding_complete') === 'true';
 
   const {
