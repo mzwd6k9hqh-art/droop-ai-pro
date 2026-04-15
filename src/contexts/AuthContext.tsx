@@ -139,11 +139,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isUnlimitedPlan = (): boolean => {
     if (!user) return false;
-    return user.plan !== 'free';
+    return user.plan === 'premium';
   };
 
   const getDailyLimit = (): number => {
-    return 5; // Free plan daily limit
+    if (!user) return 5;
+    switch (user.plan) {
+      case 'free': return 5;
+      case 'starter': return 25;
+      case 'pro': return 100;
+      case 'premium': return Infinity;
+      default: return 5;
+    }
   };
 
   const getAiMessagesRemaining = (): number => {

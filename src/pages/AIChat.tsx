@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { OnboardingResult } from '@/components/StoreOnboarding';
 import { StoreConfig } from '@/components/StorePreview';
@@ -10,7 +11,7 @@ import { ChatWelcome } from '@/components/chat/ChatWelcome';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
-import { Sparkles, PanelRight, X, Plus, Menu } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -20,6 +21,8 @@ const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
 
 export default function AIChat() {
+  const navigate = useNavigate();
+  const { user, incrementAiMessages, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
   const onboardingDone = localStorage.getItem('droop_onboarding_complete') === 'true';
 
   const {
@@ -160,6 +163,17 @@ Welcome them and present a store design concept with layout, categories, colors,
   const handleSubmit = async () => {
     if ((!input.trim() && attachments.length === 0) || isTyping) return;
 
+    // Check message limit
+    if (user && !incrementAiMessages()) {
+      toast.error(`لقد وصلت للحد اليومي (${getDailyLimit()} رسائل). قم بالترقية للحصول على المزيد!`, {
+        action: {
+          label: 'ترقية',
+          onClick: () => navigate('/pricing'),
+        },
+      });
+      return;
+    }
+
     let convId = activeId;
     if (!convId) {
       convId = createConversation();
@@ -284,7 +298,28 @@ Welcome them and present a store design concept with layout, categories, colors,
               <p className="text-[11px] text-muted-foreground">مساعدك الذكي</p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            {/* Message counter */}
+            {user && !isUnlimitedPlan() && (
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted text-xs">
+                <Zap className="h-3 w-3 text-primary" />
+                <span className="text-muted-foreground">
+                  <span className="font-semibold text-foreground">{getAiMessagesRemaining()}</span>/{getDailyLimit()}
+                </span>
+              </div>
+            )}
+            {/* Upgrade button */}
+            {user && user.plan !== 'premium' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/pricing')}
+                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20"
+              >
+                <Crown className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">ترقية</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
@@ -324,13 +359,30 @@ Welcome them and present a store design concept with layout, categories, colors,
           )}
         </div>
 
+        {/* Limit reached banner */}
+        {user && !isUnlimitedPlan() && getAiMessagesRemaining() === 0 && (
+          <div className="mx-4 mb-2 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Zap className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-foreground">لقد استنفدت رسائلك اليومية ({getDailyLimit()} رسائل)</span>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => navigate('/pricing')}
+              className="gradient-button rounded-lg gap-1.5 text-xs shrink-0"
+            >
+              <Crown className="h-3.5 w-3.5" /> ترقية الآن
+            </Button>
+          </div>
+        )}
+
         {/* Input */}
         <div className="border-t border-border/30 bg-background pt-3">
           <ChatInput
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
-            disabled={isTyping}
+            disabled={isTyping || (user ? !isUnlimitedPlan() && getAiMessagesRemaining() === 0 : false)}
             attachments={attachments}
             onAddAttachments={handleAddAttachments}
             onRemoveAttachment={handleRemoveAttachment}
