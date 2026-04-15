@@ -17,6 +17,7 @@ import Pricing from "@/pages/Pricing";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Onboarding from "@/pages/Onboarding";
+import StoreAnalysis from "@/pages/StoreAnalysis";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <BrowserRouter>
               <Routes>
               <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/store-analysis" element={<StoreAnalysis />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/landing" element={<Landing />} />
