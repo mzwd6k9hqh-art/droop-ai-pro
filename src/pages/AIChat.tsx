@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { OnboardingResult } from '@/components/StoreOnboarding';
 import { StoreConfig } from '@/components/StorePreview';
@@ -10,7 +11,7 @@ import { ChatWelcome } from '@/components/chat/ChatWelcome';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
-import { Sparkles, PanelRight, X, Plus, Menu } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
