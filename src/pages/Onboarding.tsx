@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StoreOnboarding, { OnboardingResult } from '@/components/StoreOnboarding';
 
@@ -6,6 +6,16 @@ const ONBOARDING_KEY = 'droop_onboarding_complete';
 
 export default function Onboarding() {
   const navigate = useNavigate();
+
+  // Provide navigation function to StoreOnboarding for analysis redirect
+  useEffect(() => {
+    (window as any).__navigateToAnalysis = (url: string) => {
+      navigate(`/store-analysis?url=${encodeURIComponent(url)}`);
+    };
+    return () => {
+      delete (window as any).__navigateToAnalysis;
+    };
+  }, [navigate]);
 
   const handleComplete = (result: OnboardingResult) => {
     localStorage.setItem(ONBOARDING_KEY, 'true');

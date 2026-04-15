@@ -106,7 +106,12 @@ export default function StoreOnboarding({ onComplete }: StoreOnboardingProps) {
   const handleUrlSubmit = () => {
     if (validateUrl(storeUrl)) {
       const finalUrl = storeUrl.startsWith('http') ? storeUrl : `https://${storeUrl}`;
-      onComplete({ hasStore: true, storeUrl: finalUrl });
+      // Navigate to analysis page instead of completing onboarding
+      if ((window as any).__navigateToAnalysis) {
+        (window as any).__navigateToAnalysis(finalUrl);
+      } else {
+        onComplete({ hasStore: true, storeUrl: finalUrl });
+      }
     }
   };
 
