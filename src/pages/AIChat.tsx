@@ -163,6 +163,17 @@ Welcome them and present a store design concept with layout, categories, colors,
   const handleSubmit = async () => {
     if ((!input.trim() && attachments.length === 0) || isTyping) return;
 
+    // Check message limit
+    if (user && !incrementAiMessages()) {
+      toast.error(`لقد وصلت للحد اليومي (${getDailyLimit()} رسائل). قم بالترقية للحصول على المزيد!`, {
+        action: {
+          label: 'ترقية',
+          onClick: () => navigate('/pricing'),
+        },
+      });
+      return;
+    }
+
     let convId = activeId;
     if (!convId) {
       convId = createConversation();
