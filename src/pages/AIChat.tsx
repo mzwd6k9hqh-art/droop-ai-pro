@@ -359,13 +359,30 @@ Welcome them and present a store design concept with layout, categories, colors,
           )}
         </div>
 
+        {/* Limit reached banner */}
+        {user && !isUnlimitedPlan() && getAiMessagesRemaining() === 0 && (
+          <div className="mx-4 mb-2 p-3 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Zap className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-foreground">لقد استنفدت رسائلك اليومية ({getDailyLimit()} رسائل)</span>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => navigate('/pricing')}
+              className="gradient-button rounded-lg gap-1.5 text-xs shrink-0"
+            >
+              <Crown className="h-3.5 w-3.5" /> ترقية الآن
+            </Button>
+          </div>
+        )}
+
         {/* Input */}
         <div className="border-t border-border/30 bg-background pt-3">
           <ChatInput
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
-            disabled={isTyping}
+            disabled={isTyping || (user ? !isUnlimitedPlan() && getAiMessagesRemaining() === 0 : false)}
             attachments={attachments}
             onAddAttachments={handleAddAttachments}
             onRemoveAttachment={handleRemoveAttachment}
