@@ -298,7 +298,28 @@ Welcome them and present a store design concept with layout, categories, colors,
               <p className="text-[11px] text-muted-foreground">مساعدك الذكي</p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            {/* Message counter */}
+            {user && !isUnlimitedPlan() && (
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted text-xs">
+                <Zap className="h-3 w-3 text-primary" />
+                <span className="text-muted-foreground">
+                  <span className="font-semibold text-foreground">{getAiMessagesRemaining()}</span>/{getDailyLimit()}
+                </span>
+              </div>
+            )}
+            {/* Upgrade button */}
+            {user && user.plan !== 'premium' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/pricing')}
+                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20"
+              >
+                <Crown className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">ترقية</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
