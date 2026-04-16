@@ -294,7 +294,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-foreground leading-none">DROOP AI</h1>
+              <h1 className="text-sm font-semibold text-foreground leading-none">DROOB AI</h1>
               <p className="text-[11px] text-muted-foreground">مساعدك الذكي</p>
             </div>
           </div>
