@@ -40,7 +40,7 @@ export function ChatMessage({ role, content, attachments }: ChatMessageProps) {
             'text-xs font-semibold',
             isUser ? 'text-foreground' : 'text-primary'
           )}>
-            {isUser ? 'أنت' : 'DROOP AI'}
+            {isUser ? 'أنت' : 'DROOB AI'}
           </p>
 
           {/* Attachments */}
