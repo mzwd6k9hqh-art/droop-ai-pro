@@ -54,7 +54,7 @@ export default function Dashboard() {
               <Link to="/ai">
                 <Button size="lg" className="gap-2 gradient-button shadow-lg hover:shadow-xl transition-shadow">
                   <Bot className="h-5 w-5" />
-                  Ask DROOP AI
+                  Ask DROOB AI
                 </Button>
               </Link>
               <Link to="/analytics">
@@ -103,7 +103,7 @@ export default function Dashboard() {
               </div>
               <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">DROOP AI Assistant</h3>
+            <h3 className="font-semibold text-lg mb-2">DROOB AI Assistant</h3>
             <p className="text-sm text-muted-foreground">
               Get AI-powered business insights for {user?.storeUrl ? 'your store' : 'your business'}
             </p>

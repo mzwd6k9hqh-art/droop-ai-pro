@@ -271,7 +271,7 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
           </div>
         )}
         <p className="text-xs text-gray-500 text-center">
-          {storeConfig?.footerText || `تم تصميمه بواسطة DROOP AI • ${storeName}`}
+          {storeConfig?.footerText || `تم تصميمه بواسطة DROOB AI • ${storeName}`}
         </p>
         {/* Policies */}
         {storeConfig?.policies && (

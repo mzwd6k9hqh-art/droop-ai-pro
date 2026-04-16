@@ -99,7 +99,7 @@ export default function Register() {
                 <Sparkles className="absolute -top-1 -right-1 h-3.5 w-3.5 text-accent" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-tight">DROOP AI</span>
+                <span className="text-xl font-bold tracking-tight">DROOB AI</span>
                 <span className="text-xs text-muted-foreground">Sales Booster</span>
               </div>
             </Link>
@@ -210,7 +210,7 @@ export default function Register() {
               </div>
               <h1 className="text-4xl font-bold mb-4">Start Growing Today</h1>
               <p className="text-lg opacity-90 mb-10">
-                Join thousands of entrepreneurs using DROOP AI to accelerate their business growth.
+                Join thousands of entrepreneurs using DROOB AI to accelerate their business growth.
               </p>
               
               <div className="space-y-4 text-left">

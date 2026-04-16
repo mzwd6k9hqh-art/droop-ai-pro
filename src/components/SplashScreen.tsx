@@ -44,7 +44,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
         </div>
         
         <div className="splash-text">
-          <h1 className="text-3xl font-bold tracking-tight">DROOP AI</h1>
+          <h1 className="text-3xl font-bold tracking-tight">DROOB AI</h1>
           <p className="text-muted-foreground mt-2">Sales Booster Platform</p>
         </div>
       </div>

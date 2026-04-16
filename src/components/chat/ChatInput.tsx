@@ -127,7 +127,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
-        DROOP AI يمكنه ارتكاب أخطاء. تحقق من المعلومات المهمة.
+        DROOB AI يمكنه ارتكاب أخطاء. تحقق من المعلومات المهمة.
       </p>
     </div>
   );

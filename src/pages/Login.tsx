@@ -58,7 +58,7 @@ export default function Login() {
                 <Sparkles className="absolute -top-1 -right-1 h-3.5 w-3.5 text-accent" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold tracking-tight">DROOP AI</span>
+                <span className="text-xl font-bold tracking-tight">DROOB AI</span>
                 <span className="text-xs text-muted-foreground">Sales Booster</span>
               </div>
             </Link>
@@ -122,7 +122,7 @@ export default function Login() {
                 <Sparkles className="h-4 w-4" />
                 <span className="text-sm font-medium">AI-Powered Platform</span>
               </div>
-              <h1 className="text-4xl font-bold mb-4">Welcome Back to DROOP AI</h1>
+              <h1 className="text-4xl font-bold mb-4">Welcome Back to DROOB AI</h1>
               <p className="text-lg opacity-90 mb-10">
                 Continue growing your business with intelligent insights and data-driven recommendations.
               </p>
