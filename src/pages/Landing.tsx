@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 const features = [
   {
     icon: Bot,
-    title: 'DROOP AI Assistant',
+    title: 'DROOB AI Assistant',
     description: 'Get intelligent business insights powered by advanced AI. Ask questions and receive data-driven recommendations.',
     color: 'icon-primary',
     gradient: 'from-primary/20 to-accent/20',
@@ -76,7 +76,7 @@ export default function Landing() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-button shadow-lg">
               <Zap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold tracking-tight">DROOP AI</span>
+            <span className="text-xl font-bold tracking-tight">DROOB AI</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/onboarding">
@@ -108,7 +108,7 @@ export default function Landing() {
             {/* Main heading */}
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
               Boost Your Sales with
-              <span className="gradient-text block mt-2">DROOP AI</span>
+              <span className="gradient-text block mt-2">DROOB AI</span>
             </h1>
 
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -127,7 +127,7 @@ export default function Landing() {
               <Link to="/onboarding">
                 <Button size="lg" variant="outline" className="gap-2 h-14 px-8 text-lg">
                   <Bot className="h-5 w-5" />
-                  Try DROOP AI
+                  Try DROOB AI
                 </Button>
               </Link>
             </div>
@@ -190,7 +190,7 @@ export default function Landing() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 mb-4">
                 <Star className="h-4 w-4 text-accent" />
-                <span className="text-sm font-medium text-accent">Why DROOP AI?</span>
+                <span className="text-sm font-medium text-accent">Why DROOB AI?</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Make Data-Driven Decisions with Confidence
@@ -229,7 +229,7 @@ export default function Landing() {
                     <Bot className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">DROOP AI</h3>
+                    <h3 className="font-semibold">DROOB AI</h3>
                     <p className="text-xs text-muted-foreground">Your AI Sales Assistant</p>
                   </div>
                 </div>
@@ -278,7 +278,7 @@ export default function Landing() {
                 Ready to Boost Your Sales?
               </h2>
               <p className="text-lg text-white/80 max-w-xl mx-auto mb-8">
-                Join thousands of entrepreneurs using DROOP AI to grow their businesses smarter.
+                Join thousands of entrepreneurs using DROOB AI to grow their businesses smarter.
               </p>
               
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -307,10 +307,10 @@ export default function Landing() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-button">
                 <Zap className="h-4 w-4 text-white" />
               </div>
-              <span className="font-semibold">DROOP AI</span>
+              <span className="font-semibold">DROOB AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 DROOP AI. All rights reserved. Built for e-commerce success.
+              © 2024 DROOB AI. All rights reserved. Built for e-commerce success.
             </p>
           </div>
         </div>
