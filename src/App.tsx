@@ -18,6 +18,7 @@ import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
 import Onboarding from "@/pages/Onboarding";
 import StoreAnalysis from "@/pages/StoreAnalysis";
+import Upgrade from "@/pages/Upgrade";
 
 const queryClient = new QueryClient();
 
