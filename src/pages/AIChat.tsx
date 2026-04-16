@@ -168,7 +168,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       toast.error(`لقد وصلت للحد اليومي (${getDailyLimit()} رسائل). قم بالترقية للحصول على المزيد!`, {
         action: {
           label: 'ترقية',
-          onClick: () => navigate('/pricing'),
+          onClick: () => navigate('/upgrade'),
         },
       });
       return;
@@ -313,7 +313,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/pricing')}
+                onClick={() => navigate('/upgrade')}
                 className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20"
               >
                 <Crown className="h-3.5 w-3.5" />
@@ -368,7 +368,7 @@ Welcome them and present a store design concept with layout, categories, colors,
             </div>
             <Button
               size="sm"
-              onClick={() => navigate('/pricing')}
+              onClick={() => navigate('/upgrade')}
               className="gradient-button rounded-lg gap-1.5 text-xs shrink-0"
             >
               <Crown className="h-3.5 w-3.5" /> ترقية الآن
