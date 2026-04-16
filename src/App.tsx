@@ -57,6 +57,7 @@ const App = () => (
                 <Route path="/register" element={<Register />} />
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/ai" element={<AIChat />} />
+                <Route path="/upgrade" element={<Upgrade />} />
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<LandingRoute />} />
                   <Route path="/dashboard" element={<Dashboard />} />
