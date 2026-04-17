@@ -317,7 +317,7 @@ Welcome them and present a store design concept with layout, categories, colors,
                 className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20"
               >
                 <Crown className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">ترقية</span>
+                <span>ترقية</span>
               </Button>
             )}
             <Button
