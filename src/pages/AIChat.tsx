@@ -370,6 +370,15 @@ Welcome them and present a store design concept with layout, categories, colors,
             <Button
               variant="ghost"
               size="icon"
+              onClick={() => setShowEditor(true)}
+              className="h-9 w-9 rounded-lg"
+              title="تخصيص المتجر"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setShowPreview(!showPreview)}
               className={cn(
                 'h-9 w-9 rounded-lg',
