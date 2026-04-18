@@ -11,6 +11,7 @@ import { ChatWelcome } from '@/components/chat/ChatWelcome';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
+import type { DesignVariant } from '@/components/chat/DesignVariants';
 import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ export default function AIChat() {
     createConversation,
     deleteConversation,
     addMessage,
+    updateMessage,
   } = useConversations();
 
   const [input, setInput] = useState('');
