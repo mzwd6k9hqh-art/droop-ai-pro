@@ -377,71 +377,36 @@ export function StoreEditorPanel({ open, onOpenChange, config, onChange }: Store
               </div>
 
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground">
-                  المنتجات الحالية ({config.products?.length || 0})
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    المنتجات الحالية ({config.products?.length || 0})
+                  </p>
+                  {(config.products?.length || 0) > 1 && (
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <GripVertical className="h-3 w-3" /> اسحب لإعادة الترتيب
+                    </p>
+                  )}
+                </div>
                 {(!config.products || config.products.length === 0) && (
                   <div className="text-center text-xs text-muted-foreground py-6 border border-dashed rounded-lg">
                     لا توجد منتجات. أضف أول منتج لك أعلاه.
                   </div>
                 )}
-                {(config.products || []).map((product, idx) => (
-                  <div key={idx} className="rounded-xl border border-border bg-card p-3 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <Input
-                        className="w-14 text-center text-lg shrink-0"
-                        value={product.image}
-                        maxLength={4}
-                        onChange={e => updateProduct(idx, { image: e.target.value })}
-                      />
-                      <div className="flex-1 space-y-2">
-                        <Input
-                          value={product.name}
-                          maxLength={80}
-                          placeholder="اسم المنتج"
-                          onChange={e => updateProduct(idx, { name: e.target.value })}
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={productIds} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-2">
+                      {(config.products || []).map((product, idx) => (
+                        <SortableProductCard
+                          key={productIds[idx]}
+                          id={productIds[idx]}
+                          product={product}
+                          onUpdate={patch => updateProduct(idx, patch)}
+                          onRemove={() => removeProduct(idx)}
                         />
-                        <Input
-                          value={product.price}
-                          maxLength={20}
-                          placeholder="السعر"
-                          onChange={e => updateProduct(idx, { price: e.target.value })}
-                        />
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeProduct(idx)}
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      ))}
                     </div>
-                    <Textarea
-                      value={product.description || ''}
-                      maxLength={300}
-                      rows={2}
-                      placeholder="وصف المنتج"
-                      onChange={e => updateProduct(idx, { description: e.target.value })}
-                    />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={product.inStock !== false}
-                          onCheckedChange={v => updateProduct(idx, { inStock: v })}
-                        />
-                        <span className="text-xs text-muted-foreground">متوفر</span>
-                      </div>
-                      <Input
-                        className="w-24 h-7 text-xs"
-                        placeholder="شارة"
-                        maxLength={20}
-                        value={product.badge || ''}
-                        onChange={e => updateProduct(idx, { badge: e.target.value || undefined })}
-                      />
-                    </div>
-                  </div>
-                ))}
+                  </SortableContext>
+                </DndContext>
               </div>
             </TabsContent>
 
