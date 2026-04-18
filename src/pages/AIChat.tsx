@@ -486,6 +486,14 @@ Welcome them and present a store design concept with layout, categories, colors,
           </div>
         </>
       )}
+
+      {/* Manual Store Editor */}
+      <StoreEditorPanel
+        open={showEditor}
+        onOpenChange={setShowEditor}
+        config={storeConfig}
+        onChange={setStoreConfig}
+      />
     </div>
   );
 }
