@@ -72,6 +72,32 @@ export default function AIChat() {
     });
   }, []);
 
+  const handleApplyVariant = useCallback((convId: string, msgId: string) => (variant: DesignVariant, index: number) => {
+    setStoreConfig(prev => ({
+      ...prev,
+      storeName: variant.storeName || prev.storeName,
+      storeType: variant.storeType || prev.storeType,
+      primaryColor: variant.primaryColor,
+      accentColor: variant.accentColor,
+      bgColor: variant.bgColor,
+      heroText: variant.heroText,
+      heroSubtext: variant.heroSubtext,
+      heroButtonText: variant.heroButtonText,
+      logo: variant.logo,
+      borderRadius: variant.borderRadius,
+      layout: variant.layout,
+      features: variant.features,
+      products: variant.products && variant.products.length > 0 ? variant.products : prev.products,
+      showHero: true,
+    }));
+    updateMessage(convId, msgId, { appliedVariantIndex: index });
+    toast.success(`تم تطبيق تصميم "${variant.name}"!`, {
+      action: { label: 'عرض المتجر', onClick: () => setShowPreview(true) },
+    });
+    setShowPreview(true);
+  }, [updateMessage]);
+
+
   // Auto-send initial message for new conversations with no messages
   const [initialSentFor, setInitialSentFor] = useState<string | null>(null);
   useEffect(() => {
