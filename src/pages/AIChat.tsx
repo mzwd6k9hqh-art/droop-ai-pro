@@ -136,7 +136,11 @@ Welcome them and present a store design concept with layout, categories, colors,
           }
         }
 
-        addMessage(activeId, { role: 'assistant', content: data.content });
+        addMessage(activeId, {
+          role: 'assistant',
+          content: data.content,
+          designVariants: data.designVariants,
+        });
       } catch {
         const fallback = storeContext.hasStore
           ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
