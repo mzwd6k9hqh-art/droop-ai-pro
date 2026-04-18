@@ -76,6 +76,9 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء م�
 - "update_contact_page" - تعديل صفحة التواصل. Details: { "email": "...", "phone": "...", "address": "...", "subtitle": "..." }
 - "update_offers_page" - تعديل صفحة العروض. Details: { "title": "...", "subtitle": "..." }
 
+## توليد تصاميم متعددة:
+عندما يطلب المستخدم "اقترح تصاميم"، "أرني خيارات تصميم"، "صمم لي عدة متاجر"، "تصاميم بديلة"، أو أي طلب يستدعي عرض خيارات متعددة، استدعِ أداة "generate_design_variants" التي تُرجع 3 تصاميم متميزة. كل تصميم يجب أن يكون له شخصية مختلفة (مثلاً: عصري جريء، أنيق بسيط، دافئ كلاسيكي).
+
 ## ملاحظة مهمة:
 - المتجر يحتوي على عدة صفحات: الرئيسية، جميع المنتجات، صفحة منتج فردي، العروض، من نحن، تواصل معنا.
 - استخدم إيموجي للمنتجات (مثل: 👕, 📱, 🍕, 💄, ⚽, 📚, 🧸, 🏠).
@@ -109,6 +112,57 @@ const tools = [
           },
         },
         required: ["action"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_design_variants",
+      description: "Generate 3 distinct, complete store design variants for the user to choose from. Use this when the user asks for design options, alternatives, or multiple designs.",
+      parameters: {
+        type: "object",
+        properties: {
+          variants: {
+            type: "array",
+            description: "Array of exactly 3 distinct design variants",
+            items: {
+              type: "object",
+              properties: {
+                name: { type: "string", description: "Short catchy name in Arabic for the design (e.g. 'الأناقة العصرية')" },
+                description: { type: "string", description: "Brief description in Arabic of the design vibe" },
+                storeName: { type: "string" },
+                storeType: { type: "string", enum: ["fashion", "electronics", "food", "beauty", "sports", "books", "kids", "home"] },
+                primaryColor: { type: "string", description: "Tailwind gradient classes e.g. 'from-pink-500 to-rose-600'" },
+                accentColor: { type: "string", description: "e.g. 'bg-pink-100 text-pink-700'" },
+                bgColor: { type: "string", description: "e.g. 'bg-gradient-to-br from-rose-50 to-pink-50'" },
+                heroText: { type: "string" },
+                heroSubtext: { type: "string" },
+                heroButtonText: { type: "string" },
+                logo: { type: "string", description: "Emoji logo" },
+                borderRadius: { type: "string", enum: ["none", "sm", "md", "lg", "full"] },
+                layout: { type: "string", enum: ["grid", "list"] },
+                features: { type: "array", items: { type: "string" }, description: "3-4 store features in Arabic" },
+                products: {
+                  type: "array",
+                  description: "4-6 sample products fitting the store type",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      price: { type: "string" },
+                      image: { type: "string", description: "Emoji" },
+                      description: { type: "string" },
+                    },
+                    required: ["name", "price", "image"],
+                  },
+                },
+              },
+              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "products"],
+            },
+          },
+        },
+        required: ["variants"],
       },
     },
   },
