@@ -290,6 +290,7 @@ serve(async (req) => {
       const functionCalls: any[] = [];
       const toolResultMessages: any[] = [];
       let hasWebSearch = false;
+      let designVariants: any[] | null = null;
 
       for (const toolCall of choice.tool_calls) {
         if (toolCall.function.name === "modify_store") {
@@ -299,6 +300,14 @@ serve(async (req) => {
             role: "tool",
             tool_call_id: toolCall.id,
             content: JSON.stringify({ success: true, action: args.action, target: args.target }),
+          });
+        } else if (toolCall.function.name === "generate_design_variants") {
+          const args = JSON.parse(toolCall.function.arguments);
+          designVariants = args.variants || [];
+          toolResultMessages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify({ success: true, count: designVariants?.length || 0 }),
           });
         } else if (toolCall.function.name === "web_search") {
           hasWebSearch = true;
@@ -335,17 +344,24 @@ serve(async (req) => {
       if (!textContent) {
         if (hasWebSearch) {
           textContent = "عذراً، لم أتمكن من معالجة نتائج البحث. يرجى المحاولة مرة أخرى.";
+        } else if (designVariants && designVariants.length > 0) {
+          textContent = `إليك ${designVariants.length} تصاميم مقترحة لمتجرك. اختر الأنسب لك واضغط "تطبيق هذا التصميم" 🎨`;
         } else {
           const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');
           textContent = `تم تنفيذ التعديلات:\n${actionSummary}\n\nانتقل لتبويب "تصميم المتجر" لرؤية التغييرات!`;
         }
       }
 
+      let responseType: string = "text";
+      if (designVariants && designVariants.length > 0) responseType = "design_variants";
+      else if (functionCalls.length > 0) responseType = "modify_store";
+
       return new Response(
         JSON.stringify({
-          type: functionCalls.length > 0 ? "modify_store" : "text",
+          type: responseType,
           content: textContent,
           ...(functionCalls.length > 0 ? { functionCalls } : {}),
+          ...(designVariants ? { designVariants } : {}),
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
