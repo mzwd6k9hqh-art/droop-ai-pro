@@ -7,10 +7,121 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, Package, Palette, Settings as SettingsIcon, Layout, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Package, Palette, Settings as SettingsIcon, Layout, GripVertical } from 'lucide-react';
 import { StoreConfig } from '@/components/StorePreview';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+type Product = NonNullable<StoreConfig['products']>[number];
+
+interface SortableProductProps {
+  id: string;
+  product: Product;
+  onUpdate: (patch: Partial<Product>) => void;
+  onRemove: () => void;
+}
+
+function SortableProductCard({ id, product, onUpdate, onRemove }: SortableProductProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'rounded-xl border border-border bg-card p-3 space-y-2',
+        isDragging && 'shadow-lg ring-2 ring-primary/30'
+      )}
+    >
+      <div className="flex items-start gap-2">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="touch-none cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors p-1 -ml-1 shrink-0"
+          aria-label="اسحب لإعادة الترتيب"
+        >
+          <GripVertical className="h-5 w-5" />
+        </button>
+        <Input
+          className="w-14 text-center text-lg shrink-0"
+          value={product.image}
+          maxLength={4}
+          onChange={e => onUpdate({ image: e.target.value })}
+        />
+        <div className="flex-1 space-y-2">
+          <Input
+            value={product.name}
+            maxLength={80}
+            placeholder="اسم المنتج"
+            onChange={e => onUpdate({ name: e.target.value })}
+          />
+          <Input
+            value={product.price}
+            maxLength={20}
+            placeholder="السعر"
+            onChange={e => onUpdate({ price: e.target.value })}
+          />
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onRemove}
+          className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+      <Textarea
+        value={product.description || ''}
+        maxLength={300}
+        rows={2}
+        placeholder="وصف المنتج"
+        onChange={e => onUpdate({ description: e.target.value })}
+      />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={product.inStock !== false}
+            onCheckedChange={v => onUpdate({ inStock: v })}
+          />
+          <span className="text-xs text-muted-foreground">متوفر</span>
+        </div>
+        <Input
+          className="w-24 h-7 text-xs"
+          placeholder="شارة"
+          maxLength={20}
+          value={product.badge || ''}
+          onChange={e => onUpdate({ badge: e.target.value || undefined })}
+        />
+      </div>
+    </div>
+  );
+}
 
 interface StoreEditorPanelProps {
   open: boolean;
