@@ -12,11 +12,12 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
 import type { DesignVariant } from '@/components/chat/DesignVariants';
-import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { applyModification } from '@/lib/storeModifications';
+import { StoreEditorPanel } from '@/components/StoreEditorPanel';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -41,6 +42,7 @@ export default function AIChat() {
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [storeContext] = useState<OnboardingResult | null>(() => {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
@@ -448,14 +450,26 @@ Welcome them and present a store design concept with layout, categories, colors,
           )}>
             <div className="flex items-center justify-between h-14 px-4 border-b border-border/50">
               <h2 className="text-sm font-semibold text-foreground">معاينة المتجر</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowPreview(false)}
-                className="h-8 w-8 rounded-lg"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowEditor(true)}
+                  className="h-8 gap-1.5 rounded-lg text-xs bg-primary/10 text-primary hover:bg-primary/20"
+                  title="تخصيص المتجر"
+                >
+                  <Settings2 className="h-3.5 w-3.5" />
+                  <span>تخصيص</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowPreview(false)}
+                  className="h-8 w-8 rounded-lg"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <div className="flex-1 overflow-auto">
               <StorePreview storeContext={storeContext} storeConfig={storeConfig} />
