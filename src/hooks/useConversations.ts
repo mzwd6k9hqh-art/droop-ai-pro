@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import type { DesignVariant } from '@/components/chat/DesignVariants';
 
 export interface MessageAttachment {
   url: string;
@@ -11,6 +12,8 @@ interface Message {
   content: string;
   timestamp: string;
   attachments?: MessageAttachment[];
+  designVariants?: DesignVariant[];
+  appliedVariantIndex?: number | null;
 }
 
 export interface StoredConversation {
@@ -79,13 +82,15 @@ export function useConversations() {
     }
   }, [conversations, activeId, persist]);
 
-  const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'> & { attachments?: MessageAttachment[] }) => {
+  const addMessage = useCallback((convId: string, message: Omit<Message, 'id' | 'timestamp'>) => {
     const msg: Message = {
       role: message.role,
       content: message.content,
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       attachments: message.attachments,
+      designVariants: message.designVariants,
+      appliedVariantIndex: message.appliedVariantIndex ?? null,
     };
 
     setConversations(prev => {
@@ -102,6 +107,18 @@ export function useConversations() {
     });
 
     return msg;
+  }, []);
+
+  const updateMessage = useCallback((convId: string, msgId: string, patch: Partial<Message>) => {
+    setConversations(prev => {
+      const updated = prev.map(c => {
+        if (c.id !== convId) return c;
+        const msgs = c.messages.map(m => m.id === msgId ? { ...m, ...patch } : m);
+        return { ...c, messages: msgs, updatedAt: new Date().toISOString() };
+      });
+      saveConversations(updated);
+      return updated;
+    });
   }, []);
 
   const getMessages = useCallback((convId: string | null) => {
