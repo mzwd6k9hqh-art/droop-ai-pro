@@ -137,6 +137,7 @@ export function useConversations() {
     createConversation,
     deleteConversation,
     addMessage,
+    updateMessage,
     getMessages,
   };
 }
