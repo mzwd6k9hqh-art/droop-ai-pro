@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { User, Sparkles, Film } from 'lucide-react';
+import { User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { DesignVariants, type DesignVariant } from './DesignVariants';
 
 interface MessageAttachment {
   url: string;
@@ -12,9 +13,12 @@ interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
   attachments?: MessageAttachment[];
+  designVariants?: DesignVariant[];
+  appliedVariantIndex?: number | null;
+  onApplyVariant?: (variant: DesignVariant, index: number) => void;
 }
 
-export function ChatMessage({ role, content, attachments }: ChatMessageProps) {
+export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, onApplyVariant }: ChatMessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -27,11 +31,7 @@ export function ChatMessage({ role, content, attachments }: ChatMessageProps) {
             ? 'bg-primary text-primary-foreground'
             : 'bg-gradient-to-br from-primary to-accent text-primary-foreground'
         )}>
-          {isUser ? (
-            <User className="h-4 w-4" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}
+          {isUser ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
         </div>
 
         {/* Content */}
@@ -61,6 +61,15 @@ export function ChatMessage({ role, content, attachments }: ChatMessageProps) {
           <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
+
+          {/* Design Variants */}
+          {designVariants && designVariants.length > 0 && onApplyVariant && (
+            <DesignVariants
+              variants={designVariants}
+              appliedIndex={appliedVariantIndex ?? null}
+              onApply={onApplyVariant}
+            />
+          )}
         </div>
       </div>
     </div>
