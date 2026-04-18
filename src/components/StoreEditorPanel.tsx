@@ -181,6 +181,22 @@ export function StoreEditorPanel({ open, onOpenChange, config, onChange }: Store
     update({ products });
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const productIds = (config.products || []).map((_, i) => `product-${i}`);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = productIds.indexOf(String(active.id));
+    const newIndex = productIds.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+    update({ products: arrayMove(config.products || [], oldIndex, newIndex) });
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-full sm:max-w-md p-0 flex flex-col gap-0">
