@@ -11,6 +11,7 @@ import { ChatWelcome } from '@/components/chat/ChatWelcome';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
+import type { DesignVariant } from '@/components/chat/DesignVariants';
 import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ export default function AIChat() {
     createConversation,
     deleteConversation,
     addMessage,
+    updateMessage,
   } = useConversations();
 
   const [input, setInput] = useState('');
@@ -69,6 +71,32 @@ export default function AIChat() {
       },
     });
   }, []);
+
+  const handleApplyVariant = useCallback((convId: string, msgId: string) => (variant: DesignVariant, index: number) => {
+    setStoreConfig(prev => ({
+      ...prev,
+      storeName: variant.storeName || prev.storeName,
+      storeType: variant.storeType || prev.storeType,
+      primaryColor: variant.primaryColor,
+      accentColor: variant.accentColor,
+      bgColor: variant.bgColor,
+      heroText: variant.heroText,
+      heroSubtext: variant.heroSubtext,
+      heroButtonText: variant.heroButtonText,
+      logo: variant.logo,
+      borderRadius: variant.borderRadius,
+      layout: variant.layout,
+      features: variant.features,
+      products: variant.products && variant.products.length > 0 ? variant.products : prev.products,
+      showHero: true,
+    }));
+    updateMessage(convId, msgId, { appliedVariantIndex: index });
+    toast.success(`تم تطبيق تصميم "${variant.name}"!`, {
+      action: { label: 'عرض المتجر', onClick: () => setShowPreview(true) },
+    });
+    setShowPreview(true);
+  }, [updateMessage]);
+
 
   // Auto-send initial message for new conversations with no messages
   const [initialSentFor, setInitialSentFor] = useState<string | null>(null);
@@ -108,7 +136,11 @@ Welcome them and present a store design concept with layout, categories, colors,
           }
         }
 
-        addMessage(activeId, { role: 'assistant', content: data.content });
+        addMessage(activeId, {
+          role: 'assistant',
+          content: data.content,
+          designVariants: data.designVariants,
+        });
       } catch {
         const fallback = storeContext.hasStore
           ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
@@ -244,7 +276,11 @@ Welcome them and present a store design concept with layout, categories, colors,
         }
       }
 
-      addMessage(convId, { role: 'assistant', content: data.content });
+      addMessage(convId, {
+        role: 'assistant',
+        content: data.content,
+        designVariants: data.designVariants,
+      });
     } catch (err) {
       console.error('AI Chat error:', err);
       addMessage(convId, { role: 'assistant', content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' });
@@ -351,7 +387,15 @@ Welcome them and present a store design concept with layout, categories, colors,
           ) : (
             <div className="pb-4">
               {messages.map(msg => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} attachments={msg.attachments} />
+                <ChatMessage
+                  key={msg.id}
+                  role={msg.role}
+                  content={msg.content}
+                  attachments={msg.attachments}
+                  designVariants={msg.designVariants}
+                  appliedVariantIndex={msg.appliedVariantIndex}
+                  onApplyVariant={activeId ? handleApplyVariant(activeId, msg.id) : undefined}
+                />
               ))}
               {isTyping && <TypingIndicator />}
               <div ref={messagesEndRef} />
