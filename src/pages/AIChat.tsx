@@ -276,7 +276,11 @@ Welcome them and present a store design concept with layout, categories, colors,
         }
       }
 
-      addMessage(convId, { role: 'assistant', content: data.content });
+      addMessage(convId, {
+        role: 'assistant',
+        content: data.content,
+        designVariants: data.designVariants,
+      });
     } catch (err) {
       console.error('AI Chat error:', err);
       addMessage(convId, { role: 'assistant', content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' });
@@ -383,7 +387,15 @@ Welcome them and present a store design concept with layout, categories, colors,
           ) : (
             <div className="pb-4">
               {messages.map(msg => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} attachments={msg.attachments} />
+                <ChatMessage
+                  key={msg.id}
+                  role={msg.role}
+                  content={msg.content}
+                  attachments={msg.attachments}
+                  designVariants={msg.designVariants}
+                  appliedVariantIndex={msg.appliedVariantIndex}
+                  onApplyVariant={activeId ? handleApplyVariant(activeId, msg.id) : undefined}
+                />
               ))}
               {isTyping && <TypingIndicator />}
               <div ref={messagesEndRef} />
