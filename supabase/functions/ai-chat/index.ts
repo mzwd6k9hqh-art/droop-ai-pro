@@ -170,10 +170,12 @@ const tools = [
                 logo: { type: "string", description: "Emoji logo" },
                 borderRadius: { type: "string", enum: ["none", "sm", "md", "lg", "full"] },
                 layout: { type: "string", enum: ["grid", "list"] },
+                productColumns: { type: "number", enum: [2, 3] },
                 features: { type: "array", items: { type: "string" }, description: "3-4 store features in Arabic" },
+                categories: { type: "array", items: { type: "string" }, description: "3-5 store categories in Arabic" },
                 products: {
                   type: "array",
-                  description: "4-6 sample products fitting the store type",
+                  description: "5-6 sample products with realistic names fitting the store category",
                   items: {
                     type: "object",
                     properties: {
@@ -181,12 +183,50 @@ const tools = [
                       price: { type: "string" },
                       image: { type: "string", description: "Emoji" },
                       description: { type: "string" },
+                      badge: { type: "string" },
                     },
                     required: ["name", "price", "image"],
                   },
                 },
+                testimonials: {
+                  type: "array",
+                  description: "2-3 realistic customer testimonials in Arabic",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      text: { type: "string" },
+                      rating: { type: "number" },
+                    },
+                    required: ["name", "text", "rating"],
+                  },
+                },
+                banners: {
+                  type: "array",
+                  description: "1-2 promotional banners",
+                  items: {
+                    type: "object",
+                    properties: {
+                      text: { type: "string" },
+                      image: { type: "string" },
+                    },
+                    required: ["text"],
+                  },
+                },
+                faq: {
+                  type: "array",
+                  description: "2-3 FAQs in Arabic",
+                  items: {
+                    type: "object",
+                    properties: {
+                      question: { type: "string" },
+                      answer: { type: "string" },
+                    },
+                    required: ["question", "answer"],
+                  },
+                },
               },
-              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "products"],
+              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "heroSubtext", "heroButtonText", "logo", "products", "features", "categories", "testimonials"],
             },
           },
         },
