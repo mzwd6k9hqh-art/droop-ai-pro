@@ -16,9 +16,11 @@ interface ChatMessageProps {
   designVariants?: DesignVariant[];
   appliedVariantIndex?: number | null;
   onApplyVariant?: (variant: DesignVariant, index: number) => void;
+  onRegenerateVariants?: () => void;
+  onCustomizeStore?: () => void;
 }
 
-export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, onApplyVariant }: ChatMessageProps) {
+export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, onApplyVariant, onRegenerateVariants, onCustomizeStore }: ChatMessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -68,6 +70,8 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
               variants={designVariants}
               appliedIndex={appliedVariantIndex ?? null}
               onApply={onApplyVariant}
+              onRegenerate={onRegenerateVariants}
+              onCustomize={onCustomizeStore}
             />
           )}
         </div>

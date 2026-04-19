@@ -88,8 +88,13 @@ export default function AIChat() {
       logo: variant.logo,
       borderRadius: variant.borderRadius,
       layout: variant.layout,
+      productColumns: variant.productColumns,
       features: variant.features,
+      categories: variant.categories,
       products: variant.products && variant.products.length > 0 ? variant.products : prev.products,
+      testimonials: variant.testimonials && variant.testimonials.length > 0 ? variant.testimonials : prev.testimonials,
+      banners: variant.banners && variant.banners.length > 0 ? variant.banners : prev.banners,
+      faq: variant.faq && variant.faq.length > 0 ? variant.faq : prev.faq,
       showHero: true,
     }));
     updateMessage(convId, msgId, { appliedVariantIndex: index });
@@ -407,6 +412,11 @@ Welcome them and present a store design concept with layout, categories, colors,
                   designVariants={msg.designVariants}
                   appliedVariantIndex={msg.appliedVariantIndex}
                   onApplyVariant={activeId ? handleApplyVariant(activeId, msg.id) : undefined}
+                  onRegenerateVariants={() => {
+                    setInput('اقترح 3 تصاميم جديدة ومختلفة كلياً عن السابقة بألوان وأسلوب مختلف');
+                    setTimeout(() => handleSubmit(), 50);
+                  }}
+                  onCustomizeStore={() => setShowEditor(true)}
                 />
               ))}
               {isTyping && <TypingIndicator />}
