@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Palette, Sparkles } from 'lucide-react';
+import { Check, Palette, Sparkles, RefreshCw, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -17,14 +17,21 @@ export interface DesignVariant {
   logo?: string;
   borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full';
   layout?: 'grid' | 'list';
+  productColumns?: 2 | 3;
   features?: string[];
-  products?: { name: string; price: string; image: string; description?: string }[];
+  categories?: string[];
+  products?: { name: string; price: string; image: string; description?: string; badge?: string }[];
+  testimonials?: { name: string; text: string; rating: number }[];
+  banners?: { text: string; image?: string }[];
+  faq?: { question: string; answer: string }[];
 }
 
 interface DesignVariantsProps {
   variants: DesignVariant[];
   appliedIndex?: number | null;
   onApply: (variant: DesignVariant, index: number) => void;
+  onRegenerate?: () => void;
+  onCustomize?: () => void;
 }
 
 export function DesignVariants({ variants, appliedIndex, onApply }: DesignVariantsProps) {
