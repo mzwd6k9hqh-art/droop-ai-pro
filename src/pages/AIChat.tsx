@@ -407,6 +407,11 @@ Welcome them and present a store design concept with layout, categories, colors,
                   designVariants={msg.designVariants}
                   appliedVariantIndex={msg.appliedVariantIndex}
                   onApplyVariant={activeId ? handleApplyVariant(activeId, msg.id) : undefined}
+                  onRegenerateVariants={() => {
+                    setInput('اقترح 3 تصاميم جديدة ومختلفة كلياً عن السابقة بألوان وأسلوب مختلف');
+                    setTimeout(() => handleSubmit(), 50);
+                  }}
+                  onCustomizeStore={() => setShowEditor(true)}
                 />
               ))}
               {isTyping && <TypingIndicator />}
