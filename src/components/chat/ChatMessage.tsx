@@ -70,6 +70,8 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
               variants={designVariants}
               appliedIndex={appliedVariantIndex ?? null}
               onApply={onApplyVariant}
+              onRegenerate={onRegenerateVariants}
+              onCustomize={onCustomizeStore}
             />
           )}
         </div>
