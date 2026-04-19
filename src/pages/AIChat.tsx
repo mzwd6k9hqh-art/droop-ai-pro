@@ -88,8 +88,13 @@ export default function AIChat() {
       logo: variant.logo,
       borderRadius: variant.borderRadius,
       layout: variant.layout,
+      productColumns: variant.productColumns,
       features: variant.features,
+      categories: variant.categories,
       products: variant.products && variant.products.length > 0 ? variant.products : prev.products,
+      testimonials: variant.testimonials && variant.testimonials.length > 0 ? variant.testimonials : prev.testimonials,
+      banners: variant.banners && variant.banners.length > 0 ? variant.banners : prev.banners,
+      faq: variant.faq && variant.faq.length > 0 ? variant.faq : prev.faq,
       showHero: true,
     }));
     updateMessage(convId, msgId, { appliedVariantIndex: index });
