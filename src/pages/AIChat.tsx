@@ -346,13 +346,14 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </span>
               </div>
             )}
-            {/* Upgrade button */}
-            {user && user.plan !== 'premium' && (
+            {/* Upgrade button - always visible unless premium */}
+            {(!user || user.plan !== 'premium') && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/upgrade')}
-                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20"
+                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20 font-semibold"
+                title="ترقية الخطة"
               >
                 <Crown className="h-3.5 w-3.5" />
                 <span>ترقية</span>
