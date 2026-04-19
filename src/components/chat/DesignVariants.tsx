@@ -38,6 +38,15 @@ export function DesignVariants({ variants, appliedIndex, onApply, onRegenerate, 
   if (!variants || variants.length === 0) return null;
 
   return (
+    <div className="mt-3 space-y-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{/* variants grid below */}</div>
+    </div>
+  ) && null;
+}
+
+// Replaced below
+
+  return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 mt-3">
       {variants.map((variant, idx) => {
         const isApplied = appliedIndex === idx;
