@@ -34,7 +34,7 @@ interface DesignVariantsProps {
   onCustomize?: () => void;
 }
 
-export function DesignVariants({ variants, appliedIndex, onApply }: DesignVariantsProps) {
+export function DesignVariants({ variants, appliedIndex, onApply, onRegenerate, onCustomize }: DesignVariantsProps) {
   if (!variants || variants.length === 0) return null;
 
   return (
