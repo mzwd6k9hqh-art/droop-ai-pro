@@ -42,7 +42,7 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
             'text-xs font-semibold',
             isUser ? 'text-foreground' : 'text-primary'
           )}>
-            {isUser ? 'أنت' : 'DROOB AI'}
+            {isUser ? 'You' : 'DROOB AI'}
           </p>
 
           {/* Attachments */}

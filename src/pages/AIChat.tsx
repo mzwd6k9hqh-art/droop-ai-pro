@@ -12,8 +12,9 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
 import type { DesignVariant } from '@/components/chat/DesignVariants';
-import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { applyModification } from '@/lib/storeModifications';
@@ -100,8 +101,8 @@ export default function AIChat() {
       showHero: true,
     }));
     updateMessage(convId, msgId, { appliedVariantIndex: index });
-    toast.success(`تم تطبيق تصميم "${variant.name}"!`, {
-      action: { label: 'عرض المتجر', onClick: () => setShowPreview(true) },
+    toast.success(`Applied design "${variant.name}"!`, {
+      action: { label: 'View store', onClick: () => setShowPreview(true) },
     });
     setShowPreview(true);
   }, [updateMessage]);
@@ -152,8 +153,8 @@ Welcome them and present a store design concept with layout, categories, colors,
         });
       } catch {
         const fallback = storeContext.hasStore
-          ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
-          : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! اطلب مني أي تعديل!`;
+          ? `Hi! I'll help you improve your store **${storeContext.storeUrl}**. What would you like to enhance?`
+          : `Hi! Let's build your store **${storeContext.storeName || storeContext.storeType || ''}** together! Just tell me what you want!`;
         addMessage(activeId, { role: 'assistant', content: fallback });
       } finally {
         setIsTyping(false);
@@ -185,7 +186,7 @@ Welcome them and present a store design concept with layout, categories, colors,
     const newAttachments: ChatAttachment[] = [];
     Array.from(files).forEach(file => {
       if (file.size > 20 * 1024 * 1024) {
-        toast.error('حجم الملف كبير جداً (الحد الأقصى 20MB)');
+        toast.error('File too large (max 20MB)');
         return;
       }
       const type = file.type.startsWith('video/') ? 'video' as const : 'image' as const;
@@ -206,9 +207,9 @@ Welcome them and present a store design concept with layout, categories, colors,
 
     // Check message limit
     if (user && !incrementAiMessages()) {
-      toast.error(`لقد وصلت للحد اليومي (${getDailyLimit()} رسائل). قم بالترقية للحصول على المزيد!`, {
+      toast.error(`You've reached the daily limit (${getDailyLimit()} messages). Upgrade for more!`, {
         action: {
-          label: 'ترقية',
+          label: 'Upgrade',
           onClick: () => navigate('/upgrade'),
         },
       });
@@ -229,14 +230,14 @@ Welcome them and present a store design concept with layout, categories, colors,
       type: a.type,
     }));
 
-    addMessage(convId, { role: 'user', content: userContent || '📎 مرفقات', attachments: messageAttachments });
+    addMessage(convId, { role: 'user', content: userContent || '📎 Attachments', attachments: messageAttachments });
     setInput('');
     setAttachments([]);
     setIsTyping(true);
 
     try {
       // Build multimodal content for the current message
-      let currentMessageContent: any = userContent || 'ما هذا؟';
+      let currentMessageContent: any = userContent || 'What is this?';
       
       if (currentAttachments.length > 0) {
         const parts: any[] = [];
@@ -252,10 +253,10 @@ Welcome them and present a store design concept with layout, categories, colors,
             });
           } else {
             // For video, send as text description since most models don't support video inline
-            parts.push({ type: 'text', text: `[فيديو مرفق: ${att.file.name}]` });
+            parts.push({ type: 'text', text: `[Video attached: ${att.file.name}]` });
           }
         }
-        if (parts.length === 0) parts.push({ type: 'text', text: 'ما هذا؟' });
+        if (parts.length === 0) parts.push({ type: 'text', text: 'What is this?' });
         currentMessageContent = parts;
       }
 
@@ -292,7 +293,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       });
     } catch (err) {
       console.error('AI Chat error:', err);
-      addMessage(convId, { role: 'assistant', content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' });
+      addMessage(convId, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' });
     } finally {
       setIsTyping(false);
     }
@@ -353,19 +354,6 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </span>
               </div>
             )}
-            {/* Upgrade button - always visible unless premium */}
-            {(!user || user.plan !== 'premium') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/upgrade')}
-                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20 font-semibold"
-                title="Upgrade plan"
-              >
-                <Crown className="h-3.5 w-3.5" />
-                <span>Upgrade</span>
-              </Button>
-            )}
             <Button
               variant="ghost"
               size="icon"
@@ -377,35 +365,47 @@ Welcome them and present a store design concept with layout, categories, colors,
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setShowExport(true)}
-              className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-emerald-500/10 to-blue-500/10 hover:from-emerald-500/20 hover:to-blue-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold"
-              title="Publish store"
-            >
-              <Rocket className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Publish</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowEditor(true)}
-              className="h-9 w-9 rounded-lg"
-              title="Customize store"
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
               size="icon"
               onClick={() => setShowPreview(!showPreview)}
               className={cn(
                 'h-9 w-9 rounded-lg',
                 showPreview && 'bg-primary/10 text-primary'
               )}
-              title="عرض المتجر"
+              title="View store"
             >
               <PanelRight className="h-4 w-4" />
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg"
+                  title="More"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
+                  <Rocket className="h-4 w-4 mr-2 text-emerald-600" />
+                  <span className="font-medium">Publish Store</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowEditor(true)} className="cursor-pointer">
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  <span>Customize Store</span>
+                </DropdownMenuItem>
+                {(!user || user.plan !== 'premium') && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/upgrade')} className="cursor-pointer">
+                      <Crown className="h-4 w-4 mr-2 text-amber-500" />
+                      <span className="font-semibold text-primary">Upgrade Plan</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

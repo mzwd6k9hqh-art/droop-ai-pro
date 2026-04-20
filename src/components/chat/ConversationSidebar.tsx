@@ -44,24 +44,24 @@ export function ConversationSidebar({
 
       <aside
         className={cn(
-          'fixed top-0 right-0 h-full z-50 lg:static lg:z-0',
-          'w-72 bg-sidebar-background border-l border-sidebar-border',
+          'fixed top-0 left-0 h-full z-50 lg:static lg:z-0',
+          'w-72 bg-sidebar-background border-r border-sidebar-border',
           'flex flex-col transition-transform duration-300',
           'lg:translate-x-0',
-          open ? 'translate-x-0' : 'translate-x-full lg:translate-x-0',
+          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           !open && 'lg:flex hidden'
         )}
       >
         {/* Header */}
         <div className="flex items-center justify-between h-14 px-3 border-b border-sidebar-border">
-          <h2 className="text-sm font-semibold text-sidebar-foreground">المحادثات</h2>
+          <h2 className="text-sm font-semibold text-sidebar-foreground">Conversations</h2>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={onNew}
               className="h-8 w-8 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent"
-              title="محادثة جديدة"
+              title="New chat"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -81,7 +81,7 @@ export function ConversationSidebar({
           <div className="p-2 space-y-1">
             {conversations.length === 0 && (
               <p className="text-xs text-muted-foreground text-center py-8">
-                لا توجد محادثات بعد
+                No conversations yet
               </p>
             )}
 
@@ -95,7 +95,7 @@ export function ConversationSidebar({
                     key={conv.id}
                     onClick={() => { onSelect(conv.id); onClose(); }}
                     className={cn(
-                      'group w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-right text-sm transition-colors',
+                      'group w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-sm transition-colors',
                       activeId === conv.id
                         ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                         : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
@@ -106,7 +106,7 @@ export function ConversationSidebar({
                     <button
                       onClick={(e) => { e.stopPropagation(); onDelete(conv.id); }}
                       className="opacity-0 group-hover:opacity-100 h-6 w-6 flex items-center justify-center rounded hover:bg-destructive/10 hover:text-destructive transition-all"
-                      title="حذف"
+                      title="Delete"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
@@ -128,10 +128,10 @@ function groupByDate(conversations: Conversation[]) {
   const weekAgo = new Date(now.getTime() - 7 * 86400000).getTime();
 
   const groups: { label: string; items: Conversation[] }[] = [
-    { label: 'اليوم', items: [] },
-    { label: 'أمس', items: [] },
-    { label: 'آخر 7 أيام', items: [] },
-    { label: 'أقدم', items: [] },
+    { label: 'Today', items: [] },
+    { label: 'Yesterday', items: [] },
+    { label: 'Last 7 days', items: [] },
+    { label: 'Older', items: [] },
   ];
 
   for (const conv of conversations) {
