@@ -354,19 +354,6 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </span>
               </div>
             )}
-            {/* Upgrade button - always visible unless premium */}
-            {(!user || user.plan !== 'premium') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/upgrade')}
-                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20 font-semibold"
-                title="Upgrade plan"
-              >
-                <Crown className="h-3.5 w-3.5" />
-                <span>Upgrade</span>
-              </Button>
-            )}
             <Button
               variant="ghost"
               size="icon"
@@ -378,35 +365,47 @@ Welcome them and present a store design concept with layout, categories, colors,
             </Button>
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setShowExport(true)}
-              className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-emerald-500/10 to-blue-500/10 hover:from-emerald-500/20 hover:to-blue-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold"
-              title="Publish store"
-            >
-              <Rocket className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Publish</span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowEditor(true)}
-              className="h-9 w-9 rounded-lg"
-              title="Customize store"
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
               size="icon"
               onClick={() => setShowPreview(!showPreview)}
               className={cn(
                 'h-9 w-9 rounded-lg',
                 showPreview && 'bg-primary/10 text-primary'
               )}
-              title="عرض المتجر"
+              title="View store"
             >
               <PanelRight className="h-4 w-4" />
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg"
+                  title="More"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
+                  <Rocket className="h-4 w-4 mr-2 text-emerald-600" />
+                  <span className="font-medium">Publish Store</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowEditor(true)} className="cursor-pointer">
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  <span>Customize Store</span>
+                </DropdownMenuItem>
+                {(!user || user.plan !== 'premium') && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/upgrade')} className="cursor-pointer">
+                      <Crown className="h-4 w-4 mr-2 text-amber-500" />
+                      <span className="font-semibold text-primary">Upgrade Plan</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
