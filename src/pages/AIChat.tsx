@@ -12,8 +12,9 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
 import type { DesignVariant } from '@/components/chat/DesignVariants';
-import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { applyModification } from '@/lib/storeModifications';
@@ -100,8 +101,8 @@ export default function AIChat() {
       showHero: true,
     }));
     updateMessage(convId, msgId, { appliedVariantIndex: index });
-    toast.success(`تم تطبيق تصميم "${variant.name}"!`, {
-      action: { label: 'عرض المتجر', onClick: () => setShowPreview(true) },
+    toast.success(`Applied design "${variant.name}"!`, {
+      action: { label: 'View store', onClick: () => setShowPreview(true) },
     });
     setShowPreview(true);
   }, [updateMessage]);
@@ -152,8 +153,8 @@ Welcome them and present a store design concept with layout, categories, colors,
         });
       } catch {
         const fallback = storeContext.hasStore
-          ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
-          : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! اطلب مني أي تعديل!`;
+          ? `Hi! I'll help you improve your store **${storeContext.storeUrl}**. What would you like to enhance?`
+          : `Hi! Let's build your store **${storeContext.storeName || storeContext.storeType || ''}** together! Just tell me what you want!`;
         addMessage(activeId, { role: 'assistant', content: fallback });
       } finally {
         setIsTyping(false);
@@ -185,7 +186,7 @@ Welcome them and present a store design concept with layout, categories, colors,
     const newAttachments: ChatAttachment[] = [];
     Array.from(files).forEach(file => {
       if (file.size > 20 * 1024 * 1024) {
-        toast.error('حجم الملف كبير جداً (الحد الأقصى 20MB)');
+        toast.error('File too large (max 20MB)');
         return;
       }
       const type = file.type.startsWith('video/') ? 'video' as const : 'image' as const;
@@ -206,9 +207,9 @@ Welcome them and present a store design concept with layout, categories, colors,
 
     // Check message limit
     if (user && !incrementAiMessages()) {
-      toast.error(`لقد وصلت للحد اليومي (${getDailyLimit()} رسائل). قم بالترقية للحصول على المزيد!`, {
+      toast.error(`You've reached the daily limit (${getDailyLimit()} messages). Upgrade for more!`, {
         action: {
-          label: 'ترقية',
+          label: 'Upgrade',
           onClick: () => navigate('/upgrade'),
         },
       });
@@ -229,14 +230,14 @@ Welcome them and present a store design concept with layout, categories, colors,
       type: a.type,
     }));
 
-    addMessage(convId, { role: 'user', content: userContent || '📎 مرفقات', attachments: messageAttachments });
+    addMessage(convId, { role: 'user', content: userContent || '📎 Attachments', attachments: messageAttachments });
     setInput('');
     setAttachments([]);
     setIsTyping(true);
 
     try {
       // Build multimodal content for the current message
-      let currentMessageContent: any = userContent || 'ما هذا؟';
+      let currentMessageContent: any = userContent || 'What is this?';
       
       if (currentAttachments.length > 0) {
         const parts: any[] = [];
@@ -252,10 +253,10 @@ Welcome them and present a store design concept with layout, categories, colors,
             });
           } else {
             // For video, send as text description since most models don't support video inline
-            parts.push({ type: 'text', text: `[فيديو مرفق: ${att.file.name}]` });
+            parts.push({ type: 'text', text: `[Video attached: ${att.file.name}]` });
           }
         }
-        if (parts.length === 0) parts.push({ type: 'text', text: 'ما هذا؟' });
+        if (parts.length === 0) parts.push({ type: 'text', text: 'What is this?' });
         currentMessageContent = parts;
       }
 
@@ -292,7 +293,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       });
     } catch (err) {
       console.error('AI Chat error:', err);
-      addMessage(convId, { role: 'assistant', content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' });
+      addMessage(convId, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' });
     } finally {
       setIsTyping(false);
     }
