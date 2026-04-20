@@ -12,12 +12,13 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
 import type { DesignVariant } from '@/components/chat/DesignVariants';
-import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2 } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { applyModification } from '@/lib/storeModifications';
 import { StoreEditorPanel } from '@/components/StoreEditorPanel';
+import { ExportPublishDialog } from '@/components/ExportPublishDialog';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -43,6 +44,7 @@ export default function AIChat() {
   const [isTyping, setIsTyping] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [storeContext] = useState<OnboardingResult | null>(() => {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
@@ -375,6 +377,16 @@ Welcome them and present a store design concept with layout, categories, colors,
             </Button>
             <Button
               variant="ghost"
+              size="sm"
+              onClick={() => setShowExport(true)}
+              className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-emerald-500/10 to-blue-500/10 hover:from-emerald-500/20 hover:to-blue-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold"
+              title="تصدير ونشر المتجر"
+            >
+              <Rocket className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">نشر</span>
+            </Button>
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => setShowEditor(true)}
               className="h-9 w-9 rounded-lg"
@@ -504,6 +516,13 @@ Welcome them and present a store design concept with layout, categories, colors,
         onOpenChange={setShowEditor}
         config={storeConfig}
         onChange={setStoreConfig}
+      />
+
+      {/* Export & Publish Dialog */}
+      <ExportPublishDialog
+        open={showExport}
+        onOpenChange={setShowExport}
+        config={storeConfig}
       />
     </div>
   );
