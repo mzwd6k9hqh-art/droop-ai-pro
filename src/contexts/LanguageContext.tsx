@@ -77,8 +77,16 @@ const LANGUAGE_KEY = 'salesbooster_language';
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
+    // Force English as default for all users
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(LANGUAGE_KEY);
+      // Migration: legacy users on AR/FR get switched to EN once
+      const migrated = localStorage.getItem('lang_migrated_to_en_v1');
+      if (!migrated) {
+        localStorage.setItem(LANGUAGE_KEY, 'en');
+        localStorage.setItem('lang_migrated_to_en_v1', '1');
+        return 'en';
+      }
       if (stored === 'en' || stored === 'ar' || stored === 'fr') return stored;
     }
     return 'en';

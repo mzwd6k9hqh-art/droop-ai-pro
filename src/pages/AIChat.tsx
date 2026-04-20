@@ -331,7 +331,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               size="icon"
               onClick={() => setShowSidebar(true)}
               className="h-9 w-9 rounded-lg lg:hidden"
-              title="المحادثات"
+              title="Conversations"
             >
               <Menu className="h-4 w-4" />
             </Button>
@@ -340,7 +340,7 @@ Welcome them and present a store design concept with layout, categories, colors,
             </div>
             <div>
               <h1 className="text-sm font-semibold text-foreground leading-none">DROOB AI</h1>
-              <p className="text-[11px] text-muted-foreground">مساعدك الذكي</p>
+              <p className="text-[11px] text-muted-foreground">Your smart assistant</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -360,10 +360,10 @@ Welcome them and present a store design concept with layout, categories, colors,
                 size="sm"
                 onClick={() => navigate('/upgrade')}
                 className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20 font-semibold"
-                title="ترقية الخطة"
+                title="Upgrade plan"
               >
                 <Crown className="h-3.5 w-3.5" />
-                <span>ترقية</span>
+                <span>Upgrade</span>
               </Button>
             )}
             <Button
@@ -371,7 +371,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               size="icon"
               onClick={handleNewChat}
               className="h-9 w-9 rounded-lg"
-              title="محادثة جديدة"
+              title="New chat"
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -380,17 +380,17 @@ Welcome them and present a store design concept with layout, categories, colors,
               size="sm"
               onClick={() => setShowExport(true)}
               className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-emerald-500/10 to-blue-500/10 hover:from-emerald-500/20 hover:to-blue-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold"
-              title="تصدير ونشر المتجر"
+              title="Publish store"
             >
               <Rocket className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">نشر</span>
+              <span className="hidden sm:inline">Publish</span>
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowEditor(true)}
               className="h-9 w-9 rounded-lg"
-              title="تخصيص المتجر"
+              title="Customize store"
             >
               <Settings2 className="h-4 w-4" />
             </Button>
