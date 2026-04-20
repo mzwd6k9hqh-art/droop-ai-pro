@@ -79,7 +79,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="اكتب رسالتك هنا..."
+            placeholder="Type your message here..."
             disabled={disabled}
             rows={1}
             className={cn(
@@ -104,7 +104,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
               variant="ghost"
               size="icon"
               className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-              title="إرفاق صورة أو فيديو"
+              title="Attach image or video"
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
             >
@@ -127,7 +127,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
-        DROOB AI يمكنه ارتكاب أخطاء. تحقق من المعلومات المهمة.
+        DROOB AI can make mistakes. Verify important information.
       </p>
     </div>
   );

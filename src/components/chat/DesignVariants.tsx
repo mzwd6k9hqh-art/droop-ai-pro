@@ -117,9 +117,9 @@ export function DesignVariants({ variants, appliedIndex, onApply, onRegenerate, 
                   )}
                 >
                   {isApplied ? (
-                    <><Check className="h-3.5 w-3.5" /> مُطبَّق</>
+                    <><Check className="h-3.5 w-3.5" /> Applied</>
                   ) : (
-                    <><Sparkles className="h-3.5 w-3.5" /> تطبيق هذا التصميم</>
+                    <><Sparkles className="h-3.5 w-3.5" /> Apply this design</>
                   )}
                 </Button>
               </div>
@@ -139,7 +139,7 @@ export function DesignVariants({ variants, appliedIndex, onApply, onRegenerate, 
               className="h-9 rounded-lg text-xs gap-1.5 border-primary/30 hover:bg-primary/5"
             >
               <RefreshCw className="h-3.5 w-3.5" />
-              إعادة التوليد
+              Regenerate
             </Button>
           )}
           {onCustomize && (
@@ -150,7 +150,7 @@ export function DesignVariants({ variants, appliedIndex, onApply, onRegenerate, 
               className="h-9 rounded-lg text-xs gap-1.5 border-primary/30 hover:bg-primary/5"
             >
               <Settings2 className="h-3.5 w-3.5" />
-              تخصيص يدوي
+              Customize manually
             </Button>
           )}
         </div>
