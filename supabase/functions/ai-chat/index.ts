@@ -424,10 +424,17 @@ serve(async (req) => {
       if (designVariants && designVariants.length > 0) responseType = "design_variants";
       else if (functionCalls.length > 0) responseType = "modify_store";
 
+      // Determine source of the answer for UI badge
+      let source: string = "knowledge";
+      if (hasWebSearch) source = "web_search";
+      else if (designVariants && designVariants.length > 0) source = "design_generator";
+      else if (functionCalls.length > 0) source = "store_editor";
+
       return new Response(
         JSON.stringify({
           type: responseType,
           content: textContent,
+          source,
           ...(functionCalls.length > 0 ? { functionCalls } : {}),
           ...(designVariants ? { designVariants } : {}),
         }),
@@ -436,7 +443,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ type: "text", content: choice.content }),
+      JSON.stringify({ type: "text", content: choice.content, source: "knowledge" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
