@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DesignVariants, type DesignVariant } from './DesignVariants';
+import { MessageSourceBadge, type MessageSource } from './MessageSourceBadge';
 
 interface MessageAttachment {
   url: string;
@@ -15,12 +16,13 @@ interface ChatMessageProps {
   attachments?: MessageAttachment[];
   designVariants?: DesignVariant[];
   appliedVariantIndex?: number | null;
+  source?: MessageSource;
   onApplyVariant?: (variant: DesignVariant, index: number) => void;
   onRegenerateVariants?: () => void;
   onCustomizeStore?: () => void;
 }
 
-export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, onApplyVariant, onRegenerateVariants, onCustomizeStore }: ChatMessageProps) {
+export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, source, onApplyVariant, onRegenerateVariants, onCustomizeStore }: ChatMessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -38,12 +40,15 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-2">
-          <p className={cn(
-            'text-xs font-semibold',
-            isUser ? 'text-foreground' : 'text-primary'
-          )}>
-            {isUser ? 'You' : 'DROOB AI'}
-          </p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className={cn(
+              'text-xs font-semibold',
+              isUser ? 'text-foreground' : 'text-primary'
+            )}>
+              {isUser ? 'You' : 'DROOB AI'}
+            </p>
+            {!isUser && source && <MessageSourceBadge source={source} />}
+          </div>
 
           {/* Attachments */}
           {attachments && attachments.length > 0 && (

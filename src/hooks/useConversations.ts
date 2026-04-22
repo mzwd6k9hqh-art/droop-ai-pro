@@ -6,6 +6,8 @@ export interface MessageAttachment {
   type: 'image' | 'video';
 }
 
+export type MessageSource = 'knowledge' | 'web_search' | 'store_editor' | 'design_generator';
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -14,6 +16,7 @@ interface Message {
   attachments?: MessageAttachment[];
   designVariants?: DesignVariant[];
   appliedVariantIndex?: number | null;
+  source?: MessageSource;
 }
 
 export interface StoredConversation {
@@ -91,6 +94,7 @@ export function useConversations() {
       attachments: message.attachments,
       designVariants: message.designVariants,
       appliedVariantIndex: message.appliedVariantIndex ?? null,
+      source: message.source,
     };
 
     setConversations(prev => {
