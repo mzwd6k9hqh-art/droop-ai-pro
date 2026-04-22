@@ -150,6 +150,7 @@ Welcome them and present a store design concept with layout, categories, colors,
           role: 'assistant',
           content: data.content,
           designVariants: data.designVariants,
+          source: data.source,
         });
       } catch {
         const fallback = storeContext.hasStore
@@ -290,6 +291,7 @@ Welcome them and present a store design concept with layout, categories, colors,
         role: 'assistant',
         content: data.content,
         designVariants: data.designVariants,
+        source: data.source,
       });
     } catch (err) {
       console.error('AI Chat error:', err);
@@ -423,6 +425,7 @@ Welcome them and present a store design concept with layout, categories, colors,
                   attachments={msg.attachments}
                   designVariants={msg.designVariants}
                   appliedVariantIndex={msg.appliedVariantIndex}
+                  source={msg.source}
                   onApplyVariant={activeId ? handleApplyVariant(activeId, msg.id) : undefined}
                   onRegenerateVariants={() => {
                     setInput('اقترح 3 تصاميم جديدة ومختلفة كلياً عن السابقة بألوان وأسلوب مختلف');
