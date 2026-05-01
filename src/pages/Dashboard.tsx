@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { globalMarkets, bestCountries, trendingNiches } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
+import { DraggableGrid } from '@/components/DraggableGrid';
 import {
   TrendingUp,
   Globe,
@@ -21,8 +22,54 @@ import {
   ExternalLink,
   Rocket,
   LineChart,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const quickActions: Record<string, () => React.ReactNode> = {
+  ai: () => (
+    <Link to="/ai" className="block group h-full">
+      <div className="elevated-card p-6 h-full border-transparent hover:border-primary/30 transition-all">
+        <div className="flex items-start justify-between mb-4">
+          <div className="icon-action icon-solid-primary">
+            <Bot className="h-7 w-7" />
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">DROOB AI Assistant</h3>
+        <p className="text-sm text-muted-foreground">Get AI-powered business insights</p>
+      </div>
+    </Link>
+  ),
+  analytics: () => (
+    <Link to="/analytics" className="block group h-full">
+      <div className="elevated-card p-6 h-full border-transparent hover:border-secondary/30 transition-all">
+        <div className="flex items-start justify-between mb-4">
+          <div className="icon-action icon-solid-secondary">
+            <LineChart className="h-7 w-7" />
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">Smart Analytics</h3>
+        <p className="text-sm text-muted-foreground">View detailed metrics and insights</p>
+      </div>
+    </Link>
+  ),
+  upgrade: () => (
+    <Link to="/pricing" className="block group h-full">
+      <div className="elevated-card p-6 h-full border-transparent hover:border-accent/30 transition-all">
+        <div className="flex items-start justify-between mb-4">
+          <div className="icon-action icon-solid-accent">
+            <Rocket className="h-7 w-7" />
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">Upgrade Plan</h3>
+        <p className="text-sm text-muted-foreground">Unlock more features and unlimited AI</p>
+      </div>
+    </Link>
+  ),
+};
 
 export default function Dashboard() {
   const { user } = useAuth();
