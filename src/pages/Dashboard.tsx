@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { globalMarkets, bestCountries, trendingNiches } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
+import { DraggableGrid } from '@/components/DraggableGrid';
 import {
   TrendingUp,
   Globe,
@@ -21,8 +22,54 @@ import {
   ExternalLink,
   Rocket,
   LineChart,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const quickActions: Record<string, () => React.ReactNode> = {
+  ai: () => (
+    <Link to="/ai" className="block group h-full">
+      <div className="elevated-card p-6 h-full border-transparent hover:border-primary/30 transition-all">
+        <div className="flex items-start justify-between mb-4">
+          <div className="icon-action icon-solid-primary">
+            <Bot className="h-7 w-7" />
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">DROOB AI Assistant</h3>
+        <p className="text-sm text-muted-foreground">Get AI-powered business insights</p>
+      </div>
+    </Link>
+  ),
+  analytics: () => (
+    <Link to="/analytics" className="block group h-full">
+      <div className="elevated-card p-6 h-full border-transparent hover:border-secondary/30 transition-all">
+        <div className="flex items-start justify-between mb-4">
+          <div className="icon-action icon-solid-secondary">
+            <LineChart className="h-7 w-7" />
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">Smart Analytics</h3>
+        <p className="text-sm text-muted-foreground">View detailed metrics and insights</p>
+      </div>
+    </Link>
+  ),
+  upgrade: () => (
+    <Link to="/pricing" className="block group h-full">
+      <div className="elevated-card p-6 h-full border-transparent hover:border-accent/30 transition-all">
+        <div className="flex items-start justify-between mb-4">
+          <div className="icon-action icon-solid-accent">
+            <Rocket className="h-7 w-7" />
+          </div>
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
+        </div>
+        <h3 className="font-semibold text-lg mb-2">Upgrade Plan</h3>
+        <p className="text-sm text-muted-foreground">Unlock more features and unlimited AI</p>
+      </div>
+    </Link>
+  ),
+};
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -93,53 +140,29 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/ai" className="group">
-          <div className="elevated-card p-6 h-full border-transparent hover:border-primary/30 transition-all">
-            <div className="flex items-start justify-between mb-4">
-              <div className="icon-action icon-solid-primary">
-                <Bot className="h-7 w-7" />
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">DROOB AI Assistant</h3>
-            <p className="text-sm text-muted-foreground">
-              Get AI-powered business insights for {user?.storeUrl ? 'your store' : 'your business'}
+      {/* Text summary */}
+      <div className="elevated-card p-5 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+        <div className="flex items-start gap-3">
+          <div className="icon-feature icon-primary">
+            <FileText className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="font-semibold mb-1">Your business in one paragraph</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Revenue is up <strong className="text-foreground">+12%</strong> month-over-month with retention holding strong at <strong className="text-foreground">87%</strong>. Conversions improved to <strong className="text-foreground">4.2%</strong> and your overall market score is <strong className="text-foreground">92/100</strong>. Top opportunity right now: dive into the trending niches below — competition is still light in 2 of the 3 categories.
             </p>
           </div>
-        </Link>
-
-        <Link to="/analytics" className="group">
-          <div className="elevated-card p-6 h-full border-transparent hover:border-secondary/30 transition-all">
-            <div className="flex items-start justify-between mb-4">
-              <div className="icon-action icon-solid-secondary">
-                <LineChart className="h-7 w-7" />
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">Smart Analytics</h3>
-            <p className="text-sm text-muted-foreground">
-              View detailed performance metrics and actionable insights
-            </p>
-          </div>
-        </Link>
-
-        <Link to="/pricing" className="group">
-          <div className="elevated-card p-6 h-full border-transparent hover:border-accent/30 transition-all">
-            <div className="flex items-start justify-between mb-4">
-              <div className="icon-action icon-solid-accent">
-                <Rocket className="h-7 w-7" />
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">Upgrade Plan</h3>
-            <p className="text-sm text-muted-foreground">
-              Unlock more features and unlimited AI capabilities
-            </p>
-          </div>
-        </Link>
+        </div>
       </div>
+
+      {/* Quick Actions — drag to reorder */}
+      <DraggableGrid
+        ids={['ai', 'analytics', 'upgrade']}
+        storageKey="droop_dashboard_quickactions_order_v1"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
+        {(id) => quickActions[id]?.() ?? null}
+      </DraggableGrid>
 
       {/* Global Markets */}
       <section>

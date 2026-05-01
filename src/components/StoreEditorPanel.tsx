@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, Package, Palette, Settings as SettingsIcon, Layout, GripVertical } from 'lucide-react';
+import { UndoRedoControls } from '@/components/UndoRedoControls';
 import { StoreConfig } from '@/components/StorePreview';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -128,6 +129,10 @@ interface StoreEditorPanelProps {
   onOpenChange: (open: boolean) => void;
   config: StoreConfig;
   onChange: (next: StoreConfig) => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 const COLOR_PRESETS = [
@@ -141,7 +146,7 @@ const COLOR_PRESETS = [
   { label: 'Red', primary: 'from-red-500 to-rose-700', accent: 'bg-red-100 text-red-700', bg: 'bg-gradient-to-br from-red-50 to-rose-50' },
 ];
 
-export function StoreEditorPanel({ open, onOpenChange, config, onChange }: StoreEditorPanelProps) {
+export function StoreEditorPanel({ open, onOpenChange, config, onChange, onUndo, onRedo, canUndo, canRedo }: StoreEditorPanelProps) {
   const update = (patch: Partial<StoreConfig>) => onChange({ ...config, ...patch });
 
   const [newProduct, setNewProduct] = useState({ name: '', price: '', image: '📦', description: '' });
@@ -201,10 +206,20 @@ export function StoreEditorPanel({ open, onOpenChange, config, onChange }: Store
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col gap-0">
         <SheetHeader className="px-4 py-3 border-b">
-          <SheetTitle className="flex items-center gap-2 text-base">
-            <SettingsIcon className="h-4 w-4 text-primary" />
-            Customize Store
-          </SheetTitle>
+          <div className="flex items-center justify-between gap-2">
+            <SheetTitle className="flex items-center gap-2 text-base">
+              <SettingsIcon className="h-4 w-4 text-primary" />
+              Customize Store
+            </SheetTitle>
+            {(onUndo || onRedo) && (
+              <UndoRedoControls
+                onUndo={onUndo!}
+                onRedo={onRedo!}
+                canUndo={!!canUndo}
+                canRedo={!!canRedo}
+              />
+            )}
+          </div>
         </SheetHeader>
 
         <Tabs defaultValue="general" className="flex-1 flex flex-col overflow-hidden">

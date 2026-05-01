@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customer_chats: {
+        Row: {
+          created_at: string
+          customer_avatar: string | null
+          customer_email: string | null
+          customer_name: string
+          id: string
+          last_message: string | null
+          last_message_at: string
+          seller_id: string
+          unread_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_avatar?: string | null
+          customer_email?: string | null
+          customer_name: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string
+          seller_id: string
+          unread_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_avatar?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string
+          seller_id?: string
+          unread_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_messages: {
+        Row: {
+          chat_id: string
+          content: string
+          created_at: string
+          id: string
+          read: boolean
+          seller_id: string
+          sender: Database["public"]["Enums"]["message_sender"]
+        }
+        Insert: {
+          chat_id: string
+          content: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          seller_id: string
+          sender: Database["public"]["Enums"]["message_sender"]
+        }
+        Update: {
+          chat_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          seller_id?: string
+          sender?: Database["public"]["Enums"]["message_sender"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "customer_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +99,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      message_sender: "seller" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +226,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      message_sender: ["seller", "customer"],
+    },
   },
 } as const

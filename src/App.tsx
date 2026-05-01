@@ -19,6 +19,9 @@ import NotFound from "@/pages/NotFound";
 import Onboarding from "@/pages/Onboarding";
 import StoreAnalysis from "@/pages/StoreAnalysis";
 import Upgrade from "@/pages/Upgrade";
+import VoiceCall from "@/pages/VoiceCall";
+import CustomerChat from "@/pages/CustomerChat";
+import Earnings from "@/pages/Earnings";
 
 const queryClient = new QueryClient();
 
@@ -58,10 +61,13 @@ const App = () => (
                 <Route path="/landing" element={<Landing />} />
                 <Route path="/ai" element={<AIChat />} />
                 <Route path="/upgrade" element={<Upgrade />} />
+                <Route path="/voice-call" element={<VoiceCall />} />
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<LandingRoute />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/customers" element={<CustomerChat />} />
+                  <Route path="/earnings" element={<Earnings />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/settings" element={<Settings />} />
                 </Route>

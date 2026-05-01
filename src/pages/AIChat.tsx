@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { applyModification } from '@/lib/storeModifications';
 import { StoreEditorPanel } from '@/components/StoreEditorPanel';
 import { ExportPublishDialog } from '@/components/ExportPublishDialog';
+import { useHistoryState } from '@/hooks/useHistoryState';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -51,10 +52,12 @@ export default function AIChat() {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
   });
-  const [storeConfig, setStoreConfig] = useState<StoreConfig>(() => {
-    const saved = localStorage.getItem(STORE_CONFIG_KEY);
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [storeConfig, setStoreConfig, storeConfigHistory] = useHistoryState<StoreConfig>(
+    (() => {
+      const saved = localStorage.getItem(STORE_CONFIG_KEY);
+      return saved ? JSON.parse(saved) : {};
+    })()
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const messages = activeConversation?.messages || [];
@@ -519,6 +522,10 @@ Welcome them and present a store design concept with layout, categories, colors,
         onOpenChange={setShowEditor}
         config={storeConfig}
         onChange={setStoreConfig}
+        onUndo={storeConfigHistory.undo}
+        onRedo={storeConfigHistory.redo}
+        canUndo={storeConfigHistory.canUndo}
+        canRedo={storeConfigHistory.canRedo}
       />
 
       {/* Export & Publish Dialog */}
