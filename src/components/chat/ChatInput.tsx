@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Send, ImagePlus, X, Film } from 'lucide-react';
+import { Send, ImagePlus, X, Film, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -74,22 +74,25 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
         )}
 
         <div className="flex items-end gap-2">
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Type your message here..."
-            disabled={disabled}
-            rows={1}
-            className={cn(
-              'flex-1 resize-none bg-transparent py-4 pr-4 pl-4 text-sm',
-              'placeholder:text-muted-foreground/60',
-              'focus:outline-none disabled:opacity-50',
-              'max-h-[200px] min-h-[52px]'
-            )}
-            dir="auto"
-          />
+          <div className="relative flex-1">
+            <Pencil className="absolute left-3 top-[18px] h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type your message here..."
+              disabled={disabled}
+              rows={1}
+              className={cn(
+                'w-full resize-none bg-transparent py-4 pr-4 pl-10 text-sm',
+                'placeholder:text-muted-foreground/60',
+                'focus:outline-none disabled:opacity-50',
+                'max-h-[200px] min-h-[52px]'
+              )}
+              dir="auto"
+            />
+          </div>
           <div className="flex items-center gap-1 p-2">
             <input
               ref={fileInputRef}
