@@ -52,10 +52,12 @@ export default function AIChat() {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
   });
-  const [storeConfig, setStoreConfig, storeConfigHistory] = useHistoryState<StoreConfig>(() => {
-    const saved = localStorage.getItem(STORE_CONFIG_KEY);
-    return saved ? JSON.parse(saved) : {};
-  } as any);
+  const [storeConfig, setStoreConfig, storeConfigHistory] = useHistoryState<StoreConfig>(
+    (() => {
+      const saved = localStorage.getItem(STORE_CONFIG_KEY);
+      return saved ? JSON.parse(saved) : {};
+    })()
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const messages = activeConversation?.messages || [];
@@ -520,6 +522,10 @@ Welcome them and present a store design concept with layout, categories, colors,
         onOpenChange={setShowEditor}
         config={storeConfig}
         onChange={setStoreConfig}
+        onUndo={storeConfigHistory.undo}
+        onRedo={storeConfigHistory.redo}
+        canUndo={storeConfigHistory.canUndo}
+        canRedo={storeConfigHistory.canRedo}
       />
 
       {/* Export & Publish Dialog */}
