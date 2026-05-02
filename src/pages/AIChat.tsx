@@ -12,7 +12,7 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
 import type { DesignVariant } from '@/components/chat/DesignVariants';
-import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket, MoreVertical } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket, MoreVertical, BarChart3, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
