@@ -45,6 +45,8 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
 
   const handlePublishFree = () => {
     setPublishedUrl(freeUrl);
+    localStorage.setItem('droop_store_published', 'true');
+    localStorage.setItem('droop_store_published_url', freeUrl);
     setStep('domain'); // After publishing, offer domain upgrade
   };
 

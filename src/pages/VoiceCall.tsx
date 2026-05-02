@@ -38,25 +38,64 @@ export default function VoiceCall() {
   }, [callStart]);
 
   const speak = useCallback((text: string) => {
-    if (silentMode || !('speechSynthesis' in window)) {
+    if (silentMode || typeof window === 'undefined' || !('speechSynthesis' in window)) {
       setStatus('listening');
       startListening();
       return;
     }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.05;
-    u.pitch = 1;
-    u.onend = () => {
-      setStatus('listening');
-      startListening();
+    const synth = window.speechSynthesis;
+    // Stop any active recognition so the mic doesn't pick up the AI's own voice
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      recognitionRef.current = null;
+    }
+    synth.cancel();
+
+    const speakNow = () => {
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.0;
+      u.pitch = 1;
+      u.volume = 1;
+      // Pick an English voice if available
+      const voices = synth.getVoices();
+      const preferred = voices.find(v => /en[-_]US/i.test(v.lang) && /female|samantha|google/i.test(v.name))
+        || voices.find(v => /^en/i.test(v.lang))
+        || voices[0];
+      if (preferred) u.voice = preferred;
+      u.onend = () => {
+        setStatus('listening');
+        startListening();
+      };
+      u.onerror = (ev: any) => {
+        console.warn('TTS error', ev?.error);
+        setStatus('listening');
+        startListening();
+      };
+      synthRef.current = u;
+      // Chrome quirk: resume if paused
+      try { synth.resume(); } catch {}
+      synth.speak(u);
     };
-    u.onerror = () => {
-      setStatus('listening');
-      startListening();
-    };
-    synthRef.current = u;
-    window.speechSynthesis.speak(u);
+
+    // Voices may load asynchronously
+    if (synth.getVoices().length === 0) {
+      let fired = false;
+      const handler = () => {
+        if (fired) return;
+        fired = true;
+        synth.removeEventListener('voiceschanged', handler);
+        speakNow();
+      };
+      synth.addEventListener('voiceschanged', handler);
+      setTimeout(() => {
+        if (fired) return;
+        fired = true;
+        try { synth.removeEventListener('voiceschanged', handler); } catch {}
+        speakNow();
+      }, 300);
+    } else {
+      speakNow();
+    }
   }, [silentMode]);
 
   const sendToAI = useCallback(async (userText: string) => {
