@@ -79,18 +79,20 @@ export default function VoiceCall() {
 
     // Voices may load asynchronously
     if (synth.getVoices().length === 0) {
+      let fired = false;
       const handler = () => {
+        if (fired) return;
+        fired = true;
         synth.removeEventListener('voiceschanged', handler);
         speakNow();
       };
       synth.addEventListener('voiceschanged', handler);
-      // Fallback in case the event never fires
       setTimeout(() => {
-        if (!synthRef.current || synthRef.current !== null) {
-          try { synth.removeEventListener('voiceschanged', handler); } catch {}
-        }
+        if (fired) return;
+        fired = true;
+        try { synth.removeEventListener('voiceschanged', handler); } catch {}
         speakNow();
-      }, 250);
+      }, 300);
     } else {
       speakNow();
     }
