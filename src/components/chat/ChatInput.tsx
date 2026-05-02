@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { Send, ImagePlus, X, Film, Pencil } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Send, ImagePlus, X, Film, Pencil, PhoneCall } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({ value, onChange, onSubmit, disabled, attachments, onAddAttachments, onRemoveAttachment }: ChatInputProps) {
+  const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,6 +114,16 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
               disabled={disabled}
             >
               <ImagePlus className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10"
+              title="Start voice call with DROOB AI"
+              onClick={() => navigate('/voice-call')}
+            >
+              <PhoneCall className="h-4 w-4" />
             </Button>
             <Button
               onClick={onSubmit}
