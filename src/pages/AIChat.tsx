@@ -359,6 +359,26 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </span>
               </div>
             )}
+            {/* New Chat */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleNewChat}
+              className="h-9 w-9 rounded-lg"
+              title="New chat"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+            {/* View Store */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowPreview(!showPreview)}
+              className="h-9 w-9 rounded-lg"
+              title={showPreview ? 'Hide store' : 'View store'}
+            >
+              <PanelRight className="h-4 w-4" />
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -370,16 +390,7 @@ Welcome them and present a store design concept with layout, categories, colors,
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem onClick={handleNewChat} className="cursor-pointer">
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span>New chat</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setShowPreview(!showPreview)} className="cursor-pointer">
-                  <PanelRight className="h-4 w-4 mr-2" />
-                  <span>{showPreview ? 'Hide store' : 'View store'}</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+              <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
                   <Rocket className="h-4 w-4 mr-2 text-emerald-600" />
                   <span className="font-medium">Publish Store</span>
@@ -387,6 +398,25 @@ Welcome them and present a store design concept with layout, categories, colors,
                 <DropdownMenuItem onClick={() => setShowEditor(true)} className="cursor-pointer">
                   <Settings2 className="h-4 w-4 mr-2" />
                   <span>Customize Store</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (localStorage.getItem('droop_store_published') !== 'true') {
+                      toast.error('Publish your store first to view analytics.');
+                      return;
+                    }
+                    navigate('/analytics');
+                  }}
+                  className="cursor-pointer"
+                  disabled={localStorage.getItem('droop_store_published') !== 'true'}
+                >
+                  <BarChart3 className="h-4 w-4 mr-2 text-primary" />
+                  <span>Store Analytics</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/customers')} className="cursor-pointer">
+                  <MessageSquare className="h-4 w-4 mr-2 text-accent" />
+                  <span>Customer Chat</span>
                 </DropdownMenuItem>
                 {(!user || user.plan !== 'premium') && (
                   <>
