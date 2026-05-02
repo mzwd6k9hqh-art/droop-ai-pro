@@ -359,27 +359,6 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </span>
               </div>
             )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleNewChat}
-              className="h-9 w-9 rounded-lg"
-              title="New chat"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowPreview(!showPreview)}
-              className={cn(
-                'h-9 w-9 rounded-lg',
-                showPreview && 'bg-primary/10 text-primary'
-              )}
-              title="View store"
-            >
-              <PanelRight className="h-4 w-4" />
-            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -392,6 +371,15 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem onClick={handleNewChat} className="cursor-pointer">
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span>New chat</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowPreview(!showPreview)} className="cursor-pointer">
+                  <PanelRight className="h-4 w-4 mr-2" />
+                  <span>{showPreview ? 'Hide store' : 'View store'}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
                   <Rocket className="h-4 w-4 mr-2 text-emerald-600" />
                   <span className="font-medium">Publish Store</span>
