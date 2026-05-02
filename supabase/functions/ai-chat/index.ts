@@ -338,9 +338,44 @@ serve(async (req) => {
   try {
     const { messages, storeUrl } = await req.json();
 
-    const systemWithContext = storeUrl
+    // ============ Daily awareness context ============
+    // The AI must be fully aware of WHAT IS HAPPENING TODAY: date, weekday,
+    // season, and notable e-commerce / cultural events around this date.
+    const now = new Date();
+    const weekdayAr = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const monthAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const m = now.getUTCMonth(); // 0-11
+    const d = now.getUTCDate();
+    const seasonAr = m <= 1 || m === 11 ? 'الشتاء' : m <= 4 ? 'الربيع' : m <= 7 ? 'الصيف' : 'الخريف';
+
+    // Lightweight e-commerce / regional calendar — give the AI awareness of
+    // promo windows, holidays and cultural moments that drive sales right now.
+    const calendar: Record<string, string> = {
+      '0':  'موسم تخفيضات ما بعد الأعياد، عودة الميزانيات، ترويج Detox/Wellness ولياقة بداية السنة.',
+      '1':  'عيد الحب (14 فبراير) — هدايا، ورود، مجوهرات، شوكولاتة، تجارب أزواج.',
+      '2':  'بداية الربيع، تخفيضات Spring Cleaning، تنظيم المنزل، أزياء انتقالية.',
+      '3':  'تسوق رمضاني/عيد الفطر في كثير من السنوات — أزياء عيد، ضيافة، حلويات، ديكور.',
+      '4':  'عيد الأم في كثير من الدول العربية (21 مارس مضى لكن مايو في الغرب)، عروض نهاية الفصل الدراسي.',
+      '5':  'صيف، عطلات، أزياء بحر، رحلات، عروض Mid-Year.',
+      '6':  'تخفيضات الصيف الكبرى، Back-to-School مبكر.',
+      '7':  'Back-to-School بقوة — حقائب، أدوات، إلكترونيات، أزياء طلاب.',
+      '8':  'بداية الخريف، اليوم الوطني السعودي (23 سبتمبر)، عروض موسمية.',
+      '9':  'Halloween (في الغرب)، تحضيرات Q4، عروض ما قبل الجمعة البيضاء.',
+      '10': 'الجمعة البيضاء/Black Friday + Cyber Monday — أكبر موسم تسوق في السنة. اليوم الوطني الإماراتي قريب.',
+      '11': 'موسم الأعياد ورأس السنة — هدايا، ديكور، عروض نهاية السنة، شحن سريع.',
+    };
+    const todayInsight = calendar[String(m)] || '';
+
+    const dailyContext = `\n\n## سياق اليوم (تحديث مباشر — استخدمه دائماً):
+- التاريخ اليوم: ${weekdayAr[now.getUTCDay()]} ${d} ${monthAr[m]} ${now.getUTCFullYear()} (UTC).
+- الفصل الحالي: ${seasonAr}.
+- ملاحظات تجارية لهذا الشهر: ${todayInsight}
+- أنت على علم تام بكل ما يحدث يومياً وموسمياً. استخدم هذا السياق في كل اقتراح: العروض، المنتجات الموسمية، الحملات التسويقية، توقيت الإطلاق، والتسعير.
+- إذا احتجت معلومات أحدث (أخبار، أسعار، اتجاهات لحظية) استدعِ web_search فوراً.`;
+
+    const systemWithContext = (storeUrl
       ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}. استخدم هذا السياق عند تقديم النصائح أو التعديلات.`
-      : SYSTEM_PROMPT;
+      : SYSTEM_PROMPT) + dailyContext;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
