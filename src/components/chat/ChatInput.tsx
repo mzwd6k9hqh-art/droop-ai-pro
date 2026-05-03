@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, ImagePlus, X, Film, Pencil, PhoneCall } from 'lucide-react';
+import { Send, ImagePlus, X, Film, Pencil, PhoneCall, Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export interface ChatAttachment {
   file: File;
@@ -24,6 +25,35 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
+
+  const startVoiceInput = () => {
+    const w = window as any;
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SR) { toast.error('Voice input not supported. Try Chrome.'); return; }
+    if (isRecording) { recognitionRef.current?.stop(); return; }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    let finalText = '';
+    rec.onresult = (e: any) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      onChange((value ? value + ' ' : '') + finalText + interim);
+    };
+    rec.onerror = (e: any) => {
+      if (e.error !== 'no-speech' && e.error !== 'aborted') toast.error('Voice input error');
+      setIsRecording(false);
+    };
+    rec.onend = () => setIsRecording(false);
+    recognitionRef.current = rec;
+    try { rec.start(); setIsRecording(true); } catch { setIsRecording(false); }
+  };
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -139,7 +169,23 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
               >
                 <ImagePlus className="h-[18px] w-[18px]" />
               </Button>
-              {/* Voice call — emerald glow */}
+              {/* Voice message — record speech to text */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  'h-10 w-10 rounded-full transition-all duration-200 hover:scale-105',
+                  isRecording
+                    ? 'bg-rose-500 text-white border border-rose-300 shadow-[0_0_18px_-2px_hsl(0_84%_60%/0.7)] animate-pulse'
+                    : 'bg-gradient-to-br from-rose-400/15 to-pink-500/15 hover:from-rose-400/25 hover:to-pink-500/25 border border-rose-400/30 hover:border-rose-400/50 text-rose-500 dark:text-rose-400'
+                )}
+                title={isRecording ? 'Stop recording' : 'Record voice message'}
+                onClick={startVoiceInput}
+                disabled={disabled}
+              >
+                {isRecording ? <Square className="h-[16px] w-[16px] fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
+              </Button>
               <Button
                 type="button"
                 variant="ghost"
