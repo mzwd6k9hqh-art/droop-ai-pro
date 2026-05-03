@@ -58,20 +58,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const currentUserEmail = localStorage.getItem(CURRENT_USER_KEY);
-    if (currentUserEmail) {
-      const users = getUsers();
-      let userData = users[currentUserEmail];
-      if (userData) {
-        // Check and reset daily limit on load
-        userData = checkAndResetDailyLimit(userData);
-        users[currentUserEmail] = userData;
-        saveUsers(users);
-        
-        const { password, ...userWithoutPassword } = userData;
-        setUser(userWithoutPassword);
-      }
+    // Auth removed — auto-provision a guest user so the app is accessible without login
+    const GUEST_EMAIL = 'guest@droob.local';
+    const users = getUsers();
+    let userData = users[GUEST_EMAIL];
+    if (!userData) {
+      userData = {
+        email: GUEST_EMAIL,
+        name: 'Guest',
+        storeUrl: localStorage.getItem('droop_store_url') || '',
+        password: '',
+        plan: 'free',
+        dailyAiMessagesUsed: 0,
+        lastMessageDate: getTodayDate(),
+        createdAt: new Date().toISOString(),
+      };
     }
+    userData = checkAndResetDailyLimit(userData);
+    users[GUEST_EMAIL] = userData;
+    saveUsers(users);
+    localStorage.setItem(CURRENT_USER_KEY, GUEST_EMAIL);
+    const { password, ...userWithoutPassword } = userData;
+    setUser(userWithoutPassword);
     setIsLoading(false);
   }, []);
 
