@@ -165,7 +165,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
                 className={cn(
                   'h-10 w-10 rounded-full transition-all duration-300',
                   hasContent
-                    ? 'bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(var(--accent))_100%)] text-white shadow-[0_0_22px_-2px_hsl(var(--primary)/0.7)] hover:shadow-[0_0_30px_0_hsl(var(--primary)/0.9)] hover:scale-110 animate-pulse-soft'
+                    ? 'bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(var(--accent))_100%)] text-white shadow-[0_0_22px_-2px_hsl(var(--primary)/0.7)] hover:shadow-[0_0_30px_0_hsl(var(--primary)/0.9)] hover:scale-110'
                     : 'bg-muted text-muted-foreground/60 hover:bg-muted'
                 )}
               >
