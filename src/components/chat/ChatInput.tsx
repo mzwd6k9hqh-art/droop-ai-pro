@@ -169,7 +169,23 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
               >
                 <ImagePlus className="h-[18px] w-[18px]" />
               </Button>
-              {/* Voice call — emerald glow */}
+              {/* Voice message — record speech to text */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  'h-10 w-10 rounded-full transition-all duration-200 hover:scale-105',
+                  isRecording
+                    ? 'bg-rose-500 text-white border border-rose-300 shadow-[0_0_18px_-2px_hsl(0_84%_60%/0.7)] animate-pulse'
+                    : 'bg-gradient-to-br from-rose-400/15 to-pink-500/15 hover:from-rose-400/25 hover:to-pink-500/25 border border-rose-400/30 hover:border-rose-400/50 text-rose-500 dark:text-rose-400'
+                )}
+                title={isRecording ? 'Stop recording' : 'Record voice message'}
+                onClick={startVoiceInput}
+                disabled={disabled}
+              >
+                {isRecording ? <Square className="h-[16px] w-[16px] fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
+              </Button>
               <Button
                 type="button"
                 variant="ghost"
