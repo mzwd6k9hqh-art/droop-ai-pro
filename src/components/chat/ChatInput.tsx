@@ -25,8 +25,35 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
 
-  useEffect(() => {
+  const startVoiceInput = () => {
+    const w = window as any;
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SR) { toast.error('Voice input not supported. Try Chrome.'); return; }
+    if (isRecording) { recognitionRef.current?.stop(); return; }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    let finalText = '';
+    rec.onresult = (e: any) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      onChange((value ? value + ' ' : '') + finalText + interim);
+    };
+    rec.onerror = (e: any) => {
+      if (e.error !== 'no-speech' && e.error !== 'aborted') toast.error('Voice input error');
+      setIsRecording(false);
+    };
+    rec.onend = () => setIsRecording(false);
+    recognitionRef.current = rec;
+    try { rec.start(); setIsRecording(true); } catch { setIsRecording(false); }
+  };
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
