@@ -1,8 +1,9 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, ImagePlus, X, Film, Pencil, PhoneCall } from 'lucide-react';
+import { Send, ImagePlus, X, Film, Pencil, PhoneCall, Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export interface ChatAttachment {
   file: File;
