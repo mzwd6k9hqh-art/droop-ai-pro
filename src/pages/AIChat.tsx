@@ -281,6 +281,7 @@ Welcome them and present a store design concept with layout, categories, colors,
       });
 
       if (error) throw error;
+      if (!data) throw new Error('Empty response from AI');
 
       if (data.type === 'modify_store') {
         if (data.functionCalls && Array.isArray(data.functionCalls)) {
@@ -290,15 +291,25 @@ Welcome them and present a store design concept with layout, categories, colors,
         }
       }
 
+      const replyContent =
+        (typeof data.content === 'string' && data.content.trim()) ||
+        (data.designVariants && data.designVariants.length > 0 && 'Here are some design ideas for you 🎨') ||
+        "I'm here! Could you rephrase that?";
+
       addMessage(convId, {
         role: 'assistant',
-        content: data.content,
+        content: replyContent,
         designVariants: data.designVariants,
         source: data.source,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI Chat error:', err);
-      addMessage(convId, { role: 'assistant', content: 'Sorry, something went wrong. Please try again.' });
+      const msg = err?.message?.includes('429')
+        ? 'Too many requests right now. Please wait a moment and try again.'
+        : err?.message?.includes('402')
+        ? 'AI credits exhausted. Please add credits in Settings → Workspace → Usage.'
+        : 'Sorry, something went wrong. Please try again.';
+      addMessage(convId, { role: 'assistant', content: msg });
     } finally {
       setIsTyping(false);
     }
