@@ -173,16 +173,31 @@ export default function VoiceCall() {
 
   const submitText = () => {
     const t = text.trim();
-    if (!t) return;
+    const img = pendingImage;
+    if (!t && !img) return;
     setText('');
+    setPendingImage(null);
     if (status === 'idle' || status === 'ended') {
-      // Auto-start the call context
       setStatus('processing');
       setTurns([]);
-      setTimeout(() => sendToAI(t), 50);
+      setTimeout(() => sendToAI(t || 'Take a look at this image', img?.base64), 50);
     } else {
-      sendToAI(t);
+      sendToAI(t || 'Take a look at this image', img?.base64);
     }
+  };
+
+  const handleImagePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('Image too large (max 10MB)'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      setPendingImage({ preview: base64, base64 });
+      toast.success('Image attached — add a message or send');
+    };
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => () => {
