@@ -277,13 +277,36 @@ export default function VoiceCall() {
 
       {/* Bottom: text input bar + end call */}
       <div className="px-4 pb-6 pt-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImagePicked}
+        />
+        {pendingImage && (
+          <div className="max-w-2xl mx-auto mb-2 flex items-center gap-2">
+            <div className="relative">
+              <img src={pendingImage.preview} alt="attached" className="h-16 w-16 rounded-xl object-cover border border-neutral-200" />
+              <button
+                onClick={() => setPendingImage(null)}
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-neutral-900 text-white flex items-center justify-center"
+                aria-label="Remove image"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+            <span className="text-xs text-neutral-500">Image ready — add a message or tap send.</span>
+          </div>
+        )}
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <div className="flex-1 flex items-center gap-2 bg-neutral-100 rounded-full pl-2 pr-2 h-14 border border-neutral-200">
             <button
               type="button"
+              onClick={() => fileInputRef.current?.click()}
               className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors"
-              title="More"
-              aria-label="More"
+              title="Send an image"
+              aria-label="Send an image"
             >
               <Plus className="h-5 w-5" />
             </button>
@@ -291,11 +314,11 @@ export default function VoiceCall() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitText(); } }}
-              placeholder="Message"
+              placeholder={pendingImage ? 'Add a message about the image…' : 'Message'}
               className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-neutral-400 text-neutral-900"
               dir="auto"
             />
-            {text.trim() ? (
+            {(text.trim() || pendingImage) ? (
               <button
                 onClick={submitText}
                 className="h-10 w-10 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors"
