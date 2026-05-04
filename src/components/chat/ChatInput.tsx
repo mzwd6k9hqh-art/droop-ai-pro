@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, ImagePlus, X, Film, Pencil, Mic, Square } from 'lucide-react';
+import { Send, ImagePlus, X, Film, Pencil, Mic, Square, AudioWaveform } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -80,145 +80,122 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
 
   return (
     <div className="max-w-3xl mx-auto w-full px-4 pb-4">
-      {/* Gradient glow wrapper */}
-      <div className="relative group">
-        {/* Animated gradient border / glow */}
-        <div
-          className={cn(
-            'absolute -inset-[1.5px] rounded-[28px] opacity-60 blur-[2px] transition-all duration-500',
-            'bg-[linear-gradient(120deg,hsl(var(--primary))_0%,hsl(var(--accent))_45%,hsl(var(--secondary))_100%)]',
-            'group-focus-within:opacity-100 group-focus-within:blur-[6px]',
-            hasContent && 'opacity-100 blur-[6px]'
-          )}
-        />
+      <div
+        className={cn(
+          'flex flex-col rounded-2xl border border-border bg-background',
+          'focus-within:border-primary/40 transition-colors'
+        )}
+      >
+        {/* Attachment previews */}
+        {attachments.length > 0 && (
+          <div className="flex gap-2 p-3 pb-0 flex-wrap">
+            {attachments.map((att, i) => (
+              <div key={i} className="relative group/att w-16 h-16 rounded-xl overflow-hidden border border-border bg-muted">
+                {att.type === 'image' ? (
+                  <img src={att.preview} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-muted">
+                    <Film className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                )}
+                <button
+                  onClick={() => onRemoveAttachment(i)}
+                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover/att:opacity-100 transition-opacity"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-        <div
-          className={cn(
-            'relative flex flex-col rounded-[26px] border border-white/40 dark:border-white/10',
-            'bg-card/70 backdrop-blur-xl',
-            'shadow-[0_8px_32px_-8px_hsl(var(--primary)/0.25)]',
-            'transition-all duration-300'
-          )}
-        >
-          {/* Attachment previews */}
-          {attachments.length > 0 && (
-            <div className="flex gap-2 p-3 pb-0 flex-wrap">
-              {attachments.map((att, i) => (
-                <div key={i} className="relative group/att w-16 h-16 rounded-xl overflow-hidden border border-border bg-muted">
-                  {att.type === 'image' ? (
-                    <img src={att.preview} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <Film className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  )}
-                  <button
-                    onClick={() => onRemoveAttachment(i)}
-                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover/att:opacity-100 transition-opacity"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-end gap-2 px-2 py-1.5">
-            <div className="relative flex-1">
-              <Pencil className="absolute left-4 top-[22px] h-4 w-4 text-primary/50 pointer-events-none" />
-              <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask Zyra anything..."
-                disabled={disabled}
-                rows={1}
-                className={cn(
-                  'w-full resize-none bg-transparent py-5 pr-2 pl-11 text-[15px] leading-snug',
-                  'placeholder:text-muted-foreground/50',
-                  'focus:outline-none disabled:opacity-50',
-                  'max-h-[200px] min-h-[60px]'
-                )}
-                dir="auto"
-              />
-            </div>
-            <div className="flex items-center gap-1.5 p-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              {/* Image upload — polished glass button */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  'h-10 w-10 rounded-full',
-                  'bg-gradient-to-br from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20',
-                  'border border-primary/20 hover:border-primary/40',
-                  'text-primary transition-all duration-200 hover:scale-105'
-                )}
-                title="Attach image or video"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={disabled}
-              >
-                <ImagePlus className="h-[18px] w-[18px]" />
-              </Button>
-              {/* Voice message — record speech to text */}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  'h-10 w-10 rounded-full transition-all duration-200 hover:scale-105',
-                  isRecording
-                    ? 'bg-rose-500 text-white border border-rose-300 shadow-[0_0_18px_-2px_hsl(0_84%_60%/0.7)] animate-pulse'
-                    : 'bg-gradient-to-br from-rose-400/15 to-pink-500/15 hover:from-rose-400/25 hover:to-pink-500/25 border border-rose-400/30 hover:border-rose-400/50 text-rose-500 dark:text-rose-400'
-                )}
-                title={isRecording ? 'Stop recording' : 'Record voice message'}
-                onClick={startVoiceInput}
-                disabled={disabled}
-              >
-                {isRecording ? <Square className="h-[16px] w-[16px] fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
-              </Button>
-              {/* Voice call — animated purple/violet blob */}
-              <button
-                type="button"
-                title="Start voice call with Zyra"
-                onClick={() => navigate('/voice-call')}
-                className="relative h-10 w-10 rounded-full flex items-center justify-center group/blob transition-transform hover:scale-110"
-              >
-                <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,#a78bfa,#7c3aed_55%,#4c1d95)] shadow-[0_0_18px_-2px_rgba(124,58,237,0.7)] animate-[zyra-blob_4s_ease-in-out_infinite]" />
-                <span className="absolute inset-[3px] rounded-full bg-[radial-gradient(circle_at_70%_60%,rgba(255,255,255,0.5),transparent_55%)]" />
-                <span className="absolute -inset-1 rounded-full bg-violet-500/40 blur-md opacity-60 group-hover/blob:opacity-100 transition-opacity animate-pulse" />
-              </button>
-              {/* Send — glowing gradient when active */}
-              <Button
-                onClick={onSubmit}
-                disabled={!hasContent || disabled}
-                size="icon"
-                className={cn(
-                  'h-10 w-10 rounded-full transition-all duration-300',
-                  hasContent
-                    ? 'bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(var(--accent))_100%)] text-white shadow-[0_0_22px_-2px_hsl(var(--primary)/0.7)] hover:shadow-[0_0_30px_0_hsl(var(--primary)/0.9)] hover:scale-110'
-                    : 'bg-muted text-muted-foreground/60 hover:bg-muted'
-                )}
-              >
-                <Send className={cn('h-[18px] w-[18px] transition-transform', hasContent && 'translate-x-[1px]')} />
-              </Button>
-            </div>
+        <div className="flex items-end gap-1 px-2 py-1.5">
+          <div className="relative flex-1">
+            <Pencil className="absolute left-3 top-[18px] h-4 w-4 text-muted-foreground/60 pointer-events-none" />
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask Zyra anything..."
+              disabled={disabled}
+              rows={1}
+              className={cn(
+                'w-full resize-none bg-transparent py-4 pr-2 pl-9 text-[15px] leading-snug',
+                'placeholder:text-muted-foreground/60',
+                'focus:outline-none disabled:opacity-50',
+                'max-h-[200px] min-h-[52px]'
+              )}
+              dir="auto"
+            />
+          </div>
+          <div className="flex items-center gap-0.5 p-1.5">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            {/* Image upload */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+              title="Attach image or video"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={disabled}
+            >
+              <ImagePlus className="h-[18px] w-[18px]" />
+            </Button>
+            {/* Voice message — record speech to text */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className={cn(
+                'h-9 w-9 rounded-full transition-colors',
+                isRecording
+                  ? 'bg-rose-500 text-white hover:bg-rose-600 animate-pulse'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+              title={isRecording ? 'Stop recording' : 'Record voice message'}
+              onClick={startVoiceInput}
+              disabled={disabled}
+            >
+              {isRecording ? <Square className="h-[14px] w-[14px] fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
+            </Button>
+            {/* Voice call — circular purple waveform button */}
+            <button
+              type="button"
+              title="Start voice call with Zyra"
+              onClick={() => navigate('/voice-call')}
+              className="h-9 w-9 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center transition-colors shadow-sm"
+            >
+              <AudioWaveform className="h-[18px] w-[18px]" />
+            </button>
+            {/* Send */}
+            <Button
+              onClick={onSubmit}
+              disabled={!hasContent || disabled}
+              size="icon"
+              className={cn(
+                'h-9 w-9 rounded-full ml-0.5 transition-colors',
+                hasContent
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  : 'bg-muted text-muted-foreground/60 hover:bg-muted'
+              )}
+            >
+              <Send className="h-[16px] w-[16px]" />
+            </Button>
           </div>
         </div>
       </div>
-      <p className="text-[10px] text-muted-foreground/50 text-center mt-2.5">
+      <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
         Zyra can make mistakes. Verify important information.
       </p>
     </div>
   );
 }
-
