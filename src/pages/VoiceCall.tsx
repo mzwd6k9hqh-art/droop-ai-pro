@@ -17,9 +17,11 @@ export default function VoiceCall() {
   const [partial, setPartial] = useState('');
   const [text, setText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ preview: string; base64: string } | null>(null);
 
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const turnsRef = useRef<VoiceTurn[]>([]);
   const statusRef = useRef<CallStatus>('idle');
   turnsRef.current = turns;
