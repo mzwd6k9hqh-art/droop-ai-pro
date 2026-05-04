@@ -1,29 +1,22 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Phone, PhoneOff, Mic, MicOff, Volume2, VolumeX, Sparkles,
-  ArrowLeft, Clock, MessageSquare, DollarSign, ShoppingBag,
-  TrendingUp, Eye, Star,
-} from 'lucide-react';
+import { Mic, Plus, X, Send, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { getStoreStats, fmtMoney } from '@/lib/storeStats';
+import { getStoreStats } from '@/lib/storeStats';
 
 type CallStatus = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'ended';
-interface VoiceTurn { id: string; role: 'user' | 'assistant'; content: string; at: number; }
+interface VoiceTurn { id: string; role: 'user' | 'assistant'; content: string; }
 type AnyWindow = Window & { SpeechRecognition?: any; webkitSpeechRecognition?: any };
 
 export default function VoiceCall() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<CallStatus>('idle');
-  const [muted, setMuted] = useState(false);
-  const [silentMode, setSilentMode] = useState(false);
   const [turns, setTurns] = useState<VoiceTurn[]>([]);
   const [partial, setPartial] = useState('');
-  const [callStart, setCallStart] = useState<number | null>(null);
-  const [elapsed, setElapsed] = useState(0);
+  const [text, setText] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
 
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -33,66 +26,42 @@ export default function VoiceCall() {
   statusRef.current = status;
 
   const stats = getStoreStats();
+  const lastAssistant = [...turns].reverse().find(t => t.role === 'assistant');
 
-  useEffect(() => {
-    if (!callStart || status === 'ended') return;
-    const t = setInterval(() => setElapsed(Math.floor((Date.now() - callStart) / 1000)), 1000);
-    return () => clearInterval(t);
-  }, [callStart, status]);
-
-  // ---------- TTS via ElevenLabs ----------
-  const speak = useCallback(async (text: string) => {
-    if (silentMode) {
-      setStatus('listening');
-      startListening();
-      return;
-    }
-    // Stop mic so we don't pick up our own voice
+  const speak = useCallback(async (textToSay: string) => {
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch {}
       recognitionRef.current = null;
     }
     try {
-      const { data, error } = await supabase.functions.invoke('voice-tts', { body: { text } });
+      const { data, error } = await supabase.functions.invoke('voice-tts', { body: { text: textToSay } });
       if (error) throw error;
-      const audioUrl = `data:audio/mpeg;base64,${data.audioContent}`;
-      const audio = new Audio(audioUrl);
+      const audio = new Audio(`data:audio/mpeg;base64,${data.audioContent}`);
       audioRef.current = audio;
       audio.onended = () => {
-        if (statusRef.current !== 'ended') {
-          setStatus('listening');
-          startListening();
-        }
+        if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); }
       };
       audio.onerror = () => {
-        if (statusRef.current !== 'ended') {
-          setStatus('listening');
-          startListening();
-        }
+        if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); }
       };
       await audio.play();
-    } catch (e: any) {
-      console.warn('TTS failed, falling back', e);
-      // Fallback to browser TTS
+    } catch {
       try {
         const synth = window.speechSynthesis;
         synth.cancel();
-        const u = new SpeechSynthesisUtterance(text);
+        const u = new SpeechSynthesisUtterance(textToSay);
         u.onend = () => { if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); } };
         synth.speak(u);
       } catch {
-        setStatus('listening');
-        startListening();
+        setStatus('listening'); startListening();
       }
     }
-  }, [silentMode]);
+  }, []);
 
-  // ---------- AI ----------
   const sendToAI = useCallback(async (userText: string) => {
     setStatus('processing');
-    const userTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'user', content: userText, at: Date.now() };
+    const userTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'user', content: userText };
     setTurns(prev => [...prev, userTurn]);
-
     const history = [...turnsRef.current, userTurn].map(t => ({ role: t.role, content: t.content }));
     try {
       const { data, error } = await supabase.functions.invoke('voice-chat', {
@@ -100,22 +69,19 @@ export default function VoiceCall() {
       });
       if (error) throw error;
       const reply = data?.reply || "Sorry, I didn't catch that.";
-      const aiTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'assistant', content: reply, at: Date.now() };
-      setTurns(prev => [...prev, aiTurn]);
+      setTurns(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
       setStatus('speaking');
       speak(reply);
     } catch (e: any) {
       toast.error(e?.message || 'Failed to reach AI');
-      setStatus('listening');
-      startListening();
+      setStatus('listening'); startListening();
     }
   }, [speak, stats]);
 
-  // ---------- STT ----------
   const startListening = useCallback(() => {
     const w = window as AnyWindow;
     const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!SR) { toast.error('Voice recognition not supported. Try Chrome.'); return; }
+    if (!SR) return;
     if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} }
     const rec = new SR();
     rec.continuous = false;
@@ -130,30 +96,26 @@ export default function VoiceCall() {
       setPartial(interim);
       if (final.trim()) { setPartial(''); sendToAI(final.trim()); }
     };
-    rec.onerror = (e: any) => { if (e.error !== 'no-speech' && e.error !== 'aborted') console.warn('SR error', e.error); };
     rec.onend = () => {
-      if (statusRef.current === 'listening' && !muted && recognitionRef.current === rec) {
+      if (statusRef.current === 'listening' && recognitionRef.current === rec) {
         try { rec.start(); } catch {}
       }
     };
     recognitionRef.current = rec;
     try { rec.start(); } catch {}
-  }, [sendToAI, muted]);
+  }, [sendToAI]);
 
   const startCall = async () => {
     try { await navigator.mediaDevices.getUserMedia({ audio: true }); }
     catch { toast.error('Microphone permission required.'); return; }
     setStatus('connecting');
-    setCallStart(Date.now());
-    setElapsed(0);
     setTurns([]);
     setTimeout(() => {
-      const greeting = "Hey there! It's Zyra. How's the store doing today — anything you wanna chat about?";
-      const aiTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'assistant', content: greeting, at: Date.now() };
-      setTurns([aiTurn]);
+      const greeting = "Hey there! It's Zyra. How's your store doing today — anything you want to chat about?";
+      setTurns([{ id: crypto.randomUUID(), role: 'assistant', content: greeting }]);
       setStatus('speaking');
       speak(greeting);
-    }, 600);
+    }, 400);
   };
 
   const endCall = () => {
@@ -161,15 +123,45 @@ export default function VoiceCall() {
     if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} }
     if (audioRef.current) { try { audioRef.current.pause(); } catch {} }
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    navigate(-1);
   };
 
-  const toggleMute = () => {
-    setMuted(m => {
-      const next = !m;
-      if (next && recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} }
-      else if (!next && status === 'listening') startListening();
-      return next;
-    });
+  // Press-and-hold style mic button via input bar
+  const toggleManualRecording = () => {
+    const w = window as AnyWindow;
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SR) { toast.error('Voice input not supported. Try Chrome.'); return; }
+    if (isRecording) { try { recognitionRef.current?.stop(); } catch {}; setIsRecording(false); return; }
+    const rec = new SR();
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    let finalText = '';
+    rec.onresult = (e: any) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      setText(prev => (finalText ? finalText : prev) + (interim ? ' ' + interim : ''));
+    };
+    rec.onend = () => setIsRecording(false);
+    recognitionRef.current = rec;
+    try { rec.start(); setIsRecording(true); } catch { setIsRecording(false); }
+  };
+
+  const submitText = () => {
+    const t = text.trim();
+    if (!t) return;
+    setText('');
+    if (status === 'idle' || status === 'ended') {
+      // Auto-start the call context
+      setStatus('processing');
+      setTurns([]);
+      setTimeout(() => sendToAI(t), 50);
+    } else {
+      sendToAI(t);
+    }
   };
 
   useEffect(() => () => {
@@ -178,244 +170,135 @@ export default function VoiceCall() {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
 
-  const userTurns = turns.filter(t => t.role === 'user');
-  const fmtTime = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-
+  const isSpeaking = status === 'speaking';
   const isActive = status !== 'idle' && status !== 'ended';
-  const statusLabel = {
-    idle: 'Tap to call', connecting: 'Connecting…', listening: 'Listening…',
-    processing: 'Thinking…', speaking: 'Speaking…', ended: 'Call ended',
-  }[status];
+
+  // Display text at top: latest assistant reply, or status hint
+  const topText = lastAssistant?.content
+    || (status === 'idle' ? 'Tap start to talk with Zyra' : status === 'connecting' ? 'Connecting…' : '');
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[radial-gradient(ellipse_at_top,#1a0b3d_0%,#0a0518_50%,#000000_100%)] text-white">
-      {/* Animated ambient orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-purple-600/20 blur-[120px] animate-pulse" />
-        <div className="absolute top-1/3 -right-40 h-[400px] w-[400px] rounded-full bg-indigo-600/20 blur-[120px] animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute -bottom-40 left-1/3 h-[450px] w-[450px] rounded-full bg-fuchsia-600/15 blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-
-      {/* Top bar */}
-      <div className="relative container max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
-          <ArrowLeft className="h-4 w-4" /> Back
-        </Button>
-        <div className="flex items-center gap-2 text-sm text-white/70">
-          <Sparkles className="h-4 w-4 text-fuchsia-400" />
-          Zyra · Voice Call
-        </div>
-      </div>
-
-      <div className="relative container max-w-6xl mx-auto px-4 grid lg:grid-cols-[1fr_380px] gap-6 pb-10">
-        {/* Call screen */}
-        <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 flex flex-col items-center justify-between min-h-[70vh] shadow-[0_8px_60px_-12px_rgba(124,58,237,0.4)]">
-          <div className="text-center space-y-1.5">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Zyra</p>
-            <p className="text-sm text-white/70">{statusLabel}</p>
-            {callStart && (
-              <p className="text-3xl font-mono font-light text-white tabular-nums mt-2 flex items-center justify-center gap-2">
-                <span className={cn('h-2 w-2 rounded-full bg-emerald-400', isActive && 'animate-pulse')} />
-                {fmtTime(elapsed)}
-              </p>
-            )}
-          </div>
-
-          {/* Avatar with pulsing rings */}
-          <div className="relative my-10 flex items-center justify-center">
-            {/* Outer pulsing rings */}
-            {isActive && (
-              <>
-                <span className="absolute h-[280px] w-[280px] rounded-full border border-fuchsia-400/30 animate-ping" style={{ animationDuration: '2.5s' }} />
-                <span className="absolute h-[340px] w-[340px] rounded-full border border-purple-400/20 animate-ping" style={{ animationDuration: '3s', animationDelay: '0.4s' }} />
-                <span className="absolute h-[400px] w-[400px] rounded-full border border-indigo-400/10 animate-ping" style={{ animationDuration: '3.5s', animationDelay: '0.8s' }} />
-              </>
-            )}
-
-            {/* Sound wave bars (when speaking) */}
-            {status === 'speaking' && (
-              <div className="absolute -bottom-10 flex items-end gap-1 h-10">
-                {[...Array(7)].map((_, i) => (
-                  <span
-                    key={i}
-                    className="w-1 rounded-full bg-gradient-to-t from-fuchsia-500 to-purple-300"
-                    style={{
-                      animation: `wave 1s ease-in-out ${i * 0.1}s infinite`,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Main orb */}
-            <div className={cn(
-              'relative h-56 w-56 rounded-full bg-gradient-to-br shadow-[0_0_80px_-10px_rgba(217,70,239,0.6)] transition-all duration-700',
-              status === 'speaking' && 'from-fuchsia-400 via-purple-500 to-indigo-600 scale-105',
-              status === 'listening' && 'from-emerald-400 via-teal-500 to-cyan-600',
-              status === 'processing' && 'from-amber-400 via-orange-500 to-rose-500',
-              (status === 'idle' || status === 'ended') && 'from-purple-500/60 via-fuchsia-500/60 to-indigo-600/60',
-              status === 'connecting' && 'from-purple-400 to-indigo-600 animate-pulse',
-            )}>
-              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-white/10 to-transparent" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles className="h-20 w-20 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Live transcript */}
-          <div className="w-full max-w-md text-center min-h-[60px]">
-            {partial && <p className="text-sm text-white/60 italic">"{partial}"</p>}
-            {!partial && turns.length > 0 && (
-              <p className="text-sm text-white/85 line-clamp-3 leading-relaxed">
-                {turns[turns.length - 1].role === 'assistant' ? '🤖 ' : '🗣️ '}
-                {turns[turns.length - 1].content}
-              </p>
-            )}
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center gap-4 mt-8">
-            {status === 'idle' || status === 'ended' ? (
-              <button
-                onClick={startCall}
-                className="relative group"
-              >
-                <span className="absolute -inset-2 rounded-full bg-gradient-to-r from-emerald-400 via-fuchsia-500 to-purple-500 opacity-75 blur-lg group-hover:opacity-100 group-hover:blur-xl transition-all animate-pulse" />
-                <span className="relative flex items-center gap-3 rounded-full bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 px-10 h-16 font-semibold text-white shadow-[0_0_30px_rgba(16,185,129,0.5)] hover:scale-105 transition-transform">
-                  <Phone className="h-5 w-5" />
-                  {status === 'ended' ? 'Call Again' : 'Start Call'}
-                </span>
-              </button>
-            ) : (
-              <>
-                <Button size="icon" onClick={toggleMute}
-                  className={cn('h-14 w-14 rounded-full backdrop-blur-md border border-white/20',
-                    muted ? 'bg-rose-500/80 hover:bg-rose-500' : 'bg-white/10 hover:bg-white/20 text-white')}
-                  title={muted ? 'Unmute' : 'Mute'}>
-                  {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                </Button>
-                <button onClick={endCall} className="relative group" title="End call">
-                  <span className="absolute -inset-1 rounded-full bg-rose-500 opacity-75 blur-md group-hover:opacity-100" />
-                  <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-red-600 shadow-[0_0_25px_rgba(244,63,94,0.6)] hover:scale-110 transition-transform">
-                    <PhoneOff className="h-6 w-6 text-white" />
-                  </span>
-                </button>
-                <Button size="icon" onClick={() => setSilentMode(s => !s)}
-                  className="h-14 w-14 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20"
-                  title={silentMode ? 'Enable AI voice' : 'Mute AI voice'}>
-                  {silentMode ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Insights panel — REAL store data */}
-        <div className="space-y-4">
-          <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-fuchsia-400" />
-              <h3 className="font-semibold text-white">Live Store Insights</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <DarkStat icon={DollarSign} label="Revenue (30d)" value={fmtMoney(stats.revenue30d)} color="emerald" />
-              <DarkStat icon={Star} label="Net Profit" value={fmtMoney(stats.netProfit30d)} color="amber" />
-              <DarkStat icon={ShoppingBag} label="Orders" value={String(stats.orders)} color="fuchsia" />
-              <DarkStat icon={Eye} label="Store Views" value={stats.views30d.toLocaleString()} color="indigo" />
-            </div>
-            <div className="mt-3 rounded-xl bg-gradient-to-br from-fuchsia-500/10 to-purple-500/10 border border-fuchsia-400/20 p-3">
-              <p className="text-[10px] uppercase tracking-wide text-white/50">Top product</p>
-              <p className="text-sm font-semibold text-white mt-0.5">{stats.topProduct.name}</p>
-              <p className="text-xs text-white/60 mt-0.5">
-                {fmtMoney(stats.topProduct.revenue)} · {stats.topProduct.units} units
-              </p>
-            </div>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-lg bg-white/5 border border-white/10 p-2">
-                <span className="text-white/50">Conversion</span>
-                <p className="font-semibold text-white">{stats.conversion}%</p>
-              </div>
-              <div className="rounded-lg bg-white/5 border border-white/10 p-2">
-                <span className="text-white/50">Avg order</span>
-                <p className="font-semibold text-white">{fmtMoney(stats.avgOrderValue)}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="h-4 w-4 text-emerald-400" />
-              <h3 className="font-semibold text-sm text-white">Call activity</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-lg bg-white/5 p-2">
-                <span className="text-white/50">Duration</span>
-                <p className="font-mono text-white">{fmtTime(elapsed)}</p>
-              </div>
-              <div className="rounded-lg bg-white/5 p-2">
-                <span className="text-white/50">Turns</span>
-                <p className="font-semibold text-white flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {turns.length}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-5 max-h-[35vh] overflow-y-auto">
-            <h3 className="font-semibold mb-3 text-sm text-white">Conversation log</h3>
-            {turns.length === 0 ? (
-              <p className="text-xs text-white/40">Start a call to see the live transcript.</p>
-            ) : (
-              <div className="space-y-3">
-                {turns.map(t => (
-                  <div key={t.id} className="text-sm">
-                    <span className={cn('text-[10px] uppercase tracking-wide block mb-0.5',
-                      t.role === 'user' ? 'text-emerald-300/70' : 'text-fuchsia-300/70')}>
-                      {t.role === 'user' ? 'You' : 'Zyra'}
-                    </span>
-                    <span className="text-white/90">{t.content}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {status === 'ended' && turns.length > 1 && (
-            <div className="rounded-2xl bg-gradient-to-br from-emerald-500/15 to-fuchsia-500/15 backdrop-blur-xl border border-fuchsia-400/30 p-5">
-              <h3 className="font-semibold mb-2 flex items-center gap-2 text-white">
-                <Sparkles className="h-4 w-4 text-emerald-300" /> Call Summary
-              </h3>
-              <p className="text-sm text-white/80 leading-relaxed">
-                {fmtTime(elapsed)} call · {turns.length} turns · you asked {userTurns.length} question{userTurns.length === 1 ? '' : 's'}.
-                Discussed your {fmtMoney(stats.revenue30d)} in 30-day revenue and top product "{stats.topProduct.name}".
-              </p>
-            </div>
+    <div className="fixed inset-0 bg-white text-neutral-900 flex flex-col overflow-hidden">
+      {/* Top: AI response text */}
+      <div className="flex-1 flex items-start justify-center pt-16 px-6 overflow-y-auto">
+        <div className="max-w-2xl w-full text-center">
+          {partial && (
+            <p className="text-sm text-neutral-400 italic mb-4">"{partial}"</p>
+          )}
+          <p className="text-2xl md:text-3xl leading-relaxed font-light text-neutral-900 tracking-tight">
+            {topText}
+          </p>
+          {status === 'processing' && (
+            <p className="text-sm text-neutral-400 mt-6 animate-pulse">Thinking…</p>
+          )}
+          {status === 'listening' && !partial && (
+            <p className="text-sm text-neutral-400 mt-6">Listening…</p>
           )}
         </div>
       </div>
 
-      <style>{`
-        @keyframes wave {
-          0%, 100% { height: 6px; }
-          50% { height: 32px; }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function DarkStat({ icon: Icon, label, value, color }: { icon: any; label: string; value: string; color: string }) {
-  const colorMap: Record<string, string> = {
-    emerald: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/20',
-    amber: 'text-amber-300 bg-amber-500/10 border-amber-400/20',
-    fuchsia: 'text-fuchsia-300 bg-fuchsia-500/10 border-fuchsia-400/20',
-    indigo: 'text-indigo-300 bg-indigo-500/10 border-indigo-400/20',
-  };
-  return (
-    <div className={cn('rounded-xl border p-3', colorMap[color])}>
-      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide opacity-80 mb-1">
-        <Icon className="h-3.5 w-3.5" /> {label}
+      {/* Center-bottom: animated blob */}
+      <div className="flex flex-col items-center justify-center pb-2">
+        {status === 'idle' || status === 'ended' ? (
+          <button
+            onClick={startCall}
+            className="relative mb-8 group"
+            aria-label="Start call"
+          >
+            <span className="absolute -inset-6 rounded-full bg-violet-400/30 blur-2xl group-hover:bg-violet-400/50 transition-colors" />
+            <span
+              className="relative block h-44 w-44 bg-[radial-gradient(circle_at_30%_30%,#c4b5fd,#7c3aed_55%,#4c1d95)] shadow-[0_20px_60px_-15px_rgba(124,58,237,0.6)]"
+              style={{ animation: 'zyra-blob 4s ease-in-out infinite, zyra-blob-float 5s ease-in-out infinite' }}
+            />
+            <span
+              className="absolute inset-6 bg-[radial-gradient(circle_at_70%_60%,rgba(255,255,255,0.6),transparent_60%)] pointer-events-none"
+              style={{ animation: 'zyra-blob 4s ease-in-out infinite reverse' }}
+            />
+          </button>
+        ) : (
+          <div className="relative mb-8">
+            <span className={cn(
+              'absolute -inset-8 rounded-full blur-3xl transition-colors',
+              isSpeaking ? 'bg-violet-500/40' : 'bg-violet-400/20',
+            )} />
+            <span
+              className={cn(
+                'relative block h-44 w-44 bg-[radial-gradient(circle_at_30%_30%,#c4b5fd,#7c3aed_55%,#4c1d95)] shadow-[0_20px_60px_-15px_rgba(124,58,237,0.7)]',
+              )}
+              style={{
+                animation: isSpeaking
+                  ? 'zyra-blob-speak 1.2s ease-in-out infinite, zyra-blob-float 3s ease-in-out infinite'
+                  : 'zyra-blob 4s ease-in-out infinite, zyra-blob-float 5s ease-in-out infinite',
+              }}
+            />
+            <span
+              className="absolute inset-6 bg-[radial-gradient(circle_at_70%_60%,rgba(255,255,255,0.6),transparent_60%)] pointer-events-none"
+              style={{ animation: 'zyra-blob 4s ease-in-out infinite reverse' }}
+            />
+          </div>
+        )}
       </div>
-      <div className="text-lg font-bold text-white tabular-nums">{value}</div>
+
+      {/* Bottom: text input bar + end call */}
+      <div className="px-4 pb-6 pt-2">
+        <div className="max-w-2xl mx-auto flex items-center gap-3">
+          <div className="flex-1 flex items-center gap-2 bg-neutral-100 rounded-full pl-2 pr-2 h-14 border border-neutral-200">
+            <button
+              type="button"
+              className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors"
+              title="More"
+              aria-label="More"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitText(); } }}
+              placeholder="Message"
+              className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-neutral-400 text-neutral-900"
+              dir="auto"
+            />
+            {text.trim() ? (
+              <button
+                onClick={submitText}
+                className="h-10 w-10 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors"
+                aria-label="Send"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                onClick={toggleManualRecording}
+                className={cn(
+                  'h-10 w-10 rounded-full flex items-center justify-center transition-all',
+                  isRecording
+                    ? 'bg-violet-600 text-white animate-pulse'
+                    : 'text-neutral-700 hover:bg-neutral-200'
+                )}
+                aria-label={isRecording ? 'Stop recording' : 'Record voice'}
+                title={isRecording ? 'Stop recording' : 'Voice input'}
+              >
+                {isRecording ? <Square className="h-4 w-4 fill-current" /> : <Mic className="h-5 w-5" />}
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={endCall}
+            className="h-14 w-14 rounded-full bg-neutral-900 text-white flex items-center justify-center hover:bg-neutral-800 transition-colors shadow-lg"
+            aria-label="End call"
+            title="End call"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {isActive && (
+          <p className="text-center text-[11px] text-neutral-400 mt-3">
+            {status === 'speaking' ? 'Zyra is speaking…' : status === 'listening' ? 'Listening — just speak' : ''}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
