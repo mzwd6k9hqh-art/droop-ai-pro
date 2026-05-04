@@ -17,9 +17,11 @@ export default function VoiceCall() {
   const [partial, setPartial] = useState('');
   const [text, setText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ preview: string; base64: string } | null>(null);
 
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const turnsRef = useRef<VoiceTurn[]>([]);
   const statusRef = useRef<CallStatus>('idle');
   turnsRef.current = turns;
@@ -66,14 +68,25 @@ export default function VoiceCall() {
     }
   }, [browserSpeak]);
 
-  const sendToAI = useCallback(async (userText: string) => {
+  const sendToAI = useCallback(async (userText: string, imageBase64?: string) => {
     setStatus('processing');
-    const userTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'user', content: userText };
+    const displayContent = imageBase64 ? `🖼️ ${userText || 'What do you think?'}` : userText;
+    const userTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'user', content: displayContent };
     setTurns(prev => [...prev, userTurn]);
-    const history = [...turnsRef.current, userTurn].map(t => ({ role: t.role, content: t.content }));
+
+    // Build API messages — most are plain text, but the latest may include an image
+    const history = turnsRef.current.map(t => ({ role: t.role, content: t.content }));
+    const latestContent: any = imageBase64
+      ? [
+          { type: 'text', text: userText || 'What do you see in this image?' },
+          { type: 'image_url', image_url: { url: imageBase64 } },
+        ]
+      : userText;
+    const apiMessages = [...history, { role: 'user', content: latestContent }];
+
     try {
       const { data, error } = await supabase.functions.invoke('voice-chat', {
-        body: { messages: history, storeContext: stats },
+        body: { messages: apiMessages, storeContext: stats },
       });
       if (error) throw error;
       const reply = data?.reply || "Sorry, I didn't catch that.";
@@ -160,16 +173,31 @@ export default function VoiceCall() {
 
   const submitText = () => {
     const t = text.trim();
-    if (!t) return;
+    const img = pendingImage;
+    if (!t && !img) return;
     setText('');
+    setPendingImage(null);
     if (status === 'idle' || status === 'ended') {
-      // Auto-start the call context
       setStatus('processing');
       setTurns([]);
-      setTimeout(() => sendToAI(t), 50);
+      setTimeout(() => sendToAI(t || 'Take a look at this image', img?.base64), 50);
     } else {
-      sendToAI(t);
+      sendToAI(t || 'Take a look at this image', img?.base64);
     }
+  };
+
+  const handleImagePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('Image too large (max 10MB)'); return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      setPendingImage({ preview: base64, base64 });
+      toast.success('Image attached — add a message or send');
+    };
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => () => {
@@ -249,13 +277,36 @@ export default function VoiceCall() {
 
       {/* Bottom: text input bar + end call */}
       <div className="px-4 pb-6 pt-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImagePicked}
+        />
+        {pendingImage && (
+          <div className="max-w-2xl mx-auto mb-2 flex items-center gap-2">
+            <div className="relative">
+              <img src={pendingImage.preview} alt="attached" className="h-16 w-16 rounded-xl object-cover border border-neutral-200" />
+              <button
+                onClick={() => setPendingImage(null)}
+                className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-neutral-900 text-white flex items-center justify-center"
+                aria-label="Remove image"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+            <span className="text-xs text-neutral-500">Image ready — add a message or tap send.</span>
+          </div>
+        )}
         <div className="max-w-2xl mx-auto flex items-center gap-3">
           <div className="flex-1 flex items-center gap-2 bg-neutral-100 rounded-full pl-2 pr-2 h-14 border border-neutral-200">
             <button
               type="button"
+              onClick={() => fileInputRef.current?.click()}
               className="h-10 w-10 rounded-full flex items-center justify-center text-neutral-600 hover:bg-neutral-200 transition-colors"
-              title="More"
-              aria-label="More"
+              title="Send an image"
+              aria-label="Send an image"
             >
               <Plus className="h-5 w-5" />
             </button>
@@ -263,11 +314,11 @@ export default function VoiceCall() {
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitText(); } }}
-              placeholder="Message"
+              placeholder={pendingImage ? 'Add a message about the image…' : 'Message'}
               className="flex-1 bg-transparent outline-none text-[15px] placeholder:text-neutral-400 text-neutral-900"
               dir="auto"
             />
-            {text.trim() ? (
+            {(text.trim() || pendingImage) ? (
               <button
                 onClick={submitText}
                 className="h-10 w-10 rounded-full bg-violet-600 text-white flex items-center justify-center hover:bg-violet-700 transition-colors"
