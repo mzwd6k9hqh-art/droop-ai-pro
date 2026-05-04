@@ -148,7 +148,7 @@ export default function VoiceCall() {
     setElapsed(0);
     setTurns([]);
     setTimeout(() => {
-      const greeting = "Hey there! It's DROOB. How's the store doing today — anything you wanna chat about?";
+      const greeting = "Hey there! It's Zyra. How's the store doing today — anything you wanna chat about?";
       const aiTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'assistant', content: greeting, at: Date.now() };
       setTurns([aiTurn]);
       setStatus('speaking');
@@ -203,7 +203,7 @@ export default function VoiceCall() {
         </Button>
         <div className="flex items-center gap-2 text-sm text-white/70">
           <Sparkles className="h-4 w-4 text-fuchsia-400" />
-          DROOB AI · Voice Call
+          Zyra · Voice Call
         </div>
       </div>
 
@@ -211,7 +211,7 @@ export default function VoiceCall() {
         {/* Call screen */}
         <div className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 flex flex-col items-center justify-between min-h-[70vh] shadow-[0_8px_60px_-12px_rgba(124,58,237,0.4)]">
           <div className="text-center space-y-1.5">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">DROOB AI</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Zyra</p>
             <p className="text-sm text-white/70">{statusLabel}</p>
             {callStart && (
               <p className="text-3xl font-mono font-light text-white tabular-nums mt-2 flex items-center justify-center gap-2">
@@ -370,7 +370,7 @@ export default function VoiceCall() {
                   <div key={t.id} className="text-sm">
                     <span className={cn('text-[10px] uppercase tracking-wide block mb-0.5',
                       t.role === 'user' ? 'text-emerald-300/70' : 'text-fuchsia-300/70')}>
-                      {t.role === 'user' ? 'You' : 'DROOB AI'}
+                      {t.role === 'user' ? 'You' : 'Zyra'}
                     </span>
                     <span className="text-white/90">{t.content}</span>
                   </div>

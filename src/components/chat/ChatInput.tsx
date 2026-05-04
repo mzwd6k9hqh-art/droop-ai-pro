@@ -131,7 +131,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask DROOB AI anything..."
+                placeholder="Ask Zyra anything..."
                 disabled={disabled}
                 rows={1}
                 className={cn(
@@ -198,7 +198,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
                   'shadow-[0_0_18px_-4px_hsl(158_64%_45%/0.6)] hover:shadow-[0_0_24px_-2px_hsl(158_64%_45%/0.8)]',
                   'transition-all duration-200 hover:scale-105'
                 )}
-                title="Start voice call with DROOB AI"
+                title="Start voice call with Zyra"
                 onClick={() => navigate('/voice-call')}
               >
                 <PhoneCall className="h-[18px] w-[18px]" />
@@ -222,7 +222,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground/50 text-center mt-2.5">
-        DROOB AI can make mistakes. Verify important information.
+        Zyra can make mistakes. Verify important information.
       </p>
     </div>
   );

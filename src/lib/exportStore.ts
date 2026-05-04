@@ -167,7 +167,7 @@ ${faq.length ? `<section class="section" id="faq">
     <div class="logo">${storeName}</div>
     <p style="color:#94a3b8;margin-top:8px">${description}</p>
     ${socialLinks ? `<div class="social">${socialLinks}</div>` : ''}
-    <p class="copy">© ${new Date().getFullYear()} ${storeName}. جميع الحقوق محفوظة. — صُنع بواسطة DROOB AI</p>
+    <p class="copy">© ${new Date().getFullYear()} ${storeName}. جميع الحقوق محفوظة. — صُنع بواسطة Zyra</p>
   </div>
 </footer>
 </body>

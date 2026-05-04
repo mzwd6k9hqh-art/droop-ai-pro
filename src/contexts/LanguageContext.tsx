@@ -14,7 +14,7 @@ const translations: Translations = {
   // Navigation
   'nav.dashboard': { en: 'Dashboard', ar: 'لوحة التحكم', fr: 'Tableau de bord' },
   'nav.analytics': { en: 'Analytics', ar: 'التحليلات', fr: 'Analytique' },
-  'nav.droopai': { en: 'DROOB AI', ar: 'دروب AI', fr: 'DROOB AI' },
+  'nav.droopai': { en: 'Zyra', ar: 'دروب AI', fr: 'Zyra' },
   'nav.pricing': { en: 'Pricing', ar: 'الأسعار', fr: 'Tarification' },
   'nav.settings': { en: 'Settings', ar: 'الإعدادات', fr: 'Paramètres' },
   'nav.logout': { en: 'Logout', ar: 'تسجيل الخروج', fr: 'Déconnexion' },
@@ -33,8 +33,8 @@ const translations: Translations = {
   'analytics.conversions': { en: 'Conversion Suggestions', ar: 'اقتراحات التحويل', fr: 'Suggestions de conversion' },
   
   // AI Chat
-  'ai.title': { en: 'DROOB AI Assistant', ar: 'مساعد دروب AI', fr: 'Assistant DROOB AI' },
-  'ai.placeholder': { en: 'Ask DROOB AI about business strategies...', ar: 'اسأل دروب AI عن استراتيجيات العمل...', fr: 'Demandez à DROOB AI des stratégies commerciales...' },
+  'ai.title': { en: 'Zyra Assistant', ar: 'مساعد دروب AI', fr: 'Assistant Zyra' },
+  'ai.placeholder': { en: 'Ask Zyra about business strategies...', ar: 'اسأل دروب AI عن استراتيجيات العمل...', fr: 'Demandez à Zyra des stratégies commerciales...' },
   'ai.remaining': { en: 'messages remaining', ar: 'رسائل متبقية', fr: 'messages restants' },
   'ai.limit': { en: 'Message limit reached', ar: 'تم الوصول للحد الأقصى', fr: 'Limite de messages atteinte' },
   'ai.upgrade': { en: 'Upgrade to continue chatting', ar: 'قم بالترقية للمتابعة', fr: 'Mettez à niveau pour continuer' },
