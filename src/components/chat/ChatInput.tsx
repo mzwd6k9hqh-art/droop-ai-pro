@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, ImagePlus, X, Film, Pencil, PhoneCall, Mic, Square } from 'lucide-react';
+import { Send, ImagePlus, X, Film, Pencil, Mic, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -186,23 +186,17 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
               >
                 {isRecording ? <Square className="h-[16px] w-[16px] fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
               </Button>
-              <Button
+              {/* Voice call — animated purple/violet blob */}
+              <button
                 type="button"
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  'h-10 w-10 rounded-full relative',
-                  'bg-gradient-to-br from-emerald-400/20 to-emerald-600/20 hover:from-emerald-400/30 hover:to-emerald-600/30',
-                  'border border-emerald-500/40 hover:border-emerald-500/60',
-                  'text-emerald-600 dark:text-emerald-400',
-                  'shadow-[0_0_18px_-4px_hsl(158_64%_45%/0.6)] hover:shadow-[0_0_24px_-2px_hsl(158_64%_45%/0.8)]',
-                  'transition-all duration-200 hover:scale-105'
-                )}
                 title="Start voice call with Zyra"
                 onClick={() => navigate('/voice-call')}
+                className="relative h-10 w-10 rounded-full flex items-center justify-center group/blob transition-transform hover:scale-110"
               >
-                <PhoneCall className="h-[18px] w-[18px]" />
-              </Button>
+                <span className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_30%_30%,#a78bfa,#7c3aed_55%,#4c1d95)] shadow-[0_0_18px_-2px_rgba(124,58,237,0.7)] animate-[zyra-blob_4s_ease-in-out_infinite]" />
+                <span className="absolute inset-[3px] rounded-full bg-[radial-gradient(circle_at_70%_60%,rgba(255,255,255,0.5),transparent_55%)]" />
+                <span className="absolute -inset-1 rounded-full bg-violet-500/40 blur-md opacity-60 group-hover/blob:opacity-100 transition-opacity animate-pulse" />
+              </button>
               {/* Send — glowing gradient when active */}
               <Button
                 onClick={onSubmit}
