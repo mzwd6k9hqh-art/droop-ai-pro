@@ -451,3 +451,21 @@
     to { opacity: 1; transform: scale(1); }
   }
 }
+
+@keyframes zyra-blob {
+  0%, 100% { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; transform: scale(1) rotate(0deg); }
+  33%      { border-radius: 60% 40% 55% 45% / 45% 55% 45% 55%; transform: scale(1.06) rotate(8deg); }
+  66%      { border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; transform: scale(0.97) rotate(-6deg); }
+}
+
+@keyframes zyra-blob-speak {
+  0%, 100% { border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%; transform: scale(1); }
+  25%      { border-radius: 50% 50% 60% 40% / 60% 40% 50% 50%; transform: scale(1.12); }
+  50%      { border-radius: 40% 60% 45% 55% / 50% 55% 45% 50%; transform: scale(0.95); }
+  75%      { border-radius: 55% 45% 55% 45% / 45% 50% 55% 50%; transform: scale(1.08); }
+}
+
+@keyframes zyra-blob-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}

@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY missing');
 
-    const systemPrompt = `You are DROOB AI, a friendly voice assistant for an e-commerce store owner.
+    const systemPrompt = `You are Zyra, a friendly voice assistant for an e-commerce store owner.
 Speak naturally — short, warm, conversational sentences (2-3 sentences max per reply, no markdown, no bullet lists).
 You're on a live voice call, so avoid lists, code, or emoji. Be encouraging and proactive.
 ${storeContext ? `Store context: ${JSON.stringify(storeContext).slice(0, 500)}` : ''}`;

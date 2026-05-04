@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Auth removed — auto-provision a guest user so the app is accessible without login
-    const GUEST_EMAIL = 'guest@droob.local';
+    const GUEST_EMAIL = 'guest@zyra.local';
     const users = getUsers();
     let userData = users[GUEST_EMAIL];
     if (!userData) {

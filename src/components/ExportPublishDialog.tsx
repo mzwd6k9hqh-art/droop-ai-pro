@@ -31,7 +31,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     .trim()
     .replace(/\s+/g, '-')
     .toLowerCase() || 'my-store';
-  const freeUrl = `https://${baseSlug}.droob.store`;
+  const freeUrl = `https://${baseSlug}.zyra.store`;
 
   const handleDownload = () => {
     downloadStoreHTML(config);

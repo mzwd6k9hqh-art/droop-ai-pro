@@ -271,7 +271,7 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
           </div>
         )}
         <p className="text-xs text-gray-500 text-center">
-          {storeConfig?.footerText || `Designed by DROOB AI • ${storeName}`}
+          {storeConfig?.footerText || `Designed by Zyra • ${storeName}`}
         </p>
         {/* Policies */}
         {storeConfig?.policies && (

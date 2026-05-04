@@ -67,7 +67,7 @@ export function Header() {
               <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-white/80" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-white leading-tight">DROOB AI</span>
+              <span className="text-lg font-bold tracking-tight text-white leading-tight">Zyra</span>
               <span className="text-[10px] text-white/60 leading-none">Sales Booster</span>
             </div>
           </Link>
