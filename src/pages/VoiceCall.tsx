@@ -68,14 +68,25 @@ export default function VoiceCall() {
     }
   }, [browserSpeak]);
 
-  const sendToAI = useCallback(async (userText: string) => {
+  const sendToAI = useCallback(async (userText: string, imageBase64?: string) => {
     setStatus('processing');
-    const userTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'user', content: userText };
+    const displayContent = imageBase64 ? `🖼️ ${userText || 'What do you think?'}` : userText;
+    const userTurn: VoiceTurn = { id: crypto.randomUUID(), role: 'user', content: displayContent };
     setTurns(prev => [...prev, userTurn]);
-    const history = [...turnsRef.current, userTurn].map(t => ({ role: t.role, content: t.content }));
+
+    // Build API messages — most are plain text, but the latest may include an image
+    const history = turnsRef.current.map(t => ({ role: t.role, content: t.content }));
+    const latestContent: any = imageBase64
+      ? [
+          { type: 'text', text: userText || 'What do you see in this image?' },
+          { type: 'image_url', image_url: { url: imageBase64 } },
+        ]
+      : userText;
+    const apiMessages = [...history, { role: 'user', content: latestContent }];
+
     try {
       const { data, error } = await supabase.functions.invoke('voice-chat', {
-        body: { messages: history, storeContext: stats },
+        body: { messages: apiMessages, storeContext: stats },
       });
       if (error) throw error;
       const reply = data?.reply || "Sorry, I didn't catch that.";
