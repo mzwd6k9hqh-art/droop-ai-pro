@@ -28,6 +28,20 @@ export default function VoiceCall() {
   const stats = getStoreStats();
   const lastAssistant = [...turns].reverse().find(t => t.role === 'assistant');
 
+  const browserSpeak = useCallback((textToSay: string) => {
+    try {
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(textToSay);
+      u.rate = 1.02;
+      u.pitch = 1;
+      u.onend = () => { if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); } };
+      synth.speak(u);
+    } catch {
+      setStatus('listening'); startListening();
+    }
+  }, []);
+
   const speak = useCallback(async (textToSay: string) => {
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch {}
@@ -35,28 +49,22 @@ export default function VoiceCall() {
     }
     try {
       const { data, error } = await supabase.functions.invoke('voice-tts', { body: { text: textToSay } });
-      if (error) throw error;
+      if (error || !data?.audioContent) {
+        // Edge function unavailable OR ElevenLabs flagged free tier — fall back to browser TTS
+        browserSpeak(textToSay);
+        return;
+      }
       const audio = new Audio(`data:audio/mpeg;base64,${data.audioContent}`);
       audioRef.current = audio;
       audio.onended = () => {
         if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); }
       };
-      audio.onerror = () => {
-        if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); }
-      };
+      audio.onerror = () => browserSpeak(textToSay);
       await audio.play();
     } catch {
-      try {
-        const synth = window.speechSynthesis;
-        synth.cancel();
-        const u = new SpeechSynthesisUtterance(textToSay);
-        u.onend = () => { if (statusRef.current !== 'ended') { setStatus('listening'); startListening(); } };
-        synth.speak(u);
-      } catch {
-        setStatus('listening'); startListening();
-      }
+      browserSpeak(textToSay);
     }
-  }, []);
+  }, [browserSpeak]);
 
   const sendToAI = useCallback(async (userText: string) => {
     setStatus('processing');

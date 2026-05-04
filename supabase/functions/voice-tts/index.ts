@@ -52,10 +52,12 @@ Deno.serve(async (req) => {
     if (!resp.ok) {
       const err = await resp.text();
       console.error('ElevenLabs error', resp.status, err);
-      return new Response(JSON.stringify({ error: err || 'TTS failed' }), {
-        status: resp.status,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      // Return 200 with fallback flag so the client gracefully uses browser TTS
+      // instead of throwing a FunctionsHttpError. Common case: free-tier abuse-detector lockout.
+      return new Response(
+        JSON.stringify({ fallback: true, reason: err || `TTS failed (${resp.status})` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const audioBuf = await resp.arrayBuffer();
