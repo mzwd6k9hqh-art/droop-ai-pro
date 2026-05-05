@@ -279,7 +279,7 @@ export default function Pricing() {
                   !plan.highlight && 'gradient-button'
                 )}
               >
-                {isCurrent ? t('pricing.current') : t('pricing.upgrade')}
+                {isCurrent ? 'Current Plan' : 'Upgrade Now'}
               </Button>
             </div>
           );
