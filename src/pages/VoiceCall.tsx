@@ -302,7 +302,7 @@ export default function VoiceCall() {
           </div>
         )}
         <div className="max-w-2xl mx-auto flex items-center gap-3">
-          <div className="flex-1 flex items-center gap-2 bg-neutral-100 rounded-full pl-2 pr-2 h-14 border border-neutral-200">
+          <div className="flex-1 flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full pl-2 pr-2 h-14 border border-white/15 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
