@@ -136,8 +136,9 @@ ${storeContext.description ? `- Description: ${storeContext.description}` : ''}
 Welcome them and present a store design concept with layout, categories, colors, and first steps. IMPORTANT: Call the modify_store function to set up the initial store design with appropriate products, colors, and layout based on their preferences.`;
         }
 
+        const lang = localStorage.getItem('salesbooster_language') || 'en';
         const { data, error } = await supabase.functions.invoke('ai-chat', {
-          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '' },
+          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '', language: lang },
         });
         if (error) throw error;
 
@@ -273,10 +274,12 @@ Welcome them and present a store design concept with layout, categories, colors,
         { role: 'user' as const, content: currentMessageContent },
       ];
 
+      const lang = localStorage.getItem('salesbooster_language') || 'en';
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           messages: allMessages,
           storeUrl: storeContext?.storeUrl || '',
+          language: lang,
         },
       });
 

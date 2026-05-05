@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { messages, storeContext } = await req.json();
+    const { messages, storeContext, language } = await req.json();
     if (!Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'messages must be an array' }), {
         status: 400,
@@ -28,9 +28,11 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY missing');
 
+    const lang = language === 'ar' ? 'Arabic' : language === 'fr' ? 'French' : 'English';
     const systemPrompt = `You are Zyra, a friendly voice assistant for an e-commerce store owner.
 Speak naturally — short, warm, conversational sentences (2-3 sentences max per reply, no markdown, no bullet lists).
 You're on a live voice call, so avoid lists, code, or emoji. Be encouraging and proactive.
+LANGUAGE: You MUST reply only in ${lang}.
 ${storeContext ? `Store context: ${JSON.stringify(storeContext).slice(0, 500)}` : ''}`;
 
     const aiResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

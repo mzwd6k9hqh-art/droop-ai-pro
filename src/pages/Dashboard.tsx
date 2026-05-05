@@ -115,30 +115,39 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Store Context Banner */}
-      {user?.storeUrl && (
-        <div className="elevated-card p-4 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="icon-feature icon-primary">
-                <Store className="h-5 w-5" />
+      {/* Store Context Banner / Publish Prompt */}
+      {(() => {
+        const isPublished = typeof window !== 'undefined' && localStorage.getItem('droop_store_published') === 'true';
+        if (isPublished && user?.storeUrl) {
+          return (
+            <div className="elevated-card p-4 bg-gradient-to-r from-emerald-500/10 to-primary/10 border-emerald-500/20">
+              <div className="flex items-center gap-3">
+                <div className="icon-feature icon-success"><Store className="h-5 w-5" /></div>
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{t('dashboard.realData')}</p>
+                  <a href={user.storeUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline flex items-center gap-1">
+                    {user.storeUrl}<ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
               </div>
-              <div>
-                <p className="font-medium text-sm">Analyzing data for your store</p>
-                <a 
-                  href={user.storeUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline flex items-center gap-1"
-                >
-                  {user.storeUrl}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+            </div>
+          );
+        }
+        return (
+          <div className="elevated-card p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30">
+            <div className="flex items-start gap-3">
+              <div className="icon-feature icon-warning"><Rocket className="h-5 w-5" /></div>
+              <div className="flex-1">
+                <h3 className="font-semibold mb-1">{t('dashboard.publishPrompt')}</h3>
+                <p className="text-sm text-muted-foreground mb-3">{t('dashboard.publishPromptBody')}</p>
+                <Link to="/ai">
+                  <Button size="sm" className="gradient-button gap-2"><Rocket className="h-4 w-4" />{t('dashboard.publishNow')}</Button>
+                </Link>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Text summary */}
       <div className="elevated-card p-5 bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
