@@ -195,6 +195,84 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
           </>
         )}
 
+        {/* PAYMENT STEP — required before publishing */}
+        {step === 'payment' && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                <Rocket className="h-5 w-5 text-primary" />
+                Publish your store — $9
+              </DialogTitle>
+              <DialogDescription>
+                A one-time activation fee to publish your store live, including hosting & SSL.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-2">
+              <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-muted-foreground">Total today</p>
+                  <p className="text-3xl font-black">$9.00</p>
+                </div>
+                <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-0">One-time</Badge>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Cardholder name</label>
+                  <Input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Full name on card" className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Card number</label>
+                  <Input
+                    value={card.number}
+                    onChange={e => setCard({ ...card, number: e.target.value.replace(/[^0-9 ]/g, '').slice(0, 19) })}
+                    placeholder="4242 4242 4242 4242"
+                    className="mt-1 font-mono"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">Expiry</label>
+                    <Input
+                      value={card.expiry}
+                      onChange={e => setCard({ ...card, expiry: e.target.value.replace(/[^0-9/]/g, '').slice(0, 5) })}
+                      placeholder="MM/YY"
+                      className="mt-1 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-muted-foreground">CVC</label>
+                    <Input
+                      value={card.cvc}
+                      onChange={e => setCard({ ...card, cvc: e.target.value.replace(/[^0-9]/g, '').slice(0, 4) })}
+                      placeholder="123"
+                      className="mt-1 font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                onClick={handlePay}
+                disabled={paying}
+                className="w-full h-11 gradient-button rounded-lg gap-2 font-semibold"
+              >
+                {paying ? 'Processing payment…' : <>Pay $9 & Publish <Rocket className="h-4 w-4" /></>}
+              </Button>
+              <button
+                onClick={() => setStep('main')}
+                className="w-full text-xs text-muted-foreground hover:text-foreground py-2 flex items-center justify-center gap-1"
+              >
+                <ArrowLeft className="h-3 w-3" /> Back
+              </button>
+              <p className="text-[10px] text-center text-muted-foreground">
+                🔒 Payments are simulated in this demo. To enable real Stripe checkout, ask Zyra to wire up Lovable Payments.
+              </p>
+            </div>
+          </>
+        )}
+
         {/* DOMAIN UPSELL STEP */}
         {step === 'domain' && (
           <>
