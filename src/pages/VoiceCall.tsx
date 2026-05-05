@@ -85,8 +85,9 @@ export default function VoiceCall() {
     const apiMessages = [...history, { role: 'user', content: latestContent }];
 
     try {
+      const lang = localStorage.getItem('salesbooster_language') || 'en';
       const { data, error } = await supabase.functions.invoke('voice-chat', {
-        body: { messages: apiMessages, storeContext: stats },
+        body: { messages: apiMessages, storeContext: stats, language: lang },
       });
       if (error) throw error;
       const reply = data?.reply || "Sorry, I didn't catch that.";
@@ -214,7 +215,8 @@ export default function VoiceCall() {
     || (status === 'idle' ? 'Tap start to talk with Zyra' : status === 'connecting' ? 'Connecting…' : '');
 
   return (
-    <div className="fixed inset-0 bg-white text-neutral-900 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0b0420] via-[#1a0b3d] to-[#3b0d6b] text-white flex flex-col overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none [background:radial-gradient(60%_40%_at_50%_15%,rgba(139,92,246,0.25),transparent),radial-gradient(40%_40%_at_80%_80%,rgba(236,72,153,0.18),transparent)]" />
       {/* Top: AI response text */}
       <div className="flex-1 flex items-start justify-center pt-16 px-6 overflow-y-auto">
         <div className="max-w-2xl w-full text-center">
