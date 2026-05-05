@@ -218,25 +218,25 @@ export default function VoiceCall() {
     <div className="fixed inset-0 bg-gradient-to-br from-[#0b0420] via-[#1a0b3d] to-[#3b0d6b] text-white flex flex-col overflow-hidden">
       <div className="absolute inset-0 pointer-events-none [background:radial-gradient(60%_40%_at_50%_15%,rgba(139,92,246,0.25),transparent),radial-gradient(40%_40%_at_80%_80%,rgba(236,72,153,0.18),transparent)]" />
       {/* Top: AI response text */}
-      <div className="flex-1 flex items-start justify-center pt-16 px-6 overflow-y-auto">
+      <div className="relative flex-1 flex items-start justify-center pt-16 px-6 overflow-y-auto">
         <div className="max-w-2xl w-full text-center">
           {partial && (
-            <p className="text-sm text-neutral-400 italic mb-4">"{partial}"</p>
+            <p className="text-sm text-white/60 italic mb-4">"{partial}"</p>
           )}
-          <p className="text-2xl md:text-3xl leading-relaxed font-light text-neutral-900 tracking-tight">
+          <p className="text-2xl md:text-3xl leading-relaxed font-light text-white tracking-tight">
             {topText}
           </p>
           {status === 'processing' && (
-            <p className="text-sm text-neutral-400 mt-6 animate-pulse">Thinking…</p>
+            <p className="text-sm text-white/60 mt-6 animate-pulse">Thinking…</p>
           )}
           {status === 'listening' && !partial && (
-            <p className="text-sm text-neutral-400 mt-6">Listening…</p>
+            <p className="text-sm text-white/60 mt-6">Listening…</p>
           )}
         </div>
       </div>
 
       {/* Center-bottom: animated blob */}
-      <div className="flex flex-col items-center justify-center pb-2">
+      <div className="relative flex flex-col items-center justify-center pb-2">
         {status === 'idle' || status === 'ended' ? (
           <button
             onClick={startCall}
@@ -278,7 +278,7 @@ export default function VoiceCall() {
       </div>
 
       {/* Bottom: text input bar + end call */}
-      <div className="px-4 pb-6 pt-2">
+      <div className="relative px-4 pb-6 pt-2">
         <input
           ref={fileInputRef}
           type="file"
