@@ -103,10 +103,13 @@ export default function VoiceCall() {
   const startListening = useCallback(() => {
     const w = window as AnyWindow;
     const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
-    if (!SR) return;
+    if (!SR) {
+      toast.error('Voice recognition not supported. Please use Chrome or Edge.');
+      return;
+    }
     if (recognitionRef.current) { try { recognitionRef.current.stop(); } catch {} }
     const rec = new SR();
-    rec.continuous = false;
+    rec.continuous = true;
     rec.interimResults = true;
     rec.lang = 'en-US';
     rec.onresult = (e: any) => {
@@ -116,15 +119,27 @@ export default function VoiceCall() {
         if (e.results[i].isFinal) final += t; else interim += t;
       }
       setPartial(interim);
-      if (final.trim()) { setPartial(''); sendToAI(final.trim()); }
+      if (final.trim()) {
+        setPartial('');
+        try { rec.stop(); } catch {}
+        sendToAI(final.trim());
+      }
+    };
+    rec.onerror = (ev: any) => {
+      console.warn('SpeechRecognition error', ev?.error);
+      if (ev?.error === 'not-allowed' || ev?.error === 'service-not-allowed') {
+        toast.error('Microphone access denied');
+        setStatus('ended');
+      }
     };
     rec.onend = () => {
+      // Auto-restart while we are still in the listening phase
       if (statusRef.current === 'listening' && recognitionRef.current === rec) {
         try { rec.start(); } catch {}
       }
     };
     recognitionRef.current = rec;
-    try { rec.start(); } catch {}
+    try { rec.start(); } catch (err) { console.warn('rec.start failed', err); }
   }, [sendToAI]);
 
   const startCall = async () => {
