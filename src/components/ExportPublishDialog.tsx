@@ -14,7 +14,7 @@ interface Props {
   config: StoreConfig;
 }
 
-type Step = 'main' | 'payment' | 'domain' | 'success';
+type Step = 'main' | 'domain' | 'domainPayment' | 'success';
 
 const TLDS = ['.com', '.store', '.shop', '.online'];
 
