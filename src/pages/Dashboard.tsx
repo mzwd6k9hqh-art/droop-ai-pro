@@ -158,7 +158,7 @@ export default function Dashboard() {
           <div>
             <h2 className="font-semibold mb-1">Your business in one paragraph</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Revenue is up <strong className="text-foreground">+12%</strong> month-over-month with retention holding strong at <strong className="text-foreground">87%</strong>. Conversions improved to <strong className="text-foreground">4.2%</strong> and your overall market score is <strong className="text-foreground">92/100</strong>. Top opportunity right now: dive into the trending niches below — competition is still light in 2 of the 3 categories.
+              No live performance data yet — once your store is published and customers start ordering, real revenue, conversion and store score will appear here.
             </p>
           </div>
         </div>
