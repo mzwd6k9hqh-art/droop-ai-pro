@@ -79,20 +79,30 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     }
   };
 
-  const handleBuyDomain = async () => {
+  const handleBuyDomain = () => {
     if (!customDomain.trim()) {
       toast.error('Please enter a domain name');
       return;
     }
+    // Open the $1 checkout page for the domain
+    setStep('domainPayment');
+  };
+
+  const handlePayDomain = async () => {
+    if (!card.number.trim() || !card.expiry.trim() || !card.cvc.trim() || !card.name.trim()) {
+      toast.error('Please fill in all card details');
+      return;
+    }
     setPurchasing(true);
-    // Simulate purchase flow
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 1400));
     const finalUrl = `https://${customDomain.trim().toLowerCase()}${selectedTld}`;
     setPublishedUrl(finalUrl);
+    localStorage.setItem('droop_store_published_url', finalUrl);
     setPurchasing(false);
     setStep('success');
     toast.success('🎉 Domain purchased and connected!');
   };
+
 
   const handleSkipDomain = () => {
     setStep('success');
