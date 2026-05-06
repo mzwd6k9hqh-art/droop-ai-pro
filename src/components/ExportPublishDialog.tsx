@@ -53,7 +53,6 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
   };
 
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
-  const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
 
 
   const handleCopyCode = async () => {
