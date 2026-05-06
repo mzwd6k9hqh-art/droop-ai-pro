@@ -44,28 +44,17 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
   };
 
   const handlePublishFree = () => {
-    // Gate publishing behind a one-time payment
-    setStep('payment');
+    // Publishing is free — go straight live, then offer optional domain upsell.
+    setPublishedUrl(freeUrl);
+    localStorage.setItem('droop_store_published', 'true');
+    localStorage.setItem('droop_store_published_url', freeUrl);
+    toast.success('Your store is live!');
+    setStep('domain');
   };
 
   const [paying, setPaying] = useState(false);
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
 
-  const handlePay = async () => {
-    if (!card.number.trim() || !card.expiry.trim() || !card.cvc.trim() || !card.name.trim()) {
-      toast.error('Please fill in all card details');
-      return;
-    }
-    setPaying(true);
-    await new Promise(r => setTimeout(r, 1400));
-    setPaying(false);
-    setPublishedUrl(freeUrl);
-    localStorage.setItem('droop_store_published', 'true');
-    localStorage.setItem('droop_store_published_url', freeUrl);
-    localStorage.setItem('droop_store_published_paid', 'true');
-    toast.success('Payment successful — your store is live!');
-    setStep('domain');
-  };
 
   const handleCopyCode = async () => {
     const html = generateStoreHTML(config);
