@@ -1,5 +1,6 @@
-// Centralized store stats — used by Voice Call insights and dashboards
-// so numbers stay consistent across the app.
+// Real store stats — for now there is no live order/analytics integration,
+// so every metric is honestly zero until real data is wired in.
+// Never fabricate numbers here; show what actually happened.
 export interface StoreStats {
   revenue30d: number;
   netProfit30d: number;
@@ -9,21 +10,23 @@ export interface StoreStats {
   avgOrderValue: number;
   views30d: number;
   conversion: number;
-  topProduct: { name: string; revenue: number; units: number };
+  rating: number; // 0-100 honest score
+  topProduct: { name: string; revenue: number; units: number } | null;
 }
 
 export function getStoreStats(): StoreStats {
-  // Numbers mirror /earnings + /analytics so the user sees coherent data everywhere.
+  // No real analytics source connected yet → return zeros (no fake numbers).
   return {
-    revenue30d: 12486,
-    netProfit30d: 7318,
-    margin: 58,
-    orders: 324,
-    customers: 241,
-    avgOrderValue: Math.round((12486 / 324) * 100) / 100,
-    views30d: 18420,
-    conversion: 4.2,
-    topProduct: { name: 'Premium Gift Box', revenue: 3210, units: 84 },
+    revenue30d: 0,
+    netProfit30d: 0,
+    margin: 0,
+    orders: 0,
+    customers: 0,
+    avgOrderValue: 0,
+    views30d: 0,
+    conversion: 0,
+    rating: 0,
+    topProduct: null,
   };
 }
 

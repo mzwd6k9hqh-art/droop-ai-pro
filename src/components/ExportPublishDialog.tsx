@@ -14,7 +14,7 @@ interface Props {
   config: StoreConfig;
 }
 
-type Step = 'main' | 'payment' | 'domain' | 'success';
+type Step = 'main' | 'domain' | 'domainPayment' | 'success';
 
 const TLDS = ['.com', '.store', '.shop', '.online'];
 
@@ -44,28 +44,16 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
   };
 
   const handlePublishFree = () => {
-    // Gate publishing behind a one-time payment
-    setStep('payment');
-  };
-
-  const [paying, setPaying] = useState(false);
-  const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
-
-  const handlePay = async () => {
-    if (!card.number.trim() || !card.expiry.trim() || !card.cvc.trim() || !card.name.trim()) {
-      toast.error('Please fill in all card details');
-      return;
-    }
-    setPaying(true);
-    await new Promise(r => setTimeout(r, 1400));
-    setPaying(false);
+    // Publishing is free — go straight live, then offer optional domain upsell.
     setPublishedUrl(freeUrl);
     localStorage.setItem('droop_store_published', 'true');
     localStorage.setItem('droop_store_published_url', freeUrl);
-    localStorage.setItem('droop_store_published_paid', 'true');
-    toast.success('Payment successful — your store is live!');
+    toast.success('Your store is live!');
     setStep('domain');
   };
+
+  const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
+
 
   const handleCopyCode = async () => {
     const html = generateStoreHTML(config);
@@ -90,20 +78,30 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     }
   };
 
-  const handleBuyDomain = async () => {
+  const handleBuyDomain = () => {
     if (!customDomain.trim()) {
       toast.error('Please enter a domain name');
       return;
     }
+    // Open the $1 checkout page for the domain
+    setStep('domainPayment');
+  };
+
+  const handlePayDomain = async () => {
+    if (!card.number.trim() || !card.expiry.trim() || !card.cvc.trim() || !card.name.trim()) {
+      toast.error('Please fill in all card details');
+      return;
+    }
     setPurchasing(true);
-    // Simulate purchase flow
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 1400));
     const finalUrl = `https://${customDomain.trim().toLowerCase()}${selectedTld}`;
     setPublishedUrl(finalUrl);
+    localStorage.setItem('droop_store_published_url', finalUrl);
     setPurchasing(false);
     setStep('success');
     toast.success('🎉 Domain purchased and connected!');
   };
+
 
   const handleSkipDomain = () => {
     setStep('success');
@@ -195,16 +193,16 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
           </>
         )}
 
-        {/* PAYMENT STEP — required before publishing */}
-        {step === 'payment' && (
+        {/* DOMAIN PAYMENT STEP — only triggered by "Get Domain for $1" */}
+        {step === 'domainPayment' && (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl">
-                <Rocket className="h-5 w-5 text-primary" />
-                Publish your store — $9
+                <Tag className="h-5 w-5 text-amber-500" />
+                Get your domain — $1
               </DialogTitle>
               <DialogDescription>
-                A one-time activation fee to publish your store live, including hosting & SSL.
+                One-time payment for <span className="font-mono">{customDomain.toLowerCase()}{selectedTld}</span>. First year only — renews at $12/year.
               </DialogDescription>
             </DialogHeader>
 
@@ -212,9 +210,9 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
               <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground">Total today</p>
-                  <p className="text-3xl font-black">$9.00</p>
+                  <p className="text-3xl font-black">$1.00</p>
                 </div>
-                <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-0">One-time</Badge>
+                <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-0">First year</Badge>
               </div>
 
               <div className="space-y-3">
@@ -254,20 +252,20 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
               </div>
 
               <Button
-                onClick={handlePay}
-                disabled={paying}
-                className="w-full h-11 gradient-button rounded-lg gap-2 font-semibold"
+                onClick={handlePayDomain}
+                disabled={purchasing}
+                className="w-full h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-lg gap-2"
               >
-                {paying ? 'Processing payment…' : <>Pay $9 & Publish <Rocket className="h-4 w-4" /></>}
+                {purchasing ? 'Processing payment…' : <>Pay $1 & Connect Domain <Sparkles className="h-4 w-4" /></>}
               </Button>
               <button
-                onClick={() => setStep('main')}
+                onClick={() => setStep('domain')}
                 className="w-full text-xs text-muted-foreground hover:text-foreground py-2 flex items-center justify-center gap-1"
               >
                 <ArrowLeft className="h-3 w-3" /> Back
               </button>
               <p className="text-[10px] text-center text-muted-foreground">
-                🔒 Payments are simulated in this demo. To enable real Stripe checkout, ask Zyra to wire up Lovable Payments.
+                🔒 Payments are simulated in this demo.
               </p>
             </div>
           </>
