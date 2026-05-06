@@ -52,7 +52,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     setStep('domain');
   };
 
-  const [paying, setPaying] = useState(false);
+  const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
   const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
 
 
