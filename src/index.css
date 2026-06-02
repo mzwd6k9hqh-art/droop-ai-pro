@@ -279,14 +279,14 @@
     stroke-width: 2;
   }
 
-  .icon-primary { @apply bg-primary/12 text-primary; }
+  .icon-primary { @apply bg-primary/10 text-primary; }
   .icon-secondary { @apply bg-secondary text-secondary-foreground; }
   .icon-accent { @apply bg-accent/10 text-accent; }
   .dark .icon-accent { @apply bg-accent/15 text-accent; }
   .icon-warning { @apply bg-warning/15 text-warning; }
-  .icon-info { @apply bg-info/12 text-info; }
-  .icon-success { @apply bg-success/12 text-success; }
-  .icon-destructive { @apply bg-destructive/12 text-destructive; }
+  .icon-info { @apply bg-info/10 text-info; }
+  .icon-success { @apply bg-success/10 text-success; }
+  .icon-destructive { @apply bg-destructive/10 text-destructive; }
 
   .icon-solid-primary {
     background-image: var(--gradient-button);
