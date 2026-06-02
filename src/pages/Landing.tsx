@@ -106,9 +106,9 @@ export default function Landing() {
             </div>
 
             {/* Main heading */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-              Boost Your Sales with
-              <span className="gradient-text block mt-2">Zyra</span>
+            <h1 className="font-display text-6xl md:text-7xl lg:text-8xl tracking-tight mb-6 leading-[1.05]">
+              Boost your sales
+              <span className="block italic text-primary mt-1">with Zyra.</span>
             </h1>
 
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -153,8 +153,8 @@ export default function Landing() {
               <Target className="h-4 w-4 text-secondary" />
               <span className="text-sm font-medium text-secondary">Powerful Features</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need to Grow
+            <h2 className="font-display text-4xl md:text-5xl tracking-tight mb-4">
+              Everything you need to grow.
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Our AI-powered platform provides comprehensive tools to analyze, optimize, and scale your business.
