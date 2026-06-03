@@ -45,15 +45,16 @@ const planLabels: Record<PlanType, string> = {
 };
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
+
 
   return (
     <header className="sticky top-0 z-50 w-full gradient-header shadow-lg">
