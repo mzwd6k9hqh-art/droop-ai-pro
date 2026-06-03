@@ -1,24 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { lovable } from '@/integrations/lovable';
 
 export type PlanType = 'free' | 'starter' | 'pro' | 'premium';
 
-interface User {
+interface AppUser {
+  id: string;
   email: string;
   name: string;
   storeUrl: string;
   plan: PlanType;
+  isGuest: boolean;
   dailyAiMessagesUsed: number;
   lastMessageDate: string;
   createdAt: string;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, name: string, password: string, storeUrl: string) => Promise<boolean>;
-  logout: () => void;
+  signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
+  signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
+  signOut: () => Promise<void>;
   updatePlan: (plan: PlanType) => void;
   incrementAiMessages: () => boolean;
   getAiMessagesRemaining: () => number;
@@ -28,132 +35,108 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'salesbooster_users';
-const CURRENT_USER_KEY = 'salesbooster_current_user';
+const GUEST_KEY = 'zyra_guest_user';
+const PLAN_KEY = 'zyra_user_plan';
 
-const getTodayDate = (): string => {
-  return new Date().toISOString().split('T')[0];
+const today = () => new Date().toISOString().split('T')[0];
+
+const buildGuest = (): AppUser => {
+  const raw = localStorage.getItem(GUEST_KEY);
+  const base = raw ? JSON.parse(raw) : null;
+  const guest: AppUser = base ?? {
+    id: 'guest',
+    email: 'guest@zyra.local',
+    name: 'Guest',
+    storeUrl: localStorage.getItem('droop_store_url') || '',
+    plan: (localStorage.getItem(PLAN_KEY) as PlanType) || 'free',
+    isGuest: true,
+    dailyAiMessagesUsed: 0,
+    lastMessageDate: today(),
+    createdAt: new Date().toISOString(),
+  };
+  if (guest.lastMessageDate !== today()) {
+    guest.dailyAiMessagesUsed = 0;
+    guest.lastMessageDate = today();
+  }
+  localStorage.setItem(GUEST_KEY, JSON.stringify(guest));
+  return guest;
 };
 
-const getUsers = (): Record<string, User & { password: string }> => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : {};
-};
-
-const saveUsers = (users: Record<string, User & { password: string }>) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-};
+const buildFromSupabase = (su: SupabaseUser): AppUser => ({
+  id: su.id,
+  email: su.email ?? '',
+  name:
+    (su.user_metadata?.name as string) ||
+    (su.user_metadata?.full_name as string) ||
+    (su.email?.split('@')[0] ?? 'You'),
+  storeUrl: localStorage.getItem('droop_store_url') || '',
+  plan: (localStorage.getItem(PLAN_KEY) as PlanType) || 'free',
+  isGuest: false,
+  dailyAiMessagesUsed: 0,
+  lastMessageDate: today(),
+  createdAt: su.created_at,
+});
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkAndResetDailyLimit = (userData: User & { password: string }): User & { password: string } => {
-    const today = getTodayDate();
-    if (userData.lastMessageDate !== today) {
-      userData.dailyAiMessagesUsed = 0;
-      userData.lastMessageDate = today;
-    }
-    return userData;
-  };
-
   useEffect(() => {
-    // Auth removed — auto-provision a guest user so the app is accessible without login
-    const GUEST_EMAIL = 'guest@zyra.local';
-    const users = getUsers();
-    let userData = users[GUEST_EMAIL];
-    if (!userData) {
-      userData = {
-        email: GUEST_EMAIL,
-        name: 'Guest',
-        storeUrl: localStorage.getItem('droop_store_url') || '',
-        password: '',
-        plan: 'free',
-        dailyAiMessagesUsed: 0,
-        lastMessageDate: getTodayDate(),
-        createdAt: new Date().toISOString(),
-      };
-    }
-    userData = checkAndResetDailyLimit(userData);
-    users[GUEST_EMAIL] = userData;
-    saveUsers(users);
-    localStorage.setItem(CURRENT_USER_KEY, GUEST_EMAIL);
-    const { password, ...userWithoutPassword } = userData;
-    setUser(userWithoutPassword);
-    setIsLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession?.user) {
+        setUser(buildFromSupabase(newSession.user));
+      } else {
+        setUser(buildGuest());
+      }
+    });
+
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user ? buildFromSupabase(s.user) : buildGuest());
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    const users = getUsers();
-    let userData = users[email.toLowerCase()];
-    
-    if (userData && userData.password === password) {
-      // Check and reset daily limit on login
-      userData = checkAndResetDailyLimit(userData);
-      users[email.toLowerCase()] = userData;
-      saveUsers(users);
-      
-      const { password: _, ...userWithoutPassword } = userData;
-      setUser(userWithoutPassword);
-      localStorage.setItem(CURRENT_USER_KEY, email.toLowerCase());
-      return true;
-    }
-    return false;
+  const signInWithEmail = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return error ? { error: error.message } : {};
   };
 
-  const register = async (email: string, name: string, password: string, storeUrl: string): Promise<boolean> => {
-    const users = getUsers();
-    const emailLower = email.toLowerCase();
-    
-    if (users[emailLower]) {
-      return false;
-    }
-
-    const newUser: User & { password: string } = {
-      email: emailLower,
-      name,
-      storeUrl,
+  const signUpWithEmail = async (email: string, password: string, name?: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
       password,
-      plan: 'free',
-      dailyAiMessagesUsed: 0,
-      lastMessageDate: getTodayDate(),
-      createdAt: new Date().toISOString(),
-    };
-
-    users[emailLower] = newUser;
-    saveUsers(users);
-
-    const { password: _, ...userWithoutPassword } = newUser;
-    setUser(userWithoutPassword);
-    localStorage.setItem(CURRENT_USER_KEY, emailLower);
-    return true;
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: name ? { name } : undefined,
+      },
+    });
+    return error ? { error: error.message } : {};
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem(CURRENT_USER_KEY);
+  const signInWithGoogle = async () => {
+    const result = await lovable.auth.signInWithOAuth('google', { redirect_uri: window.location.origin });
+    if (result.error) return { error: result.error.message ?? String(result.error) };
+    return {};
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   const updatePlan = (plan: PlanType) => {
-    if (!user) return;
-    
-    const users = getUsers();
-    if (users[user.email]) {
-      users[user.email].plan = plan;
-      saveUsers(users);
-      setUser({ ...user, plan });
-    }
+    localStorage.setItem(PLAN_KEY, plan);
+    setUser(prev => (prev ? { ...prev, plan } : prev));
   };
 
-  const isUnlimitedPlan = (): boolean => {
-    if (!user) return false;
-    return user.plan === 'premium';
-  };
+  const isUnlimitedPlan = () => user?.plan === 'premium';
 
-  const getDailyLimit = (): number => {
-    if (!user) return 5;
-    switch (user.plan) {
-      case 'free': return 5;
+  const getDailyLimit = () => {
+    switch (user?.plan) {
       case 'starter': return 25;
       case 'pro': return 100;
       case 'premium': return Infinity;
@@ -161,54 +144,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const getAiMessagesRemaining = (): number => {
+  const getAiMessagesRemaining = () => {
     if (!user) return 0;
-    
-    // Paid plans have unlimited messages
     if (isUnlimitedPlan()) return Infinity;
-    
-    // Check if we need to reset for a new day
-    const today = getTodayDate();
-    if (user.lastMessageDate !== today) {
-      return getDailyLimit();
-    }
-    
+    if (user.lastMessageDate !== today()) return getDailyLimit();
     return Math.max(0, getDailyLimit() - user.dailyAiMessagesUsed);
   };
 
-  const incrementAiMessages = (): boolean => {
+  const incrementAiMessages = () => {
     if (!user) return false;
-    
-    // Paid plans can always send
     if (isUnlimitedPlan()) return true;
-    
-    const today = getTodayDate();
-    const users = getUsers();
-    
-    if (!users[user.email]) return false;
-    
-    // Reset counter if it's a new day
-    if (user.lastMessageDate !== today) {
-      users[user.email].dailyAiMessagesUsed = 0;
-      users[user.email].lastMessageDate = today;
-    }
-    
-    // Check if limit reached
-    if (users[user.email].dailyAiMessagesUsed >= getDailyLimit()) {
-      return false;
-    }
-    
-    // Increment counter
-    users[user.email].dailyAiMessagesUsed += 1;
-    users[user.email].lastMessageDate = today;
-    saveUsers(users);
-    
-    setUser({
-      ...user,
-      dailyAiMessagesUsed: users[user.email].dailyAiMessagesUsed,
-      lastMessageDate: today,
-    });
-    
+    const t = today();
+    let used = user.lastMessageDate !== t ? 0 : user.dailyAiMessagesUsed;
+    if (used >= getDailyLimit()) return false;
+    used += 1;
+    const next: AppUser = { ...user, dailyAiMessagesUsed: used, lastMessageDate: t };
+    setUser(next);
+    if (user.isGuest) localStorage.setItem(GUEST_KEY, JSON.stringify(next));
     return true;
   };
 
@@ -216,11 +168,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        session,
+        isAuthenticated: !!session,
         isLoading,
-        login,
-        register,
-        logout,
+        signInWithEmail,
+        signUpWithEmail,
+        signInWithGoogle,
+        signOut,
         updatePlan,
         incrementAiMessages,
         getAiMessagesRemaining,
@@ -234,9 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within an AuthProvider');
+  return ctx;
 }

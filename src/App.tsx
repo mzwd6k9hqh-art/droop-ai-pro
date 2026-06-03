@@ -20,8 +20,16 @@ import Upgrade from "@/pages/Upgrade";
 import VoiceCall from "@/pages/VoiceCall";
 import CustomerChat from "@/pages/CustomerChat";
 import Earnings from "@/pages/Earnings";
+import Auth from "@/pages/Auth";
+
+import { useActivityTracker } from "@/hooks/useActivityTracker";
 
 const queryClient = new QueryClient();
+
+function ActivityTrackerMount() {
+  useActivityTracker();
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -32,6 +40,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ActivityTrackerMount />
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/landing" element={<Landing />} />
@@ -40,9 +49,9 @@ const App = () => (
                 <Route path="/ai" element={<AIChat />} />
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/voice-call" element={<VoiceCall />} />
-                {/* Legacy auth routes redirect to onboarding */}
-                <Route path="/login" element={<Navigate to="/onboarding" replace />} />
-                <Route path="/register" element={<Navigate to="/onboarding" replace />} />
+                <Route path="/login" element={<Auth />} />
+                <Route path="/register" element={<Auth />} />
+                <Route path="/auth" element={<Auth />} />
                 <Route element={<AppLayout />}>
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/analytics" element={<Analytics />} />
@@ -54,6 +63,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+
           </TooltipProvider>
         </AuthProvider>
       </LanguageProvider>
