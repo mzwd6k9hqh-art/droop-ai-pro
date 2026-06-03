@@ -510,6 +510,15 @@ serve(async (req) => {
       else if (designVariants && designVariants.length > 0) source = "design_generator";
       else if (functionCalls.length > 0) source = "store_editor";
 
+      // Fire-and-forget memory extraction (signed-in users)
+      if (userId && queryText && textContent) {
+        EdgeRuntime?.waitUntil?.(
+          extractMemoriesFromExchange(queryText, textContent)
+            .then(items => items.length ? saveMemories(userId!, items) : null)
+            .catch(e => console.error("memory pipeline:", e))
+        );
+      }
+
       return new Response(
         JSON.stringify({
           type: responseType,
@@ -522,10 +531,20 @@ serve(async (req) => {
       );
     }
 
+    // Fire-and-forget memory extraction for plain text replies too
+    if (userId && queryText && choice.content) {
+      EdgeRuntime?.waitUntil?.(
+        extractMemoriesFromExchange(queryText, choice.content)
+          .then(items => items.length ? saveMemories(userId!, items) : null)
+          .catch(e => console.error("memory pipeline:", e))
+      );
+    }
+
     return new Response(
       JSON.stringify({ type: "text", content: choice.content, source: "knowledge" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
+
   } catch (error: any) {
     console.error("AI Chat error:", error);
     const status = error.status || 500;
