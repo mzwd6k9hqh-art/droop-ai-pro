@@ -22,7 +22,14 @@ import CustomerChat from "@/pages/CustomerChat";
 import Earnings from "@/pages/Earnings";
 import Auth from "@/pages/Auth";
 
+import { useActivityTracker } from "@/hooks/useActivityTracker";
+
 const queryClient = new QueryClient();
+
+function ActivityTrackerMount() {
+  useActivityTracker();
+  return null;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -33,6 +40,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ActivityTrackerMount />
               <Routes>
                 <Route path="/" element={<Landing />} />
                 <Route path="/landing" element={<Landing />} />
@@ -55,6 +63,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
+
           </TooltipProvider>
         </AuthProvider>
       </LanguageProvider>
