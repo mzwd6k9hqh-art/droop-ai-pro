@@ -360,51 +360,72 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl, language } = await req.json();
+    const { messages, storeUrl, language, appContext } = await req.json();
     const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
 
-    // ============ Daily awareness context ============
+    // ============ Identify signed-in user (optional) ============
+    let userId: string | null = null;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      try {
+        const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+          global: { headers: { Authorization: authHeader } },
+        });
+        const { data: { user } } = await supa.auth.getUser();
+        userId = user?.id ?? null;
+      } catch (e) { console.error("auth resolve error", e); }
+    }
+
+    // ============ Recall long-term memories (signed-in users only) ============
+    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
+    const queryText = typeof lastUserMsg?.content === 'string'
+      ? lastUserMsg.content
+      : Array.isArray(lastUserMsg?.content)
+        ? lastUserMsg.content.filter((p: any) => p.type === 'text').map((p: any) => p.text).join(' ')
+        : '';
+
+    let memoryBlock = '';
+    if (userId && queryText) {
+      const memories = await recallMemories(userId, queryText, 6);
+      if (memories.length) {
+        memoryBlock = `\n\n## What you remember about this user\n` +
+          memories.map(m => `- (${m.kind}, importance ${m.importance}) ${m.content}`).join('\n');
+      }
+    }
+
+    // ============ Real-time app context ============
+    let contextBlock = '';
+    if (appContext) {
+      const lines: string[] = [];
+      if (appContext.route) lines.push(`Current page: ${appContext.route}`);
+      if (appContext.storeSummary) lines.push(`Store snapshot: ${appContext.storeSummary}`);
+      if (appContext.recentActivity?.length) {
+        lines.push(`Recent activity: ${appContext.recentActivity.slice(0, 5).join(' → ')}`);
+      }
+      if (appContext.plan) lines.push(`Plan: ${appContext.plan}`);
+      if (lines.length) contextBlock = `\n\n## Live app context\n${lines.join('\n')}`;
+    }
+
     const now = new Date();
-    const weekdayAr = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    const monthAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-    const m = now.getUTCMonth();
-    const d = now.getUTCDate();
-    const seasonAr = m <= 1 || m === 11 ? 'الشتاء' : m <= 4 ? 'الربيع' : m <= 7 ? 'الصيف' : 'الخريف';
+    const dailyContext = `\n\n## Today: ${now.toUTCString().slice(0, 16)} UTC.`;
 
-    const calendar: Record<string, string> = {
-      '0':  'موسم تخفيضات ما بعد الأعياد، عودة الميزانيات، ترويج Detox/Wellness ولياقة بداية السنة.',
-      '1':  'عيد الحب (14 فبراير) — هدايا، ورود، مجوهرات، شوكولاتة، تجارب أزواج.',
-      '2':  'بداية الربيع، تخفيضات Spring Cleaning، تنظيم المنزل، أزياء انتقالية.',
-      '3':  'تسوق رمضاني/عيد الفطر في كثير من السنوات — أزياء عيد، ضيافة، حلويات، ديكور.',
-      '4':  'عيد الأم في كثير من الدول العربية، عروض نهاية الفصل الدراسي.',
-      '5':  'صيف، عطلات، أزياء بحر، رحلات، عروض Mid-Year.',
-      '6':  'تخفيضات الصيف الكبرى، Back-to-School مبكر.',
-      '7':  'Back-to-School بقوة — حقائب، أدوات، إلكترونيات، أزياء طلاب.',
-      '8':  'بداية الخريف، اليوم الوطني السعودي (23 سبتمبر)، عروض موسمية.',
-      '9':  'Halloween، تحضيرات Q4، عروض ما قبل الجمعة البيضاء.',
-      '10': 'الجمعة البيضاء/Black Friday + Cyber Monday — أكبر موسم تسوق.',
-      '11': 'موسم الأعياد ورأس السنة — هدايا، ديكور، عروض نهاية السنة.',
-    };
-    const todayInsight = calendar[String(m)] || '';
-
-    const dailyContext = `\n\n## سياق اليوم: ${weekdayAr[now.getUTCDay()]} ${d} ${monthAr[m]} ${now.getUTCFullYear()} (${seasonAr}). ${todayInsight}`;
-
-    // Hard language directive — overrides the Arabic default in SYSTEM_PROMPT.
     const langDirective =
       lang === 'en'
-        ? `\n\n## LANGUAGE RULE (CRITICAL): You MUST reply ONLY in English. Ignore any previous instructions about Arabic. Every word, including action confirmations and product suggestions, must be in English.`
+        ? `\n\n## LANGUAGE: Reply ONLY in English.`
         : lang === 'fr'
-        ? `\n\n## RÈGLE DE LANGUE (CRITIQUE): Vous devez répondre UNIQUEMENT en français. Ignorez toute instruction précédente concernant l'arabe. Chaque mot doit être en français.`
-        : `\n\n## قاعدة اللغة: أجب بالعربية الفصحى دائماً.`;
+        ? `\n\n## LANGUE: Répondez UNIQUEMENT en français.`
+        : `\n\n## اللغة: أجب بالعربية الفصحى.`;
 
-    const systemWithContext = (storeUrl
-      ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}.`
-      : SYSTEM_PROMPT) + dailyContext + langDirective;
+    const systemWithContext =
+      `${ZYRA_PERSONA}\n\n---\n\n${SYSTEM_PROMPT}` +
+      (storeUrl ? `\n\nUser's store: ${storeUrl}.` : '') +
+      memoryBlock + contextBlock + dailyContext + langDirective;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
       ...messages,
     ];
+
 
     const data = await callAI(apiMessages);
     const choice = data.choices?.[0]?.message;
