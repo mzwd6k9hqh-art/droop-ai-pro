@@ -275,13 +275,27 @@ Welcome them and present a store design concept with layout, categories, colors,
       ];
 
       const lang = localStorage.getItem('salesbooster_language') || 'en';
+      const { getRecentActivity } = await import('@/hooks/useActivityTracker');
+      const storeSummary = [
+        storeConfig.storeName && `name: ${storeConfig.storeName}`,
+        storeConfig.storeType && `type: ${storeConfig.storeType}`,
+        storeConfig.products?.length != null && `products: ${storeConfig.products.length}`,
+        localStorage.getItem('droop_store_published') === 'true' && 'status: published',
+      ].filter(Boolean).join(', ');
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           messages: allMessages,
           storeUrl: storeContext?.storeUrl || '',
           language: lang,
+          appContext: {
+            route: window.location.pathname,
+            plan: user?.plan || 'free',
+            storeSummary: storeSummary || undefined,
+            recentActivity: getRecentActivity(),
+          },
         },
       });
+
 
       if (error) throw error;
       if (!data) throw new Error('Empty response from AI');
