@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      assistant_memory: {
+        Row: {
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          importance: number
+          kind: string
+          last_used_at: string | null
+          metadata: Json
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          kind?: string
+          last_used_at?: string | null
+          metadata?: Json
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          kind?: string
+          last_used_at?: string | null
+          metadata?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       customer_chats: {
         Row: {
           created_at: string
@@ -91,12 +127,81 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          preferences: Json
+          store_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          preferences?: Json
+          store_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          preferences?: Json
+          store_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          route: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          route?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          route?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_assistant_memory: {
+        Args: { p_limit?: number; p_query: string; p_user_id: string }
+        Returns: {
+          content: string
+          id: string
+          importance: number
+          kind: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       message_sender: "seller" | "customer"
