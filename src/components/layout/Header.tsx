@@ -24,9 +24,6 @@ import {
   Menu,
   LayoutDashboard,
   Sparkles,
-  PhoneCall,
-  MessageSquare,
-  DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,16 +42,15 @@ const planLabels: Record<PlanType, string> = {
 };
 
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
-
 
   return (
     <header className="sticky top-0 z-50 w-full gradient-header shadow-lg">
@@ -68,7 +64,7 @@ export function Header() {
               <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-white/80" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-white leading-tight">Zyra</span>
+              <span className="text-lg font-bold tracking-tight text-white leading-tight">DROOB AI</span>
               <span className="text-[10px] text-white/60 leading-none">Sales Booster</span>
             </div>
           </Link>
@@ -90,24 +86,6 @@ export function Header() {
               <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
                 <Bot className="h-4 w-4" />
                 {t('nav.droopai')}
-              </Button>
-            </Link>
-            <Link to="/voice-call">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
-                <PhoneCall className="h-4 w-4" />
-                Voice
-              </Button>
-            </Link>
-            <Link to="/customers">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
-                <MessageSquare className="h-4 w-4" />
-                Customers
-              </Button>
-            </Link>
-            <Link to="/earnings">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
-                <DollarSign className="h-4 w-4" />
-                Earnings
               </Button>
             </Link>
             <Link to="/pricing">
@@ -190,18 +168,6 @@ export function Header() {
               <DropdownMenuItem onClick={() => navigate('/ai')}>
                 <Bot className="mr-2 h-4 w-4" />
                 {t('nav.droopai')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/voice-call')}>
-                <PhoneCall className="mr-2 h-4 w-4" />
-                Voice Call
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/customers')}>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Customers
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/earnings')}>
-                <DollarSign className="mr-2 h-4 w-4" />
-                Earnings
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate('/pricing')}>
                 <CreditCard className="mr-2 h-4 w-4" />

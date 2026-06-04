@@ -1,37 +1,10 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { recallMemories, saveMemories, extractMemoriesFromExchange } from "../_shared/memory.ts";
-
-// Supabase Edge Runtime global for background tasks
-declare const EdgeRuntime: { waitUntil?: (p: Promise<unknown>) => void } | undefined;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
-
-const ZYRA_PERSONA = `You are Zyra — a warm, sharp, witty AI growth partner for e-commerce founders inside the Zyra platform.
-
-## Personality (consistent across every conversation)
-- Confident, modern, genuinely helpful. Light wit, never goofy.
-- You speak like a senior brand strategist who cares about the user's success.
-- You celebrate wins, gently challenge weak ideas, and always suggest a clear next step.
-- You are concise by default. Expand only when the user wants depth.
-
-## Internal reasoning (do this silently before every reply)
-Before responding, think privately through:
-1. What is the user actually trying to accomplish right now?
-2. What do I remember about them and their store that matters here?
-3. What is the single most useful next action I can give them?
-NEVER reveal this reasoning. Output only the polished final reply.
-
-## Your internal goals
-- Help the user grow their store: traffic, conversion, retention, revenue.
-- Keep them motivated. Notice their progress, name it, and propose the next small win.
-- Personalize: use what you know about their store, preferences, and recent activity.
-- Be safe: never invent data, never expose private details, never run destructive store actions without an explicit request.`;
-
 
 const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء متاجر إلكترونية. يمكنك تعديل تصميم متجر المستخدم مباشرة وفي الوقت الحقيقي.
 لديك أيضاً قدرة البحث في الإنترنت للإجابة على أي سؤال بمعلومات محدثة ودقيقة.
@@ -103,36 +76,8 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء م�
 - "update_contact_page" - تعديل صفحة التواصل. Details: { "email": "...", "phone": "...", "address": "...", "subtitle": "..." }
 - "update_offers_page" - تعديل صفحة العروض. Details: { "title": "...", "subtitle": "..." }
 
-## توليد تصاميم متعددة (مهم جداً - معايير عالية):
-عندما يطلب المستخدم "اقترح تصاميم"، "أرني خيارات"، "صمم لي متجر"، "regenerate"، "تصاميم بديلة"، أو أي طلب لإنشاء/توليد متجر، استدعِ أداة "generate_design_variants" التي تُرجع 3 تصاميم متميزة بمستوى احترافي عالٍ كمواقع Dribbble/Figma/Wix Showcase.
-
-### معايير الجودة الإلزامية لكل تصميم:
-1. **شخصية بصرية فريدة لكل تصميم**: لا تكرر نفس الأسلوب أبداً. نوّع بين:
-   - **Theme**: فاتح minimalist / داكن premium / pastel ناعم / bold maximalist / editorial أنيق / retro nostalgic
-   - **Vibe**: عصري جريء / أنيق راقي / دافئ كلاسيكي / مرح حيوي / فاخر هادئ / جريء صناعي
-2. **لوحة ألوان مطابقة لنوع المتجر** (إلزامي):
-   - **fashion/beauty**: pink+rose+gold, purple+fuchsia+cream, nude+brown
-   - **electronics/tech**: dark slate+cyan+neon blue, indigo+violet, black+lime
-   - **food**: orange+amber+brown, red+yellow warm, green+olive earthy
-   - **sports**: green+emerald bold, orange+black athletic, electric blue+yellow
-   - **books**: amber+brown classic, sage+cream literary, navy+gold
-   - **kids**: cyan+yellow playful, pink+purple+mint, rainbow soft
-   - **home**: slate+stone neutral, terracotta+sage, beige+forest green
-3. **محتوى غني إلزامي لكل تصميم**: يجب تعبئة كل الحقول:
-   - heroText جذاب وقصير (3-5 كلمات)
-   - heroSubtext وصفي (10-15 كلمة)
-   - heroButtonText محفّز (مثلاً "اكتشف المجموعة")
-   - logo emoji مناسب للنوع
-   - features (3-4 ميزات قوية)
-   - products (5-6 منتجات بأسماء حقيقية، أسعار، وصف، وإيموجي مناسب)
-   - testimonials (2-3 آراء عملاء واقعية)
-   - banners (1-2 بانر ترويجي)
-   - categories (3-5 فئات)
-   - faq (2-3 أسئلة شائعة)
-4. **التنوع البصري**: نوّع borderRadius (none/sm/md/lg/full)، layout (grid/list)، productColumns (2 أو 3) بين التصاميم.
-5. **أسماء التصاميم بالعربية**: استخدم أسماء جذابة مثل "الأناقة الفاخرة"، "الجرأة العصرية"، "الدفء الكلاسيكي"، "النقاء الأنيق".
-
-عند طلب "Regenerate" أو "تصاميم جديدة" أو "غيّر التصاميم"، ولّد 3 تصاميم مختلفة كلياً عن السابقة.
+## توليد تصاميم متعددة:
+عندما يطلب المستخدم "اقترح تصاميم"، "أرني خيارات تصميم"، "صمم لي عدة متاجر"، "تصاميم بديلة"، أو أي طلب يستدعي عرض خيارات متعددة، استدعِ أداة "generate_design_variants" التي تُرجع 3 تصاميم متميزة. كل تصميم يجب أن يكون له شخصية مختلفة (مثلاً: عصري جريء، أنيق بسيط، دافئ كلاسيكي).
 
 ## ملاحظة مهمة:
 - المتجر يحتوي على عدة صفحات: الرئيسية، جميع المنتجات، صفحة منتج فردي، العروض، من نحن، تواصل معنا.
@@ -197,12 +142,10 @@ const tools = [
                 logo: { type: "string", description: "Emoji logo" },
                 borderRadius: { type: "string", enum: ["none", "sm", "md", "lg", "full"] },
                 layout: { type: "string", enum: ["grid", "list"] },
-                productColumns: { type: "number", enum: [2, 3] },
                 features: { type: "array", items: { type: "string" }, description: "3-4 store features in Arabic" },
-                categories: { type: "array", items: { type: "string" }, description: "3-5 store categories in Arabic" },
                 products: {
                   type: "array",
-                  description: "5-6 sample products with realistic names fitting the store category",
+                  description: "4-6 sample products fitting the store type",
                   items: {
                     type: "object",
                     properties: {
@@ -210,50 +153,12 @@ const tools = [
                       price: { type: "string" },
                       image: { type: "string", description: "Emoji" },
                       description: { type: "string" },
-                      badge: { type: "string" },
                     },
                     required: ["name", "price", "image"],
                   },
                 },
-                testimonials: {
-                  type: "array",
-                  description: "2-3 realistic customer testimonials in Arabic",
-                  items: {
-                    type: "object",
-                    properties: {
-                      name: { type: "string" },
-                      text: { type: "string" },
-                      rating: { type: "number" },
-                    },
-                    required: ["name", "text", "rating"],
-                  },
-                },
-                banners: {
-                  type: "array",
-                  description: "1-2 promotional banners",
-                  items: {
-                    type: "object",
-                    properties: {
-                      text: { type: "string" },
-                      image: { type: "string" },
-                    },
-                    required: ["text"],
-                  },
-                },
-                faq: {
-                  type: "array",
-                  description: "2-3 FAQs in Arabic",
-                  items: {
-                    type: "object",
-                    properties: {
-                      question: { type: "string" },
-                      answer: { type: "string" },
-                    },
-                    required: ["question", "answer"],
-                  },
-                },
               },
-              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "heroSubtext", "heroButtonText", "logo", "products", "features", "categories", "testimonials"],
+              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "products"],
             },
           },
         },
@@ -363,72 +268,16 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl, language, appContext } = await req.json();
-    const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
+    const { messages, storeUrl } = await req.json();
 
-    // ============ Identify signed-in user (optional) ============
-    let userId: string | null = null;
-    const authHeader = req.headers.get("Authorization");
-    if (authHeader?.startsWith("Bearer ")) {
-      try {
-        const supa = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
-          global: { headers: { Authorization: authHeader } },
-        });
-        const { data: { user } } = await supa.auth.getUser();
-        userId = user?.id ?? null;
-      } catch (e) { console.error("auth resolve error", e); }
-    }
-
-    // ============ Recall long-term memories (signed-in users only) ============
-    const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user');
-    const queryText = typeof lastUserMsg?.content === 'string'
-      ? lastUserMsg.content
-      : Array.isArray(lastUserMsg?.content)
-        ? lastUserMsg.content.filter((p: any) => p.type === 'text').map((p: any) => p.text).join(' ')
-        : '';
-
-    let memoryBlock = '';
-    if (userId && queryText) {
-      const memories = await recallMemories(userId, queryText, 6);
-      if (memories.length) {
-        memoryBlock = `\n\n## What you remember about this user\n` +
-          memories.map(m => `- (${m.kind}, importance ${m.importance}) ${m.content}`).join('\n');
-      }
-    }
-
-    // ============ Real-time app context ============
-    let contextBlock = '';
-    if (appContext) {
-      const lines: string[] = [];
-      if (appContext.route) lines.push(`Current page: ${appContext.route}`);
-      if (appContext.storeSummary) lines.push(`Store snapshot: ${appContext.storeSummary}`);
-      if (appContext.recentActivity?.length) {
-        lines.push(`Recent activity: ${appContext.recentActivity.slice(0, 5).join(' → ')}`);
-      }
-      if (appContext.plan) lines.push(`Plan: ${appContext.plan}`);
-      if (lines.length) contextBlock = `\n\n## Live app context\n${lines.join('\n')}`;
-    }
-
-    const now = new Date();
-    const dailyContext = `\n\n## Today: ${now.toUTCString().slice(0, 16)} UTC.`;
-
-    const langDirective =
-      lang === 'en'
-        ? `\n\n## LANGUAGE: Reply ONLY in English.`
-        : lang === 'fr'
-        ? `\n\n## LANGUE: Répondez UNIQUEMENT en français.`
-        : `\n\n## اللغة: أجب بالعربية الفصحى.`;
-
-    const systemWithContext =
-      `${ZYRA_PERSONA}\n\n---\n\n${SYSTEM_PROMPT}` +
-      (storeUrl ? `\n\nUser's store: ${storeUrl}.` : '') +
-      memoryBlock + contextBlock + dailyContext + langDirective;
+    const systemWithContext = storeUrl
+      ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}. استخدم هذا السياق عند تقديم النصائح أو التعديلات.`
+      : SYSTEM_PROMPT;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
       ...messages,
     ];
-
 
     const data = await callAI(apiMessages);
     const choice = data.choices?.[0]?.message;
@@ -507,26 +356,10 @@ serve(async (req) => {
       if (designVariants && designVariants.length > 0) responseType = "design_variants";
       else if (functionCalls.length > 0) responseType = "modify_store";
 
-      // Determine source of the answer for UI badge
-      let source: string = "knowledge";
-      if (hasWebSearch) source = "web_search";
-      else if (designVariants && designVariants.length > 0) source = "design_generator";
-      else if (functionCalls.length > 0) source = "store_editor";
-
-      // Fire-and-forget memory extraction (signed-in users)
-      if (userId && queryText && textContent) {
-        EdgeRuntime?.waitUntil?.(
-          extractMemoriesFromExchange(queryText, textContent)
-            .then(items => items.length ? saveMemories(userId!, items) : null)
-            .catch(e => console.error("memory pipeline:", e))
-        );
-      }
-
       return new Response(
         JSON.stringify({
           type: responseType,
           content: textContent,
-          source,
           ...(functionCalls.length > 0 ? { functionCalls } : {}),
           ...(designVariants ? { designVariants } : {}),
         }),
@@ -534,20 +367,10 @@ serve(async (req) => {
       );
     }
 
-    // Fire-and-forget memory extraction for plain text replies too
-    if (userId && queryText && choice.content) {
-      EdgeRuntime?.waitUntil?.(
-        extractMemoriesFromExchange(queryText, choice.content)
-          .then(items => items.length ? saveMemories(userId!, items) : null)
-          .catch(e => console.error("memory pipeline:", e))
-      );
-    }
-
     return new Response(
-      JSON.stringify({ type: "text", content: choice.content, source: "knowledge" }),
+      JSON.stringify({ type: "text", content: choice.content }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-
   } catch (error: any) {
     console.error("AI Chat error:", error);
     const status = error.status || 500;

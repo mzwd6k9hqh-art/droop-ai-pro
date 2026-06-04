@@ -7,12 +7,12 @@ interface ChatWelcomeProps {
 }
 
 const suggestions = [
-  { icon: Palette, text: 'Change the store colors to deep blue', label: 'Change Colors' },
-  { icon: ShoppingBag, text: 'Add a new product priced at $99', label: 'Add Product' },
-  { icon: Type, text: 'Change the store name', label: 'Edit Name' },
-  { icon: LayoutGrid, text: 'Change product layout to list view', label: 'Change Layout' },
-  { icon: Search, text: 'Search for the latest e-commerce trends', label: 'Web Search' },
-  { icon: TrendingUp, text: 'Suggest ways to boost my store sales', label: 'Marketing Tips' },
+  { icon: Palette, text: 'غيّر ألوان المتجر إلى الأزرق الداكن', label: 'تغيير الألوان' },
+  { icon: ShoppingBag, text: 'أضف منتج جديد بسعر 99 ريال', label: 'إضافة منتج' },
+  { icon: Type, text: 'غيّر اسم المتجر', label: 'تعديل الاسم' },
+  { icon: LayoutGrid, text: 'غيّر تصميم المنتجات إلى قائمة', label: 'تغيير التصميم' },
+  { icon: Search, text: 'ابحث عن أحدث اتجاهات التجارة الإلكترونية', label: 'بحث في الويب' },
+  { icon: TrendingUp, text: 'اقترح طرق لزيادة مبيعات متجري', label: 'نصائح تسويقية' },
 ];
 
 export function ChatWelcome({ onSuggestionClick }: ChatWelcomeProps) {
@@ -28,9 +28,9 @@ export function ChatWelcome({ onSuggestionClick }: ChatWelcomeProps) {
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold text-foreground mb-2">Hi, how can I help you?</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-2">مرحباً، كيف أقدر أساعدك؟</h1>
       <p className="text-muted-foreground text-sm mb-10 max-w-md text-center">
-        I'm your smart assistant for building and managing your store. Ask me anything or pick a suggestion.
+        أنا مساعدك الذكي لبناء وإدارة متجرك. اسألني أي شيء أو اختر من الاقتراحات
       </p>
 
       {/* Suggestion Cards */}
@@ -40,7 +40,7 @@ export function ChatWelcome({ onSuggestionClick }: ChatWelcomeProps) {
             key={i}
             onClick={() => onSuggestionClick(s.text)}
             className={cn(
-              'group flex items-center gap-3 p-4 rounded-xl text-left',
+              'group flex items-center gap-3 p-4 rounded-xl text-right',
               'bg-card border border-border/60 hover:border-primary/30',
               'transition-all hover:shadow-md hover:-translate-y-0.5',
               'text-sm text-foreground'

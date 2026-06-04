@@ -3,7 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import { User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DesignVariants, type DesignVariant } from './DesignVariants';
-import { MessageSourceBadge, type MessageSource } from './MessageSourceBadge';
 
 interface MessageAttachment {
   url: string;
@@ -16,13 +15,10 @@ interface ChatMessageProps {
   attachments?: MessageAttachment[];
   designVariants?: DesignVariant[];
   appliedVariantIndex?: number | null;
-  source?: MessageSource;
   onApplyVariant?: (variant: DesignVariant, index: number) => void;
-  onRegenerateVariants?: () => void;
-  onCustomizeStore?: () => void;
 }
 
-export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, source, onApplyVariant, onRegenerateVariants, onCustomizeStore }: ChatMessageProps) {
+export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, onApplyVariant }: ChatMessageProps) {
   const isUser = role === 'user';
 
   return (
@@ -40,15 +36,12 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className={cn(
-              'text-xs font-semibold',
-              isUser ? 'text-foreground' : 'text-primary'
-            )}>
-              {isUser ? 'You' : 'Zyra'}
-            </p>
-            {!isUser && source && <MessageSourceBadge source={source} />}
-          </div>
+          <p className={cn(
+            'text-xs font-semibold',
+            isUser ? 'text-foreground' : 'text-primary'
+          )}>
+            {isUser ? 'أنت' : 'DROOB AI'}
+          </p>
 
           {/* Attachments */}
           {attachments && attachments.length > 0 && (
@@ -75,8 +68,6 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
               variants={designVariants}
               appliedIndex={appliedVariantIndex ?? null}
               onApply={onApplyVariant}
-              onRegenerate={onRegenerateVariants}
-              onCustomize={onCustomizeStore}
             />
           )}
         </div>

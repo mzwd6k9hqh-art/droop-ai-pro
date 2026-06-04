@@ -2,12 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Analytics from "@/pages/Analytics";
 import AIChat from "@/pages/AIChat";
@@ -17,21 +19,26 @@ import NotFound from "@/pages/NotFound";
 import Onboarding from "@/pages/Onboarding";
 import StoreAnalysis from "@/pages/StoreAnalysis";
 import Upgrade from "@/pages/Upgrade";
-import VoiceCall from "@/pages/VoiceCall";
-import CustomerChat from "@/pages/CustomerChat";
-import Earnings from "@/pages/Earnings";
-import Auth from "@/pages/Auth";
-import Integrations from "@/pages/Integrations";
-
-import { useActivityTracker } from "@/hooks/useActivityTracker";
-import { useProactiveAssistant } from "@/hooks/useProactiveAssistant";
 
 const queryClient = new QueryClient();
 
-function ActivityTrackerMount() {
-  useActivityTracker();
-  useProactiveAssistant();
-  return null;
+// Landing route wrapper - shows landing for unauthenticated users
+function LandingRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+  
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+  
+  return <Landing />;
 }
 
 const App = () => (
@@ -43,31 +50,24 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <ActivityTrackerMount />
               <Routes>
-                <Route path="/" element={<Landing />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/store-analysis" element={<StoreAnalysis />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
                 <Route path="/landing" element={<Landing />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="/store-analysis" element={<StoreAnalysis />} />
                 <Route path="/ai" element={<AIChat />} />
                 <Route path="/upgrade" element={<Upgrade />} />
-                <Route path="/voice-call" element={<VoiceCall />} />
-                <Route path="/login" element={<Auth />} />
-                <Route path="/register" element={<Auth />} />
-                <Route path="/auth" element={<Auth />} />
                 <Route element={<AppLayout />}>
+                  <Route path="/" element={<LandingRoute />} />
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/customers" element={<CustomerChat />} />
-                  <Route path="/earnings" element={<Earnings />} />
-                  <Route path="/integrations" element={<Integrations />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/settings" element={<Settings />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-
           </TooltipProvider>
         </AuthProvider>
       </LanguageProvider>
