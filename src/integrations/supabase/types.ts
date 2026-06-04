@@ -14,16 +14,272 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_logs: {
+        Row: {
+          action: string | null
+          created_at: string
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json
+          route: string | null
+          session_id: string | null
+          target: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          route?: string | null
+          session_id?: string | null
+          target?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json
+          route?: string | null
+          session_id?: string | null
+          target?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      assistant_memory: {
+        Row: {
+          content: string
+          created_at: string
+          embedding: string | null
+          id: string
+          importance: number
+          kind: string
+          last_used_at: string | null
+          metadata: Json
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          kind?: string
+          last_used_at?: string | null
+          metadata?: Json
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          embedding?: string | null
+          id?: string
+          importance?: number
+          kind?: string
+          last_used_at?: string | null
+          metadata?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      customer_chats: {
+        Row: {
+          created_at: string
+          customer_avatar: string | null
+          customer_email: string | null
+          customer_name: string
+          id: string
+          last_message: string | null
+          last_message_at: string
+          seller_id: string
+          unread_count: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_avatar?: string | null
+          customer_email?: string | null
+          customer_name: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string
+          seller_id: string
+          unread_count?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_avatar?: string | null
+          customer_email?: string | null
+          customer_name?: string
+          id?: string
+          last_message?: string | null
+          last_message_at?: string
+          seller_id?: string
+          unread_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_messages: {
+        Row: {
+          chat_id: string
+          content: string
+          created_at: string
+          id: string
+          read: boolean
+          seller_id: string
+          sender: Database["public"]["Enums"]["message_sender"]
+        }
+        Insert: {
+          chat_id: string
+          content: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          seller_id: string
+          sender: Database["public"]["Enums"]["message_sender"]
+        }
+        Update: {
+          chat_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          read?: boolean
+          seller_id?: string
+          sender?: Database["public"]["Enums"]["message_sender"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "customer_chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          credentials: Json
+          id: string
+          provider: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          credentials?: Json
+          id?: string
+          provider: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          credentials?: Json
+          id?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          preferences: Json
+          store_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          preferences?: Json
+          store_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          preferences?: Json
+          store_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          route: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          route?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          route?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_assistant_memory: {
+        Args: { p_limit?: number; p_query: string; p_user_id: string }
+        Returns: {
+          content: string
+          id: string
+          importance: number
+          kind: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
-      [_ in never]: never
+      message_sender: "seller" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +406,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      message_sender: ["seller", "customer"],
+    },
   },
 } as const
