@@ -20,7 +20,6 @@ const WHOP_CHECKOUT_URL = 'https://whop.com/checkout/your-product-id';
 interface PlanCard {
   id: PlanType;
   name: string;
-  nameAr: string;
   price: string;
   period: string;
   dailyMessages: number | 'unlimited';
@@ -36,87 +35,83 @@ const plans: PlanCard[] = [
   {
     id: 'free',
     name: 'Free',
-    nameAr: 'مجاني',
     price: '$0',
-    period: 'مجاناً للأبد',
+    period: 'free forever',
     dailyMessages: 5,
-    description: 'ابدأ مجاناً مع الميزات الأساسية',
+    description: 'Get started with the basics',
     icon: Zap,
     gradient: 'from-slate-500 to-slate-600',
     features: [
-      { name: '5 رسائل يومية للذكاء الاصطناعي', included: true },
-      { name: 'معاينة المتجر الأساسية', included: true },
-      { name: 'لوحة التحكم', included: true },
-      { name: 'محادثة واحدة', included: true },
-      { name: 'رفع الصور والفيديو', included: false },
-      { name: 'تحليل المتجر', included: false },
-      { name: 'تقارير متقدمة', included: false },
-      { name: 'دعم الأولوية', included: false },
+      { name: '5 daily AI messages', included: true },
+      { name: 'Basic store preview', included: true },
+      { name: 'Dashboard', included: true },
+      { name: 'Single conversation', included: true },
+      { name: 'Image & video upload', included: false },
+      { name: 'Store analysis', included: false },
+      { name: 'Advanced reports', included: false },
+      { name: 'Priority support', included: false },
     ],
   },
   {
     id: 'starter',
     name: 'Starter',
-    nameAr: 'مبتدئ',
     price: '$19',
-    period: '/شهرياً',
+    period: '/month',
     dailyMessages: 25,
-    description: 'لرواد الأعمال الأفراد',
+    description: 'For solo entrepreneurs',
     icon: Star,
     gradient: 'from-blue-500 to-cyan-500',
     features: [
-      { name: '25 رسالة يومية للذكاء الاصطناعي', included: true, highlight: true },
-      { name: 'محادثات غير محدودة', included: true },
-      { name: 'رفع الصور والفيديو', included: true },
-      { name: 'تحليل المتجر', included: true },
-      { name: 'تحليلات أساسية', included: true },
-      { name: 'متجر متعدد الصفحات', included: true },
-      { name: 'تصدير التقارير', included: false },
-      { name: 'دعم الأولوية', included: false },
+      { name: '25 daily AI messages', included: true, highlight: true },
+      { name: 'Unlimited conversations', included: true },
+      { name: 'Image & video upload', included: true },
+      { name: 'Store analysis', included: true },
+      { name: 'Basic analytics', included: true },
+      { name: 'Multi-page store', included: true },
+      { name: 'Export reports', included: false },
+      { name: 'Priority support', included: false },
     ],
   },
   {
     id: 'pro',
     name: 'Pro',
-    nameAr: 'احترافي',
     price: '$49',
-    period: '/شهرياً',
+    period: '/month',
     dailyMessages: 100,
-    description: 'للأعمال المتنامية',
+    description: 'For growing businesses',
     icon: Crown,
     highlight: true,
-    badge: 'الأكثر شعبية',
+    badge: 'Most Popular',
     gradient: 'from-primary to-accent',
     features: [
-      { name: '100 رسالة يومية للذكاء الاصطناعي', included: true, highlight: true },
-      { name: 'تحليل ذكاء اصطناعي متقدم', included: true, highlight: true },
-      { name: 'مجموعة تحليلات كاملة', included: true },
-      { name: 'تتبع المنافسين', included: true },
-      { name: 'تقارير مخصصة وتصدير', included: true },
-      { name: 'دعم عبر البريد الإلكتروني', included: true },
-      { name: 'أدوات تخصيص المتجر', included: true },
-      { name: 'وصول API', included: false },
+      { name: '100 daily AI messages', included: true, highlight: true },
+      { name: 'Advanced AI analysis', included: true, highlight: true },
+      { name: 'Full analytics suite', included: true },
+      { name: 'Competitor tracking', included: true },
+      { name: 'Custom reports & export', included: true },
+      { name: 'Email support', included: true },
+      { name: 'Store customization tools', included: true },
+      { name: 'API access', included: false },
     ],
   },
   {
     id: 'premium',
     name: 'Premium',
-    nameAr: 'مميز',
     price: '$99',
-    period: '/شهرياً',
+    period: '/month',
     dailyMessages: 'unlimited',
-    description: 'للأعمال الراسخة',
+    description: 'For established businesses',
     icon: Sparkles,
     gradient: 'from-amber-500 to-orange-500',
     features: [
-      { name: 'رسائل ذكاء اصطناعي غير محدودة', included: true, highlight: true },
-      { name: 'جميع ميزات Pro', included: true },
-      { name: 'تقارير بشعارك', included: true },
-      { name: 'تعاون الفريق (5 مقاعد)', included: true },
-      { name: 'وصول كامل لـ API', included: true },
-      { name: 'دعم أولوية 24/7', included: true },
-      { name: 'تكاملات مخصصة', included: true },
-      { name: 'مدير حساب مخصص', included: true },
+      { name: 'Unlimited AI messages', included: true, highlight: true },
+      { name: 'All Pro features', included: true },
+      { name: 'White-label reports', included: true },
+      { name: 'Team collaboration (5 seats)', included: true },
+      { name: 'Full API access', included: true },
+      { name: 'Priority 24/7 support', included: true },
+      { name: 'Custom integrations', included: true },
+      { name: 'Dedicated account manager', included: true },
     ],
   },
 ];
@@ -128,37 +123,36 @@ export default function Upgrade() {
   const handleUpgrade = (planId: PlanType) => {
     if (planId === 'free') {
       updatePlan('free');
-      toast.success('تم التخفيض إلى الخطة المجانية');
+      toast.success('Switched to the Free plan');
       return;
     }
     window.open(`${WHOP_CHECKOUT_URL}?plan=${planId}`, '_blank');
-    toast.info('جاري التوجيه إلى صفحة الدفع...');
+    toast.info('Redirecting to checkout…');
     setTimeout(() => {
       updatePlan(planId);
-      toast.success(`تمت الترقية إلى خطة ${plans.find(p => p.id === planId)?.nameAr}!`);
+      toast.success(`Upgraded to ${plans.find(p => p.id === planId)?.name}!`);
     }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
+    // Force English on this page regardless of app language setting
+    <div className="min-h-screen bg-background" dir="ltr" lang="en">
       <div className="sticky top-0 z-10 flex items-center h-14 px-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/ai')}
+          onClick={() => navigate(-1)}
           className="h-9 w-9 rounded-lg mr-3"
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-bold">ترقية خطتك</h1>
+          <h1 className="text-lg font-bold">Upgrade your plan</h1>
         </div>
       </div>
 
       <div className="px-4 py-6 max-w-7xl mx-auto">
-        {/* Current Plan Info */}
         {user && (
           <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
             <div className="flex items-center justify-between flex-wrap gap-3">
@@ -167,34 +161,35 @@ export default function Upgrade() {
                   <MessageSquare className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">خطتك الحالية: <span className="text-primary">{plans.find(p => p.id === user.plan)?.nameAr || user.plan}</span></p>
+                  <p className="text-sm font-semibold">
+                    Current plan:{' '}
+                    <span className="text-primary">
+                      {plans.find(p => p.id === user.plan)?.name || user.plan}
+                    </span>
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {isUnlimitedPlan()
-                      ? 'رسائل غير محدودة ✨'
-                      : `${getAiMessagesRemaining()} رسائل متبقية من ${getDailyLimit()} يومياً`}
+                      ? 'Unlimited messages ✨'
+                      : `${getAiMessagesRemaining()} of ${getDailyLimit()} daily messages remaining`}
                   </p>
                 </div>
               </div>
               {!isUnlimitedPlan() && (
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-32 rounded-full bg-muted overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all"
-                      style={{ width: `${Math.max(5, (getAiMessagesRemaining() / getDailyLimit()) * 100)}%` }}
-                    />
-                  </div>
+                <div className="h-2 w-32 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all"
+                    style={{ width: `${Math.max(5, (getAiMessagesRemaining() / getDailyLimit()) * 100)}%` }}
+                  />
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* Plans Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {plans.map((plan) => {
             const Icon = plan.icon;
             const isCurrent = user?.plan === plan.id;
-
             return (
               <div
                 key={plan.id}
@@ -213,13 +208,12 @@ export default function Upgrade() {
                   </div>
                 )}
 
-                {/* Plan Header */}
                 <div className="mb-4">
                   <div className={cn(
                     'inline-flex p-2.5 rounded-xl mb-3',
-                    plan.highlight ? 'bg-white/20' : 'bg-gradient-to-br ' + plan.gradient + ' bg-opacity-10'
+                    plan.highlight ? 'bg-white/20' : 'bg-gradient-to-br ' + plan.gradient
                   )}>
-                    <Icon className={cn('h-6 w-6', plan.highlight ? 'text-white' : 'text-white')} />
+                    <Icon className="h-6 w-6 text-white" />
                   </div>
                   <h3 className={cn('text-lg font-bold', plan.highlight && 'text-white')}>{plan.name}</h3>
                   <p className={cn('text-xs mt-0.5', plan.highlight ? 'text-white/70' : 'text-muted-foreground')}>
@@ -227,7 +221,6 @@ export default function Upgrade() {
                   </p>
                 </div>
 
-                {/* Price */}
                 <div className="mb-4">
                   <span className={cn('text-3xl font-bold', plan.highlight && 'text-white')}>{plan.price}</span>
                   <span className={cn('text-sm', plan.highlight ? 'text-white/70' : 'text-muted-foreground')}>
@@ -235,18 +228,14 @@ export default function Upgrade() {
                   </span>
                 </div>
 
-                {/* Daily Messages Badge */}
                 <div className={cn(
                   'mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold',
-                  plan.highlight
-                    ? 'bg-white/20 text-white'
-                    : 'bg-primary/10 text-primary border border-primary/20'
+                  plan.highlight ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary border border-primary/20'
                 )}>
                   <MessageSquare className="h-3.5 w-3.5" />
-                  {plan.dailyMessages === 'unlimited' ? 'رسائل غير محدودة' : `${plan.dailyMessages} رسالة/يوم`}
+                  {plan.dailyMessages === 'unlimited' ? 'Unlimited messages' : `${plan.dailyMessages} messages/day`}
                 </div>
 
-                {/* Features */}
                 <ul className="space-y-2 mb-5">
                   {plan.features.map((feature, i) => (
                     <li key={i} className={cn('flex items-start gap-2 text-xs', plan.highlight && 'text-white')}>
@@ -262,7 +251,6 @@ export default function Upgrade() {
                   ))}
                 </ul>
 
-                {/* CTA */}
                 <Button
                   onClick={() => handleUpgrade(plan.id)}
                   disabled={isCurrent}
@@ -273,7 +261,7 @@ export default function Upgrade() {
                     !plan.highlight && !isCurrent && 'gradient-button'
                   )}
                 >
-                  {isCurrent ? 'خطتك الحالية' : 'اختر هذه الخطة'}
+                  {isCurrent ? 'Current plan' : 'Choose this plan'}
                 </Button>
               </div>
             );

@@ -65,7 +65,7 @@ export function DroopAILogo({
       {showText && (
         <div className="flex flex-col">
           <span className={cn('font-bold tracking-tight', sizes.text)}>
-            DROOB AI
+            Zyra
           </span>
           {size !== 'sm' && (
             <span className="text-xs text-muted-foreground">Sales Booster</span>

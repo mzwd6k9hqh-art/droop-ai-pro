@@ -142,7 +142,7 @@ export default function Pricing() {
   };
 
   return (
-    <div className="py-4 animate-slide-up">
+    <div className="py-4 animate-slide-up" dir="ltr" lang="en">
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
@@ -150,7 +150,7 @@ export default function Pricing() {
           <span className="text-sm font-medium text-primary">Choose Your Plan</span>
         </div>
         <h1 className="text-4xl font-bold tracking-tight mb-4">
-          {t('pricing.title')}
+          Choose Your Plan
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           Scale your business with AI-powered insights. Start free and upgrade as you grow.
@@ -279,7 +279,7 @@ export default function Pricing() {
                   !plan.highlight && 'gradient-button'
                 )}
               >
-                {isCurrent ? t('pricing.current') : t('pricing.upgrade')}
+                {isCurrent ? 'Current Plan' : 'Upgrade Now'}
               </Button>
             </div>
           );
@@ -291,7 +291,7 @@ export default function Pricing() {
         <h2 className="text-2xl font-bold text-center mb-8">All Features</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Bot, label: 'DROOB AI Assistant', color: 'icon-primary' },
+            { icon: Bot, label: 'Zyra Assistant', color: 'icon-primary' },
             { icon: BarChart3, label: 'Business Analytics', color: 'icon-info' },
             { icon: Globe, label: 'Global Market Data', color: 'icon-secondary' },
             { icon: Rocket, label: 'Growth Insights', color: 'icon-warning' },

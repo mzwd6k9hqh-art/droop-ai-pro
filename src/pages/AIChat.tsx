@@ -12,12 +12,15 @@ import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
 import { useConversations, MessageAttachment } from '@/hooks/useConversations';
 import type { DesignVariant } from '@/components/chat/DesignVariants';
-import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2 } from 'lucide-react';
+import { Sparkles, PanelRight, X, Plus, Menu, Crown, Zap, Settings2, Rocket, MoreVertical, BarChart3, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { applyModification } from '@/lib/storeModifications';
 import { StoreEditorPanel } from '@/components/StoreEditorPanel';
+import { ExportPublishDialog } from '@/components/ExportPublishDialog';
+import { useHistoryState } from '@/hooks/useHistoryState';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -43,15 +46,18 @@ export default function AIChat() {
   const [isTyping, setIsTyping] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [storeContext] = useState<OnboardingResult | null>(() => {
     const saved = localStorage.getItem(STORE_CONTEXT_KEY);
     return saved ? JSON.parse(saved) : null;
   });
-  const [storeConfig, setStoreConfig] = useState<StoreConfig>(() => {
-    const saved = localStorage.getItem(STORE_CONFIG_KEY);
-    return saved ? JSON.parse(saved) : {};
-  });
+  const [storeConfig, setStoreConfig, storeConfigHistory] = useHistoryState<StoreConfig>(
+    (() => {
+      const saved = localStorage.getItem(STORE_CONFIG_KEY);
+      return saved ? JSON.parse(saved) : {};
+    })()
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const messages = activeConversation?.messages || [];
@@ -88,13 +94,18 @@ export default function AIChat() {
       logo: variant.logo,
       borderRadius: variant.borderRadius,
       layout: variant.layout,
+      productColumns: variant.productColumns,
       features: variant.features,
+      categories: variant.categories,
       products: variant.products && variant.products.length > 0 ? variant.products : prev.products,
+      testimonials: variant.testimonials && variant.testimonials.length > 0 ? variant.testimonials : prev.testimonials,
+      banners: variant.banners && variant.banners.length > 0 ? variant.banners : prev.banners,
+      faq: variant.faq && variant.faq.length > 0 ? variant.faq : prev.faq,
       showHero: true,
     }));
     updateMessage(convId, msgId, { appliedVariantIndex: index });
-    toast.success(`تم تطبيق تصميم "${variant.name}"!`, {
-      action: { label: 'عرض المتجر', onClick: () => setShowPreview(true) },
+    toast.success(`Applied design "${variant.name}"!`, {
+      action: { label: 'View store', onClick: () => setShowPreview(true) },
     });
     setShowPreview(true);
   }, [updateMessage]);
@@ -125,8 +136,9 @@ ${storeContext.description ? `- Description: ${storeContext.description}` : ''}
 Welcome them and present a store design concept with layout, categories, colors, and first steps. IMPORTANT: Call the modify_store function to set up the initial store design with appropriate products, colors, and layout based on their preferences.`;
         }
 
+        const lang = localStorage.getItem('salesbooster_language') || 'en';
         const { data, error } = await supabase.functions.invoke('ai-chat', {
-          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '' },
+          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '', language: lang },
         });
         if (error) throw error;
 
@@ -142,11 +154,12 @@ Welcome them and present a store design concept with layout, categories, colors,
           role: 'assistant',
           content: data.content,
           designVariants: data.designVariants,
+          source: data.source,
         });
       } catch {
         const fallback = storeContext.hasStore
-          ? `مرحباً! سأساعدك في تحسين متجرك **${storeContext.storeUrl}**. ماذا تريد تحسينه؟`
-          : `مرحباً! هيا نبني متجرك **${storeContext.storeName || storeContext.storeType || ''}** معاً! اطلب مني أي تعديل!`;
+          ? `Hi! I'll help you improve your store **${storeContext.storeUrl}**. What would you like to enhance?`
+          : `Hi! Let's build your store **${storeContext.storeName || storeContext.storeType || ''}** together! Just tell me what you want!`;
         addMessage(activeId, { role: 'assistant', content: fallback });
       } finally {
         setIsTyping(false);
@@ -178,7 +191,7 @@ Welcome them and present a store design concept with layout, categories, colors,
     const newAttachments: ChatAttachment[] = [];
     Array.from(files).forEach(file => {
       if (file.size > 20 * 1024 * 1024) {
-        toast.error('حجم الملف كبير جداً (الحد الأقصى 20MB)');
+        toast.error('File too large (max 20MB)');
         return;
       }
       const type = file.type.startsWith('video/') ? 'video' as const : 'image' as const;
@@ -199,9 +212,9 @@ Welcome them and present a store design concept with layout, categories, colors,
 
     // Check message limit
     if (user && !incrementAiMessages()) {
-      toast.error(`لقد وصلت للحد اليومي (${getDailyLimit()} رسائل). قم بالترقية للحصول على المزيد!`, {
+      toast.error(`You've reached the daily limit (${getDailyLimit()} messages). Upgrade for more!`, {
         action: {
-          label: 'ترقية',
+          label: 'Upgrade',
           onClick: () => navigate('/upgrade'),
         },
       });
@@ -222,14 +235,14 @@ Welcome them and present a store design concept with layout, categories, colors,
       type: a.type,
     }));
 
-    addMessage(convId, { role: 'user', content: userContent || '📎 مرفقات', attachments: messageAttachments });
+    addMessage(convId, { role: 'user', content: userContent || '📎 Attachments', attachments: messageAttachments });
     setInput('');
     setAttachments([]);
     setIsTyping(true);
 
     try {
       // Build multimodal content for the current message
-      let currentMessageContent: any = userContent || 'ما هذا؟';
+      let currentMessageContent: any = userContent || 'What is this?';
       
       if (currentAttachments.length > 0) {
         const parts: any[] = [];
@@ -245,10 +258,10 @@ Welcome them and present a store design concept with layout, categories, colors,
             });
           } else {
             // For video, send as text description since most models don't support video inline
-            parts.push({ type: 'text', text: `[فيديو مرفق: ${att.file.name}]` });
+            parts.push({ type: 'text', text: `[Video attached: ${att.file.name}]` });
           }
         }
-        if (parts.length === 0) parts.push({ type: 'text', text: 'ما هذا؟' });
+        if (parts.length === 0) parts.push({ type: 'text', text: 'What is this?' });
         currentMessageContent = parts;
       }
 
@@ -261,14 +274,17 @@ Welcome them and present a store design concept with layout, categories, colors,
         { role: 'user' as const, content: currentMessageContent },
       ];
 
+      const lang = localStorage.getItem('salesbooster_language') || 'en';
       const { data, error } = await supabase.functions.invoke('ai-chat', {
         body: {
           messages: allMessages,
           storeUrl: storeContext?.storeUrl || '',
+          language: lang,
         },
       });
 
       if (error) throw error;
+      if (!data) throw new Error('Empty response from AI');
 
       if (data.type === 'modify_store') {
         if (data.functionCalls && Array.isArray(data.functionCalls)) {
@@ -278,14 +294,25 @@ Welcome them and present a store design concept with layout, categories, colors,
         }
       }
 
+      const replyContent =
+        (typeof data.content === 'string' && data.content.trim()) ||
+        (data.designVariants && data.designVariants.length > 0 && 'Here are some design ideas for you 🎨') ||
+        "I'm here! Could you rephrase that?";
+
       addMessage(convId, {
         role: 'assistant',
-        content: data.content,
+        content: replyContent,
         designVariants: data.designVariants,
+        source: data.source,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI Chat error:', err);
-      addMessage(convId, { role: 'assistant', content: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.' });
+      const msg = err?.message?.includes('429')
+        ? 'Too many requests right now. Please wait a moment and try again.'
+        : err?.message?.includes('402')
+        ? 'AI credits exhausted. Please add credits in Settings → Workspace → Usage.'
+        : 'Sorry, something went wrong. Please try again.';
+      addMessage(convId, { role: 'assistant', content: msg });
     } finally {
       setIsTyping(false);
     }
@@ -324,7 +351,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               size="icon"
               onClick={() => setShowSidebar(true)}
               className="h-9 w-9 rounded-lg lg:hidden"
-              title="المحادثات"
+              title="Conversations"
             >
               <Menu className="h-4 w-4" />
             </Button>
@@ -332,8 +359,8 @@ Welcome them and present a store design concept with layout, categories, colors,
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-foreground leading-none">DROOB AI</h1>
-              <p className="text-[11px] text-muted-foreground">مساعدك الذكي</p>
+              <h1 className="text-sm font-semibold text-foreground leading-none">Zyra</h1>
+              <p className="text-[11px] text-muted-foreground">Your smart assistant</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -346,49 +373,76 @@ Welcome them and present a store design concept with layout, categories, colors,
                 </span>
               </div>
             )}
-            {/* Upgrade button - always visible unless premium */}
-            {(!user || user.plan !== 'premium') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/upgrade')}
-                className="h-8 rounded-lg gap-1.5 text-xs bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 text-primary border border-primary/20 font-semibold"
-                title="ترقية الخطة"
-              >
-                <Crown className="h-3.5 w-3.5" />
-                <span>ترقية</span>
-              </Button>
-            )}
+            {/* New Chat */}
             <Button
               variant="ghost"
               size="icon"
               onClick={handleNewChat}
               className="h-9 w-9 rounded-lg"
-              title="محادثة جديدة"
+              title="New chat"
             >
               <Plus className="h-4 w-4" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowEditor(true)}
-              className="h-9 w-9 rounded-lg"
-              title="تخصيص المتجر"
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
+            {/* View Store */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setShowPreview(!showPreview)}
-              className={cn(
-                'h-9 w-9 rounded-lg',
-                showPreview && 'bg-primary/10 text-primary'
-              )}
-              title="عرض المتجر"
+              className="h-9 w-9 rounded-lg"
+              title={showPreview ? 'Hide store' : 'View store'}
             >
               <PanelRight className="h-4 w-4" />
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-lg"
+                  title="More"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
+                  <Rocket className="h-4 w-4 mr-2 text-emerald-600" />
+                  <span className="font-medium">Publish Store</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowEditor(true)} className="cursor-pointer">
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  <span>Customize Store</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    if (localStorage.getItem('droop_store_published') !== 'true') {
+                      toast.error('Publish your store first to view analytics.');
+                      return;
+                    }
+                    navigate('/analytics');
+                  }}
+                  className="cursor-pointer"
+                  disabled={localStorage.getItem('droop_store_published') !== 'true'}
+                >
+                  <BarChart3 className="h-4 w-4 mr-2 text-primary" />
+                  <span>Store Analytics</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/customers')} className="cursor-pointer">
+                  <MessageSquare className="h-4 w-4 mr-2 text-accent" />
+                  <span>Customer Chat</span>
+                </DropdownMenuItem>
+                {(!user || user.plan !== 'premium') && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/upgrade')} className="cursor-pointer">
+                      <Crown className="h-4 w-4 mr-2 text-amber-500" />
+                      <span className="font-semibold text-primary">Upgrade Plan</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -406,7 +460,13 @@ Welcome them and present a store design concept with layout, categories, colors,
                   attachments={msg.attachments}
                   designVariants={msg.designVariants}
                   appliedVariantIndex={msg.appliedVariantIndex}
+                  source={msg.source}
                   onApplyVariant={activeId ? handleApplyVariant(activeId, msg.id) : undefined}
+                  onRegenerateVariants={() => {
+                    setInput('اقترح 3 تصاميم جديدة ومختلفة كلياً عن السابقة بألوان وأسلوب مختلف');
+                    setTimeout(() => handleSubmit(), 50);
+                  }}
+                  onCustomizeStore={() => setShowEditor(true)}
                 />
               ))}
               {isTyping && <TypingIndicator />}
@@ -494,6 +554,17 @@ Welcome them and present a store design concept with layout, categories, colors,
         onOpenChange={setShowEditor}
         config={storeConfig}
         onChange={setStoreConfig}
+        onUndo={storeConfigHistory.undo}
+        onRedo={storeConfigHistory.redo}
+        canUndo={storeConfigHistory.canUndo}
+        canRedo={storeConfigHistory.canRedo}
+      />
+
+      {/* Export & Publish Dialog */}
+      <ExportPublishDialog
+        open={showExport}
+        onOpenChange={setShowExport}
+        config={storeConfig}
       />
     </div>
   );

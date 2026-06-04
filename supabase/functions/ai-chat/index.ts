@@ -76,8 +76,36 @@ const SYSTEM_PROMPT = `أنت مساعد ذكي داخل تطبيق بناء م�
 - "update_contact_page" - تعديل صفحة التواصل. Details: { "email": "...", "phone": "...", "address": "...", "subtitle": "..." }
 - "update_offers_page" - تعديل صفحة العروض. Details: { "title": "...", "subtitle": "..." }
 
-## توليد تصاميم متعددة:
-عندما يطلب المستخدم "اقترح تصاميم"، "أرني خيارات تصميم"، "صمم لي عدة متاجر"، "تصاميم بديلة"، أو أي طلب يستدعي عرض خيارات متعددة، استدعِ أداة "generate_design_variants" التي تُرجع 3 تصاميم متميزة. كل تصميم يجب أن يكون له شخصية مختلفة (مثلاً: عصري جريء، أنيق بسيط، دافئ كلاسيكي).
+## توليد تصاميم متعددة (مهم جداً - معايير عالية):
+عندما يطلب المستخدم "اقترح تصاميم"، "أرني خيارات"، "صمم لي متجر"، "regenerate"، "تصاميم بديلة"، أو أي طلب لإنشاء/توليد متجر، استدعِ أداة "generate_design_variants" التي تُرجع 3 تصاميم متميزة بمستوى احترافي عالٍ كمواقع Dribbble/Figma/Wix Showcase.
+
+### معايير الجودة الإلزامية لكل تصميم:
+1. **شخصية بصرية فريدة لكل تصميم**: لا تكرر نفس الأسلوب أبداً. نوّع بين:
+   - **Theme**: فاتح minimalist / داكن premium / pastel ناعم / bold maximalist / editorial أنيق / retro nostalgic
+   - **Vibe**: عصري جريء / أنيق راقي / دافئ كلاسيكي / مرح حيوي / فاخر هادئ / جريء صناعي
+2. **لوحة ألوان مطابقة لنوع المتجر** (إلزامي):
+   - **fashion/beauty**: pink+rose+gold, purple+fuchsia+cream, nude+brown
+   - **electronics/tech**: dark slate+cyan+neon blue, indigo+violet, black+lime
+   - **food**: orange+amber+brown, red+yellow warm, green+olive earthy
+   - **sports**: green+emerald bold, orange+black athletic, electric blue+yellow
+   - **books**: amber+brown classic, sage+cream literary, navy+gold
+   - **kids**: cyan+yellow playful, pink+purple+mint, rainbow soft
+   - **home**: slate+stone neutral, terracotta+sage, beige+forest green
+3. **محتوى غني إلزامي لكل تصميم**: يجب تعبئة كل الحقول:
+   - heroText جذاب وقصير (3-5 كلمات)
+   - heroSubtext وصفي (10-15 كلمة)
+   - heroButtonText محفّز (مثلاً "اكتشف المجموعة")
+   - logo emoji مناسب للنوع
+   - features (3-4 ميزات قوية)
+   - products (5-6 منتجات بأسماء حقيقية، أسعار، وصف، وإيموجي مناسب)
+   - testimonials (2-3 آراء عملاء واقعية)
+   - banners (1-2 بانر ترويجي)
+   - categories (3-5 فئات)
+   - faq (2-3 أسئلة شائعة)
+4. **التنوع البصري**: نوّع borderRadius (none/sm/md/lg/full)، layout (grid/list)، productColumns (2 أو 3) بين التصاميم.
+5. **أسماء التصاميم بالعربية**: استخدم أسماء جذابة مثل "الأناقة الفاخرة"، "الجرأة العصرية"، "الدفء الكلاسيكي"، "النقاء الأنيق".
+
+عند طلب "Regenerate" أو "تصاميم جديدة" أو "غيّر التصاميم"، ولّد 3 تصاميم مختلفة كلياً عن السابقة.
 
 ## ملاحظة مهمة:
 - المتجر يحتوي على عدة صفحات: الرئيسية، جميع المنتجات، صفحة منتج فردي، العروض، من نحن، تواصل معنا.
@@ -142,10 +170,12 @@ const tools = [
                 logo: { type: "string", description: "Emoji logo" },
                 borderRadius: { type: "string", enum: ["none", "sm", "md", "lg", "full"] },
                 layout: { type: "string", enum: ["grid", "list"] },
+                productColumns: { type: "number", enum: [2, 3] },
                 features: { type: "array", items: { type: "string" }, description: "3-4 store features in Arabic" },
+                categories: { type: "array", items: { type: "string" }, description: "3-5 store categories in Arabic" },
                 products: {
                   type: "array",
-                  description: "4-6 sample products fitting the store type",
+                  description: "5-6 sample products with realistic names fitting the store category",
                   items: {
                     type: "object",
                     properties: {
@@ -153,12 +183,50 @@ const tools = [
                       price: { type: "string" },
                       image: { type: "string", description: "Emoji" },
                       description: { type: "string" },
+                      badge: { type: "string" },
                     },
                     required: ["name", "price", "image"],
                   },
                 },
+                testimonials: {
+                  type: "array",
+                  description: "2-3 realistic customer testimonials in Arabic",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      text: { type: "string" },
+                      rating: { type: "number" },
+                    },
+                    required: ["name", "text", "rating"],
+                  },
+                },
+                banners: {
+                  type: "array",
+                  description: "1-2 promotional banners",
+                  items: {
+                    type: "object",
+                    properties: {
+                      text: { type: "string" },
+                      image: { type: "string" },
+                    },
+                    required: ["text"],
+                  },
+                },
+                faq: {
+                  type: "array",
+                  description: "2-3 FAQs in Arabic",
+                  items: {
+                    type: "object",
+                    properties: {
+                      question: { type: "string" },
+                      answer: { type: "string" },
+                    },
+                    required: ["question", "answer"],
+                  },
+                },
               },
-              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "products"],
+              required: ["name", "description", "storeType", "primaryColor", "accentColor", "bgColor", "heroText", "heroSubtext", "heroButtonText", "logo", "products", "features", "categories", "testimonials"],
             },
           },
         },
@@ -268,11 +336,46 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl } = await req.json();
+    const { messages, storeUrl, language } = await req.json();
+    const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
 
-    const systemWithContext = storeUrl
-      ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}. استخدم هذا السياق عند تقديم النصائح أو التعديلات.`
-      : SYSTEM_PROMPT;
+    // ============ Daily awareness context ============
+    const now = new Date();
+    const weekdayAr = ['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    const monthAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    const m = now.getUTCMonth();
+    const d = now.getUTCDate();
+    const seasonAr = m <= 1 || m === 11 ? 'الشتاء' : m <= 4 ? 'الربيع' : m <= 7 ? 'الصيف' : 'الخريف';
+
+    const calendar: Record<string, string> = {
+      '0':  'موسم تخفيضات ما بعد الأعياد، عودة الميزانيات، ترويج Detox/Wellness ولياقة بداية السنة.',
+      '1':  'عيد الحب (14 فبراير) — هدايا، ورود، مجوهرات، شوكولاتة، تجارب أزواج.',
+      '2':  'بداية الربيع، تخفيضات Spring Cleaning، تنظيم المنزل، أزياء انتقالية.',
+      '3':  'تسوق رمضاني/عيد الفطر في كثير من السنوات — أزياء عيد، ضيافة، حلويات، ديكور.',
+      '4':  'عيد الأم في كثير من الدول العربية، عروض نهاية الفصل الدراسي.',
+      '5':  'صيف، عطلات، أزياء بحر، رحلات، عروض Mid-Year.',
+      '6':  'تخفيضات الصيف الكبرى، Back-to-School مبكر.',
+      '7':  'Back-to-School بقوة — حقائب، أدوات، إلكترونيات، أزياء طلاب.',
+      '8':  'بداية الخريف، اليوم الوطني السعودي (23 سبتمبر)، عروض موسمية.',
+      '9':  'Halloween، تحضيرات Q4، عروض ما قبل الجمعة البيضاء.',
+      '10': 'الجمعة البيضاء/Black Friday + Cyber Monday — أكبر موسم تسوق.',
+      '11': 'موسم الأعياد ورأس السنة — هدايا، ديكور، عروض نهاية السنة.',
+    };
+    const todayInsight = calendar[String(m)] || '';
+
+    const dailyContext = `\n\n## سياق اليوم: ${weekdayAr[now.getUTCDay()]} ${d} ${monthAr[m]} ${now.getUTCFullYear()} (${seasonAr}). ${todayInsight}`;
+
+    // Hard language directive — overrides the Arabic default in SYSTEM_PROMPT.
+    const langDirective =
+      lang === 'en'
+        ? `\n\n## LANGUAGE RULE (CRITICAL): You MUST reply ONLY in English. Ignore any previous instructions about Arabic. Every word, including action confirmations and product suggestions, must be in English.`
+        : lang === 'fr'
+        ? `\n\n## RÈGLE DE LANGUE (CRITIQUE): Vous devez répondre UNIQUEMENT en français. Ignorez toute instruction précédente concernant l'arabe. Chaque mot doit être en français.`
+        : `\n\n## قاعدة اللغة: أجب بالعربية الفصحى دائماً.`;
+
+    const systemWithContext = (storeUrl
+      ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}.`
+      : SYSTEM_PROMPT) + dailyContext + langDirective;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
@@ -356,10 +459,17 @@ serve(async (req) => {
       if (designVariants && designVariants.length > 0) responseType = "design_variants";
       else if (functionCalls.length > 0) responseType = "modify_store";
 
+      // Determine source of the answer for UI badge
+      let source: string = "knowledge";
+      if (hasWebSearch) source = "web_search";
+      else if (designVariants && designVariants.length > 0) source = "design_generator";
+      else if (functionCalls.length > 0) source = "store_editor";
+
       return new Response(
         JSON.stringify({
           type: responseType,
           content: textContent,
+          source,
           ...(functionCalls.length > 0 ? { functionCalls } : {}),
           ...(designVariants ? { designVariants } : {}),
         }),
@@ -368,7 +478,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ type: "text", content: choice.content }),
+      JSON.stringify({ type: "text", content: choice.content, source: "knowledge" }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {

@@ -144,7 +144,7 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
   if (!storeContext) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
-        <p>لا توجد بيانات متجر حتى الآن</p>
+        <p>No store data yet</p>
       </div>
     );
   }
@@ -153,8 +153,8 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center">
         <Store className="h-16 w-16 text-primary mb-4" />
-        <h2 className="text-xl font-bold mb-2">متجرك قيد التحليل</h2>
-        <p className="text-muted-foreground mb-4">جاري تحليل متجرك وتقديم التحسينات</p>
+        <h2 className="text-xl font-bold mb-2">Your store is being analyzed</h2>
+        <p className="text-muted-foreground mb-4">Analyzing your store and generating improvements</p>
         <a href={storeContext.storeUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">
           {storeContext.storeUrl}
         </a>
@@ -173,11 +173,11 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
   const storeName = storeConfig?.storeName || storeContext.storeName || 'My Store';
 
   const navPages = [
-    { id: 'home', title: 'الرئيسية' },
-    { id: 'products', title: 'جميع المنتجات' },
-    { id: 'offers', title: 'العروض' },
-    { id: 'about', title: 'من نحن' },
-    { id: 'contact', title: 'تواصل معنا' },
+    { id: 'home', title: 'Home' },
+    { id: 'products', title: 'All Products' },
+    { id: 'offers', title: 'Offers' },
+    { id: 'about', title: 'About' },
+    { id: 'contact', title: 'Contact' },
   ];
 
   const renderPage = () => {
@@ -271,14 +271,14 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
           </div>
         )}
         <p className="text-xs text-gray-500 text-center">
-          {storeConfig?.footerText || `تم تصميمه بواسطة DROOB AI • ${storeName}`}
+          {storeConfig?.footerText || `Designed by Zyra • ${storeName}`}
         </p>
         {/* Policies */}
         {storeConfig?.policies && (
           <div className="flex justify-center gap-3 mt-2">
-            {storeConfig.policies.shipping && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">سياسة الشحن</span>}
-            {storeConfig.policies.returns && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">الاسترجاع</span>}
-            {storeConfig.policies.privacy && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">الخصوصية</span>}
+            {storeConfig.policies.shipping && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">Shipping Policy</span>}
+            {storeConfig.policies.returns && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">Returns</span>}
+            {storeConfig.policies.privacy && <span className="text-[10px] text-gray-400 cursor-pointer hover:text-gray-600">Privacy</span>}
           </div>
         )}
       </div>
