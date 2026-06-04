@@ -21,13 +21,16 @@ import VoiceCall from "@/pages/VoiceCall";
 import CustomerChat from "@/pages/CustomerChat";
 import Earnings from "@/pages/Earnings";
 import Auth from "@/pages/Auth";
+import Integrations from "@/pages/Integrations";
 
 import { useActivityTracker } from "@/hooks/useActivityTracker";
+import { useProactiveAssistant } from "@/hooks/useProactiveAssistant";
 
 const queryClient = new QueryClient();
 
 function ActivityTrackerMount() {
   useActivityTracker();
+  useProactiveAssistant();
   return null;
 }
 
@@ -57,6 +60,7 @@ const App = () => (
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/customers" element={<CustomerChat />} />
                   <Route path="/earnings" element={<Earnings />} />
+                  <Route path="/integrations" element={<Integrations />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/settings" element={<Settings />} />
                 </Route>
