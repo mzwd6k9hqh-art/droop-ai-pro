@@ -29,6 +29,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { getStoreName } from '@/lib/storeName';
 
 type Product = NonNullable<StoreConfig['products']>[number];
 
@@ -239,7 +240,7 @@ export function StoreEditorPanel({ open, onOpenChange, config, onChange, onUndo,
                   value={config.storeName || ''}
                   maxLength={60}
                   onChange={e => update({ storeName: e.target.value })}
-                  placeholder="My Store"
+                  placeholder={getStoreName()}
                 />
               </div>
               <div className="space-y-1.5">

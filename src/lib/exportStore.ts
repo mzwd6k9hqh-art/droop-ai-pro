@@ -1,4 +1,5 @@
 import { StoreConfig } from '@/components/StorePreview';
+import { getStoreName } from './storeName';
 
 const escapeHtml = (s: string = '') =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -6,7 +7,7 @@ const escapeHtml = (s: string = '') =>
 const isImg = (v?: string) => !!v && (v.startsWith('http') || v.startsWith('data:image') || v.startsWith('/'));
 
 export function generateStoreHTML(config: StoreConfig): string {
-  const storeName = escapeHtml(config.storeName || 'My Store');
+  const storeName = escapeHtml(config.storeName || getStoreName());
   const description = escapeHtml(config.description || 'متجر إلكتروني عصري');
   const heroText = escapeHtml(config.heroText || `مرحباً بكم في ${storeName}`);
   const heroSubtext = escapeHtml(config.heroSubtext || description);

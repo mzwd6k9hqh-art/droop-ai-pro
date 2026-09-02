@@ -9,6 +9,7 @@ import { AllProductsPage } from '@/components/store/pages/AllProductsPage';
 import { AboutPage } from '@/components/store/pages/AboutPage';
 import { ContactPage } from '@/components/store/pages/ContactPage';
 import { OffersPage } from '@/components/store/pages/OffersPage';
+import { getStoreName } from '@/lib/storeName';
 
 export interface StoreConfig {
   storeName?: string;
@@ -170,7 +171,7 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
   const bgClasses = storeConfig?.bgColor || defaultColors.bg;
 
   const products = storeConfig?.products || SAMPLE_PRODUCTS[type] || SAMPLE_PRODUCTS.fashion;
-  const storeName = storeConfig?.storeName || storeContext.storeName || 'My Store';
+  const storeName = storeConfig?.storeName || storeContext.storeName || getStoreName();
 
   const navPages = [
     { id: 'home', title: 'Home' },
