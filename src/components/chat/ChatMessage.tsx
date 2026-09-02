@@ -4,6 +4,7 @@ import { User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DesignVariants, type DesignVariant } from './DesignVariants';
 import { MessageSourceBadge, type MessageSource } from './MessageSourceBadge';
+import { ZyraMark } from '@/components/ZyraMark';
 
 interface MessageAttachment {
   url: string;
@@ -33,16 +34,17 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
           'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
           isUser
             ? 'bg-primary text-primary-foreground'
-            : 'bg-gradient-to-br from-primary to-accent text-primary-foreground'
+            : 'bg-white/95 shadow-sm'
         )}>
-          {isUser ? <User className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+          {isUser ? <User className="h-4 w-4" /> : <ZyraMark className="h-5 w-5" />}
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <p className={cn(
-              'text-xs font-semibold',
+              'text-xs',
+              isUser ? 'font-semibold' : 'font-bold tracking-tight',
               isUser ? 'text-foreground' : 'text-primary'
             )}>
               {isUser ? 'You' : 'ZYRA'}
