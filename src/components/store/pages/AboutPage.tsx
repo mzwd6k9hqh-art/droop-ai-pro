@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, Users, Target, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreConfig } from '@/components/StorePreview';
+import { getStoreName } from '@/lib/storeName';
 
 interface AboutPageProps {
   config: StoreConfig;
@@ -10,7 +11,7 @@ interface AboutPageProps {
 }
 
 export function AboutPage({ config, primaryGradient, onNavigate }: AboutPageProps) {
-  const storeName = config.storeName || 'My Store';
+  const storeName = config.storeName || getStoreName();
   const about = config.pages?.about || {};
 
   return (

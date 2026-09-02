@@ -10,7 +10,7 @@ const translations: Translations = {
   // Navigation
   'nav.dashboard': { en: 'Dashboard', ar: 'لوحة التحكم', fr: 'Tableau de bord' },
   'nav.analytics': { en: 'Analytics', ar: 'التحليلات', fr: 'Analytique' },
-  'nav.droopai': { en: 'Zyra', ar: 'زيرا', fr: 'Zyra' },
+  'nav.droopai': { en: 'ZYRA', ar: 'زيرا', fr: 'ZYRA' },
   'nav.pricing': { en: 'Pricing', ar: 'الأسعار', fr: 'Tarification' },
   'nav.settings': { en: 'Settings', ar: 'الإعدادات', fr: 'Paramètres' },
   'nav.logout': { en: 'Logout', ar: 'تسجيل الخروج', fr: 'Déconnexion' },
@@ -23,10 +23,10 @@ const translations: Translations = {
   'dashboard.markets': { en: 'Top Global Markets', ar: 'أفضل الأسواق العالمية', fr: 'Marchés mondiaux' },
   'dashboard.countries': { en: 'Best Countries to Start', ar: 'أفضل الدول للبدء', fr: 'Meilleurs pays pour commencer' },
   'dashboard.trending': { en: 'Trending Niches', ar: 'المجالات الرائجة', fr: 'Niches tendance' },
-  'dashboard.askZyra': { en: 'Ask Zyra', ar: 'اسأل زيرا', fr: 'Demander à Zyra' },
+  'dashboard.askZYRA': { en: 'Ask ZYRA', ar: 'اسأل زيرا', fr: 'Demander à ZYRA' },
   'dashboard.analyzing': { en: 'Analyzing data for your store', ar: 'تحليل بيانات متجرك', fr: 'Analyse des données de votre boutique' },
-  'dashboard.publishPrompt': { en: 'Publish your store so Zyra can analyze it', ar: 'انشر متجرك لتحليله بواسطة زيرا', fr: 'Publiez votre boutique pour que Zyra l\'analyse' },
-  'dashboard.publishPromptBody': { en: 'Once your store is live, Zyra will pull in real sales, traffic and conversion data automatically.', ar: 'بمجرد نشر متجرك، ستجلب زيرا بيانات المبيعات والزيارات والتحويلات تلقائياً.', fr: 'Une fois votre boutique en ligne, Zyra récupérera automatiquement les ventes, le trafic et les conversions.' },
+  'dashboard.publishPrompt': { en: 'Publish your store so ZYRA can analyze it', ar: 'انشر متجرك لتحليله بواسطة زيرا', fr: 'Publiez votre boutique pour que ZYRA l\'analyse' },
+  'dashboard.publishPromptBody': { en: 'Once your store is live, ZYRA will pull in real sales, traffic and conversion data automatically.', ar: 'بمجرد نشر متجرك، ستجلب زيرا بيانات المبيعات والزيارات والتحويلات تلقائياً.', fr: 'Une fois votre boutique en ligne, ZYRA récupérera automatiquement les ventes, le trafic et les conversions.' },
   'dashboard.publishNow': { en: 'Publish my store', ar: 'انشر متجري', fr: 'Publier ma boutique' },
   'dashboard.realData': { en: 'Showing live data from your published store.', ar: 'عرض بيانات حية من متجرك المنشور.', fr: 'Affichage des données en direct de votre boutique publiée.' },
 
@@ -38,8 +38,8 @@ const translations: Translations = {
   'analytics.subtitle': { en: 'AI-generated insights and recommendations for your business', ar: 'رؤى وتوصيات مولدة بالذكاء الاصطناعي لعملك', fr: 'Insights et recommandations générés par IA' },
 
   // AI Chat
-  'ai.title': { en: 'Zyra Assistant', ar: 'مساعد زيرا', fr: 'Assistant Zyra' },
-  'ai.placeholder': { en: 'Ask Zyra anything…', ar: 'اسأل زيرا أي شيء…', fr: 'Demandez n\'importe quoi à Zyra…' },
+  'ai.title': { en: 'ZYRA Assistant', ar: 'مساعد زيرا', fr: 'Assistant ZYRA' },
+  'ai.placeholder': { en: 'Ask ZYRA anything…', ar: 'اسأل زيرا أي شيء…', fr: 'Demandez n\'importe quoi à ZYRA…' },
   'ai.remaining': { en: 'messages remaining', ar: 'رسائل متبقية', fr: 'messages restants' },
   'ai.limit': { en: 'Message limit reached', ar: 'تم الوصول للحد الأقصى', fr: 'Limite atteinte' },
   'ai.upgrade': { en: 'Upgrade to continue', ar: 'قم بالترقية للمتابعة', fr: 'Mettez à niveau' },

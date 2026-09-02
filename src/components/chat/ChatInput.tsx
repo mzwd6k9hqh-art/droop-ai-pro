@@ -117,7 +117,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
               value={value}
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask Zyra anything..."
+              placeholder="Ask ZYRA anything..."
               disabled={disabled}
               rows={1}
               className={cn(
@@ -170,7 +170,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
             {/* Voice call — circular purple waveform button */}
             <button
               type="button"
-              title="Start voice call with Zyra"
+              title="Start voice call with ZYRA"
               onClick={() => navigate('/voice-call')}
               className="h-9 w-9 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center transition-colors shadow-sm"
             >
@@ -194,7 +194,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
-        Zyra can make mistakes. Verify important information.
+        ZYRA can make mistakes. Verify important information.
       </p>
     </div>
   );

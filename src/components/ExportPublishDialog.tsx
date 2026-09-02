@@ -7,6 +7,7 @@ import { Download, Globe, Copy, Check, Code2, Rocket, Share2, Sparkles, ArrowLef
 import { StoreConfig } from '@/components/StorePreview';
 import { downloadStoreHTML, generateStoreHTML, publishStorePreview } from '@/lib/exportStore';
 import { toast } from 'sonner';
+import { getStoreName } from '@/lib/storeName';
 
 interface Props {
   open: boolean;
@@ -71,7 +72,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
   const handleShare = async (url: string) => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: config.storeName || 'My Store', url });
+        await navigator.share({ title: config.storeName || getStoreName(), url });
       } catch {}
     } else {
       handleCopyUrl(url);

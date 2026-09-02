@@ -291,7 +291,7 @@ export default function Pricing() {
         <h2 className="text-2xl font-bold text-center mb-8">All Features</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { icon: Bot, label: 'Zyra Assistant', color: 'icon-primary' },
+            { icon: Bot, label: 'ZYRA Assistant', color: 'icon-primary' },
             { icon: BarChart3, label: 'Business Analytics', color: 'icon-info' },
             { icon: Globe, label: 'Global Market Data', color: 'icon-secondary' },
             { icon: Rocket, label: 'Growth Insights', color: 'icon-warning' },

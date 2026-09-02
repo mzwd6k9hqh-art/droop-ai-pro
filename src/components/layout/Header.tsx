@@ -29,6 +29,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ZyraMark } from '@/components/ZyraMark';
 
 const planBadgeStyles: Record<PlanType, string> = {
   free: 'bg-muted text-muted-foreground',
@@ -61,13 +62,11 @@ export function Header() {
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-transform group-hover:scale-105">
-                <Bot className="h-5 w-5 text-white" />
-              </div>
+              <ZyraMark className="h-9 w-9 transition-transform group-hover:scale-105" tile />
               <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-white/80" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-white leading-tight">Zyra</span>
+              <span className="text-lg font-bold tracking-tight text-white leading-tight">ZYRA</span>
               <span className="text-[10px] text-white/60 leading-none">Sales Booster</span>
             </div>
           </Link>

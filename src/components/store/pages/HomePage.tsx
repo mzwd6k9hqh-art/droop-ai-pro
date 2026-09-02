@@ -2,6 +2,7 @@ import React from 'react';
 import { ShoppingBag, Star, Truck, Shield, RotateCcw, MessageSquare, ArrowLeft, Sparkles, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StoreConfig } from '@/components/StorePreview';
+import { getStoreName } from '@/lib/storeName';
 
 interface HomePageProps {
   config: StoreConfig;
@@ -12,7 +13,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ config, primaryGradient, accentClasses, products, onNavigate }: HomePageProps) {
-  const heroText = config.heroText || config.storeName || 'My Store';
+  const heroText = config.heroText || config.storeName || getStoreName();
   const heroSubtext = config.heroSubtext || config.description || 'اكتشف أفضل المنتجات المختارة بعناية لك';
   const showHero = config.showHero !== false;
   const layout = config.layout || 'grid';
