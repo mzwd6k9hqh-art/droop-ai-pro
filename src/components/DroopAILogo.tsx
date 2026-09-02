@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bot, Sparkles, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ZyraMark } from '@/components/ZyraMark';
 
 interface DroopAILogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -50,10 +51,7 @@ export function DroopAILogo({
             animated && 'hover:scale-105'
           )}
         >
-          <Bot className={cn(
-            sizes.icon,
-            variant === 'minimal' ? 'text-primary' : 'text-white'
-          )} />
+          <ZyraMark className={cn(sizes.icon)} />
           
           {/* Sparkle decoration for gradient variant */}
           {variant === 'gradient' && (size === 'lg' || size === 'xl') && (
@@ -95,7 +93,7 @@ export function DroopAIAvatar({ size = 'md', className }: { size?: 'sm' | 'md' |
       sizeMap[size],
       className
     )}>
-      <Bot className={cn('text-white', iconSize[size])} />
+      <ZyraMark className={cn(iconSize[size])} />
     </div>
   );
 }

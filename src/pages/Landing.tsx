@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ZyraMark } from '@/components/ZyraMark';
 
 const features = [
   {
@@ -73,9 +74,7 @@ export default function Landing() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl gradient-button shadow-lg">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
+            <ZyraMark className="h-10 w-10" tile />
             <span className="text-xl font-bold tracking-tight">ZYRA</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -304,10 +303,8 @@ export default function Landing() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg gradient-button">
-                <Zap className="h-4 w-4 text-white" />
-              </div>
-              <span className="font-semibold">ZYRA</span>
+              <ZyraMark className="h-8 w-8" tile />
+              <span className="font-bold tracking-tight">ZYRA</span>
             </div>
             <p className="text-sm text-muted-foreground">
               © 2024 ZYRA. All rights reserved. Built for e-commerce success.

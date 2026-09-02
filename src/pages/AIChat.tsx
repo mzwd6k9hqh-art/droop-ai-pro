@@ -21,6 +21,7 @@ import { applyModification } from '@/lib/storeModifications';
 import { StoreEditorPanel } from '@/components/StoreEditorPanel';
 import { ExportPublishDialog } from '@/components/ExportPublishDialog';
 import { useHistoryState } from '@/hooks/useHistoryState';
+import { ZyraMark } from '@/components/ZyraMark';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -355,11 +356,9 @@ Welcome them and present a store design concept with layout, categories, colors,
             >
               <Menu className="h-4 w-4" />
             </Button>
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <ZyraMark className="h-8 w-8" tile />
             <div>
-              <h1 className="text-sm font-semibold text-foreground leading-none">ZYRA</h1>
+              <h1 className="text-sm font-bold tracking-tight text-foreground leading-none">ZYRA</h1>
               <p className="text-[11px] text-muted-foreground">Your smart assistant</p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bot, Sparkles } from 'lucide-react';
+import { ZyraMark } from '@/components/ZyraMark';
 
 interface SplashScreenProps {
   onComplete?: () => void;
@@ -37,7 +38,7 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
       <div className="flex flex-col items-center gap-6 splash-content">
         <div className="splash-logo relative">
           <div className="splash-logo-inner">
-            <Bot className="h-12 w-12 text-white" />
+            <ZyraMark className="h-12 w-12" />
           </div>
           <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-accent" />
           <div className="splash-glow" />
