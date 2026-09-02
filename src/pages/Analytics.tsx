@@ -83,7 +83,7 @@ export default function Analytics() {
             <div className="flex-1">
               <h3 className="font-semibold mb-1">Publish your store to see real analytics</h3>
               <p className="text-sm text-muted-foreground mb-3">
-                Once your store is live, Zyra will track real visitors, orders, and revenue here.
+                Once your store is live, ZYRA will track real visitors, orders, and revenue here.
               </p>
               <Link to="/ai">
                 <Button size="sm" className="gradient-button gap-2"><Rocket className="h-4 w-4" />Publish Now</Button>

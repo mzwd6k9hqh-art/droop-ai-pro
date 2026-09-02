@@ -148,7 +148,7 @@ export default function VoiceCall() {
     setStatus('connecting');
     setTurns([]);
     setTimeout(() => {
-      const greeting = "Hey there! It's Zyra. How's your store doing today — anything you want to chat about?";
+      const greeting = "Hey there! It's ZYRA. How's your store doing today — anything you want to chat about?";
       setTurns([{ id: crypto.randomUUID(), role: 'assistant', content: greeting }]);
       setStatus('speaking');
       speak(greeting);
@@ -227,7 +227,7 @@ export default function VoiceCall() {
 
   // Display text at top: latest assistant reply, or status hint
   const topText = lastAssistant?.content
-    || (status === 'idle' ? 'Tap start to talk with Zyra' : status === 'connecting' ? 'Connecting…' : '');
+    || (status === 'idle' ? 'Tap start to talk with ZYRA' : status === 'connecting' ? 'Connecting…' : '');
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#0b0420] via-[#1a0b3d] to-[#3b0d6b] text-white flex flex-col overflow-hidden">
@@ -371,7 +371,7 @@ export default function VoiceCall() {
         </div>
         {isActive && (
           <p className="text-center text-[11px] text-neutral-400 mt-3">
-            {status === 'speaking' ? 'Zyra is speaking…' : status === 'listening' ? 'Listening — just speak' : ''}
+            {status === 'speaking' ? 'ZYRA is speaking…' : status === 'listening' ? 'Listening — just speak' : ''}
           </p>
         )}
       </div>

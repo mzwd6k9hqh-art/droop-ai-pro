@@ -359,7 +359,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               <Sparkles className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-foreground leading-none">Zyra</h1>
+              <h1 className="text-sm font-semibold text-foreground leading-none">ZYRA</h1>
               <p className="text-[11px] text-muted-foreground">Your smart assistant</p>
             </div>
           </div>
@@ -426,7 +426,7 @@ Welcome them and present a store design concept with layout, categories, colors,
                   disabled={localStorage.getItem('droop_store_published') !== 'true'}
                 >
                   <BarChart3 className="h-4 w-4 mr-2 text-primary" />
-                  <span>Store Analytics</span>
+                  <span>Home</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/customers')} className="cursor-pointer">
                   <MessageSquare className="h-4 w-4 mr-2 text-accent" />

@@ -45,7 +45,7 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
               'text-xs font-semibold',
               isUser ? 'text-foreground' : 'text-primary'
             )}>
-              {isUser ? 'You' : 'Zyra'}
+              {isUser ? 'You' : 'ZYRA'}
             </p>
             {!isUser && source && <MessageSourceBadge source={source} />}
           </div>

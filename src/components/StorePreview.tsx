@@ -271,7 +271,7 @@ export default function StorePreview({ storeContext, storeConfig }: StorePreview
           </div>
         )}
         <p className="text-xs text-gray-500 text-center">
-          {storeConfig?.footerText || `Designed by Zyra • ${storeName}`}
+          {storeConfig?.footerText || `Designed by ZYRA • ${storeName}`}
         </p>
         {/* Policies */}
         {storeConfig?.policies && (

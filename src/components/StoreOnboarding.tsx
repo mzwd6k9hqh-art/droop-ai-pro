@@ -146,7 +146,7 @@ export default function StoreOnboarding({ onComplete }: StoreOnboardingProps) {
       {/* Welcome Step */}
       {step === 'welcome' && (
         <div className="text-center animate-slide-up max-w-md">
-          <h2 className="text-2xl font-bold mb-3">Welcome to Zyra! 👋</h2>
+          <h2 className="text-2xl font-bold mb-3">Welcome to ZYRA! 👋</h2>
           <p className="text-muted-foreground text-lg mb-8">
             I'm your AI-powered store assistant. Let me help you build or optimize your online store.
           </p>
