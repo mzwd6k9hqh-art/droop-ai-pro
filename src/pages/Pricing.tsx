@@ -20,8 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const WHOP_CHECKOUT_URL = 'https://whop.com/checkout/your-product-id';
+import { startCheckout } from '@/lib/payments';
 
 interface PlanFeature {
   name: string;
@@ -122,38 +121,36 @@ export default function Pricing() {
   const { user, updatePlan } = useAuth();
   const { t } = useLanguage();
 
-  const handleUpgrade = (planId: PlanType) => {
+  const [loadingPlan, setLoadingPlan] = React.useState<PlanType | null>(null);
+
+  const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free') {
       updatePlan('free');
-      toast.success('Downgraded to Free plan');
+      toast.success(t('plan.switchedFree'));
       return;
     }
-
-    // Redirect to Whop checkout
-    window.open(`${WHOP_CHECKOUT_URL}?plan=${planId}`, '_blank');
-    
-    // For demo purposes, we'll also update locally
-    // In production, this would be handled by webhook after payment
-    toast.info('Redirecting to checkout...');
-    setTimeout(() => {
-      updatePlan(planId);
-      toast.success(`Upgraded to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan!`);
-    }, 1000);
+    try {
+      setLoadingPlan(planId);
+      await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+    } catch (e) {
+      setLoadingPlan(null);
+      toast.error((e as Error).message);
+    }
   };
 
   return (
-    <div className="py-4 animate-slide-up" dir="ltr" lang="en">
+    <div className="py-4 animate-slide-up">
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
           <Crown className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-primary">Choose Your Plan</span>
+          <span className="text-sm font-medium text-primary">{t('pricing.title')}</span>
         </div>
         <h1 className="text-4xl font-bold tracking-tight mb-4">
-          Choose Your Plan
+          {t('pricing.title')}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Scale your business with AI-powered insights. Start free and upgrade as you grow.
+          {t('pricing.subtitle')}
         </p>
       </div>
 
@@ -271,7 +268,7 @@ export default function Pricing() {
 
               <Button
                 onClick={() => handleUpgrade(plan.id)}
-                disabled={isCurrent}
+                disabled={isCurrent || loadingPlan !== null}
                 variant={plan.highlight ? 'secondary' : 'default'}
                 className={cn(
                   'w-full',
@@ -279,7 +276,7 @@ export default function Pricing() {
                   !plan.highlight && 'gradient-button'
                 )}
               >
-                {isCurrent ? 'Current Plan' : 'Upgrade Now'}
+                {isCurrent ? t('plan.current') : loadingPlan === plan.id ? t('plan.redirecting') : t('pricing.upgrade')}
               </Button>
             </div>
           );
@@ -288,7 +285,7 @@ export default function Pricing() {
 
       {/* Feature Comparison */}
       <div className="mt-16 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-8">All Features</h2>
+        <h2 className="text-2xl font-bold text-center mb-8">{t('pricing.allFeatures')}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: Bot, label: 'ZYRA Assistant', color: 'icon-primary' },

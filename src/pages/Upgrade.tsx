@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const WHOP_CHECKOUT_URL = 'https://whop.com/checkout/your-product-id';
+import { startCheckout } from '@/lib/payments';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PlanCard {
   id: PlanType;
@@ -118,25 +118,28 @@ const plans: PlanCard[] = [
 
 export default function Upgrade() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const { user, updatePlan, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
 
-  const handleUpgrade = (planId: PlanType) => {
+  const [loadingPlan, setLoadingPlan] = React.useState<PlanType | null>(null);
+
+  const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free') {
       updatePlan('free');
-      toast.success('Switched to the Free plan');
+      toast.success(t('plan.switchedFree'));
       return;
     }
-    window.open(`${WHOP_CHECKOUT_URL}?plan=${planId}`, '_blank');
-    toast.info('Redirecting to checkout…');
-    setTimeout(() => {
-      updatePlan(planId);
-      toast.success(`Upgraded to ${plans.find(p => p.id === planId)?.name}!`);
-    }, 1000);
+    try {
+      setLoadingPlan(planId);
+      await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+    } catch (e) {
+      setLoadingPlan(null);
+      toast.error((e as Error).message);
+    }
   };
 
   return (
-    // Force English on this page regardless of app language setting
-    <div className="min-h-screen bg-background" dir="ltr" lang="en">
+    <div className="min-h-screen bg-background">
       <div className="sticky top-0 z-10 flex items-center h-14 px-4 border-b border-border/50 bg-background/80 backdrop-blur-sm">
         <Button
           variant="ghost"
@@ -148,7 +151,7 @@ export default function Upgrade() {
         </Button>
         <div className="flex items-center gap-2">
           <Crown className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-bold">Upgrade your plan</h1>
+          <h1 className="text-lg font-bold">{t('plan.upgradeTitle')}</h1>
         </div>
       </div>
 
@@ -162,15 +165,15 @@ export default function Upgrade() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold">
-                    Current plan:{' '}
+                    {t('plan.current')}:{' '}
                     <span className="text-primary">
                       {plans.find(p => p.id === user.plan)?.name || user.plan}
                     </span>
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {isUnlimitedPlan()
-                      ? 'Unlimited messages ✨'
-                      : `${getAiMessagesRemaining()} of ${getDailyLimit()} daily messages remaining`}
+                      ? t('plan.unlimitedMsgs')
+                      : `${getAiMessagesRemaining()} / ${getDailyLimit()} · ${t('ai.remaining')}`}
                   </p>
                 </div>
               </div>
@@ -253,7 +256,7 @@ export default function Upgrade() {
 
                 <Button
                   onClick={() => handleUpgrade(plan.id)}
-                  disabled={isCurrent}
+                  disabled={isCurrent || loadingPlan !== null}
                   variant={plan.highlight ? 'secondary' : 'default'}
                   className={cn(
                     'w-full rounded-xl',
@@ -261,7 +264,7 @@ export default function Upgrade() {
                     !plan.highlight && !isCurrent && 'gradient-button'
                   )}
                 >
-                  {isCurrent ? 'Current plan' : 'Choose this plan'}
+                  {isCurrent ? t('plan.current') : loadingPlan === plan.id ? t('plan.redirecting') : t('plan.choose')}
                 </Button>
               </div>
             );

@@ -3,11 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Download, Globe, Copy, Check, Code2, Rocket, Share2, Sparkles, ArrowLeft, Tag } from 'lucide-react';
+import { Download, Globe, Copy, Check, Code2, Rocket, Share2, Sparkles, Tag, ArrowLeft } from 'lucide-react';
 import { StoreConfig } from '@/components/StorePreview';
 import { downloadStoreHTML, generateStoreHTML, publishStorePreview } from '@/lib/exportStore';
 import { toast } from 'sonner';
 import { getStoreName } from '@/lib/storeName';
+import { startCheckout } from '@/lib/payments';
 
 interface Props {
   open: boolean;
@@ -15,7 +16,7 @@ interface Props {
   config: StoreConfig;
 }
 
-type Step = 'main' | 'domain' | 'domainPayment' | 'success';
+type Step = 'main' | 'domain' | 'success';
 
 const TLDS = ['.com', '.store', '.shop', '.online'];
 
@@ -53,8 +54,6 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     setStep('domain');
   };
 
-  const [card, setCard] = useState({ number: '', expiry: '', cvc: '', name: '' });
-
 
   const handleCopyCode = async () => {
     const html = generateStoreHTML(config);
@@ -79,30 +78,21 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     }
   };
 
-  const handleBuyDomain = () => {
-    if (!customDomain.trim()) {
+  const handleBuyDomain = async () => {
+    const name = customDomain.trim().toLowerCase();
+    if (!name) {
       toast.error('Please enter a domain name');
       return;
     }
-    // Open the $1 checkout page for the domain
-    setStep('domainPayment');
-  };
-
-  const handlePayDomain = async () => {
-    if (!card.number.trim() || !card.expiry.trim() || !card.cvc.trim() || !card.name.trim()) {
-      toast.error('Please fill in all card details');
-      return;
+    try {
+      setPurchasing(true);
+      localStorage.setItem('droop_pending_domain', `${name}${selectedTld}`);
+      await startCheckout({ kind: 'domain', domain: `${name}${selectedTld}` });
+    } catch (e) {
+      setPurchasing(false);
+      toast.error((e as Error).message);
     }
-    setPurchasing(true);
-    await new Promise(r => setTimeout(r, 1400));
-    const finalUrl = `https://${customDomain.trim().toLowerCase()}${selectedTld}`;
-    setPublishedUrl(finalUrl);
-    localStorage.setItem('droop_store_published_url', finalUrl);
-    setPurchasing(false);
-    setStep('success');
-    toast.success('🎉 Domain purchased and connected!');
   };
-
 
   const handleSkipDomain = () => {
     setStep('success');
@@ -194,84 +184,6 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
           </>
         )}
 
-        {/* DOMAIN PAYMENT STEP — only triggered by "Get Domain for $1" */}
-        {step === 'domainPayment' && (
-          <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-xl">
-                <Tag className="h-5 w-5 text-amber-500" />
-                Get your domain — $1
-              </DialogTitle>
-              <DialogDescription>
-                One-time payment for <span className="font-mono">{customDomain.toLowerCase()}{selectedTld}</span>. First year only — renews at $12/year.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-4 py-2">
-              <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Total today</p>
-                  <p className="text-3xl font-black">$1.00</p>
-                </div>
-                <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-0">First year</Badge>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Cardholder name</label>
-                  <Input value={card.name} onChange={e => setCard({ ...card, name: e.target.value })} placeholder="Full name on card" className="mt-1" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Card number</label>
-                  <Input
-                    value={card.number}
-                    onChange={e => setCard({ ...card, number: e.target.value.replace(/[^0-9 ]/g, '').slice(0, 19) })}
-                    placeholder="4242 4242 4242 4242"
-                    className="mt-1 font-mono"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">Expiry</label>
-                    <Input
-                      value={card.expiry}
-                      onChange={e => setCard({ ...card, expiry: e.target.value.replace(/[^0-9/]/g, '').slice(0, 5) })}
-                      placeholder="MM/YY"
-                      className="mt-1 font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground">CVC</label>
-                    <Input
-                      value={card.cvc}
-                      onChange={e => setCard({ ...card, cvc: e.target.value.replace(/[^0-9]/g, '').slice(0, 4) })}
-                      placeholder="123"
-                      className="mt-1 font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Button
-                onClick={handlePayDomain}
-                disabled={purchasing}
-                className="w-full h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-lg gap-2"
-              >
-                {purchasing ? 'Processing payment…' : <>Pay $1 & Connect Domain <Sparkles className="h-4 w-4" /></>}
-              </Button>
-              <button
-                onClick={() => setStep('domain')}
-                className="w-full text-xs text-muted-foreground hover:text-foreground py-2 flex items-center justify-center gap-1"
-              >
-                <ArrowLeft className="h-3 w-3" /> Back
-              </button>
-              <p className="text-[10px] text-center text-muted-foreground">
-                🔒 Payments are simulated in this demo.
-              </p>
-            </div>
-          </>
-        )}
-
         {/* DOMAIN UPSELL STEP */}
         {step === 'domain' && (
           <>
@@ -353,7 +265,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                   className="w-full mt-4 h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-lg gap-2 shadow-lg"
                 >
                   {purchasing ? (
-                    <>Processing...</>
+                    <>Redirecting to secure checkout…</>
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4" />
@@ -362,7 +274,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                   )}
                 </Button>
                 <p className="text-[10px] text-center text-muted-foreground mt-2">
-                  $1 first year, then $12/year. Cancel anytime.
+                  $1 first year, then $12/year. Secure payment by Stripe.
                 </p>
               </div>
 
