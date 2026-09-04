@@ -144,13 +144,13 @@ export default function Pricing() {
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
           <Crown className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-primary">Choose Your Plan</span>
+          <span className="text-sm font-medium text-primary">{t('pricing.title')}</span>
         </div>
         <h1 className="text-4xl font-bold tracking-tight mb-4">
-          Choose Your Plan
+          {t('pricing.title')}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Scale your business with AI-powered insights. Start free and upgrade as you grow.
+          {t('pricing.subtitle')}
         </p>
       </div>
 
@@ -268,7 +268,7 @@ export default function Pricing() {
 
               <Button
                 onClick={() => handleUpgrade(plan.id)}
-                disabled={isCurrent}
+                disabled={isCurrent || loadingPlan !== null}
                 variant={plan.highlight ? 'secondary' : 'default'}
                 className={cn(
                   'w-full',
@@ -276,7 +276,7 @@ export default function Pricing() {
                   !plan.highlight && 'gradient-button'
                 )}
               >
-                {isCurrent ? 'Current Plan' : 'Upgrade Now'}
+                {isCurrent ? t('plan.current') : loadingPlan === plan.id ? t('plan.redirecting') : t('pricing.upgrade')}
               </Button>
             </div>
           );
@@ -285,7 +285,7 @@ export default function Pricing() {
 
       {/* Feature Comparison */}
       <div className="mt-16 max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-8">All Features</h2>
+        <h2 className="text-2xl font-bold text-center mb-8">{t('pricing.allFeatures')}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { icon: Bot, label: 'ZYRA Assistant', color: 'icon-primary' },
