@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
 import Analytics from "@/pages/Analytics";
@@ -33,6 +34,7 @@ const App = () => (
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <InstallPrompt />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Landing />} />
