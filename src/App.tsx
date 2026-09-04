@@ -42,6 +42,8 @@ const App = () => (
                 <Route path="/ai" element={<AIChat />} />
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/voice-call" element={<VoiceCall />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-canceled" element={<PaymentCanceled />} />
                 {/* Legacy auth routes redirect to onboarding */}
                 <Route path="/login" element={<Navigate to="/onboarding" replace />} />
                 <Route path="/register" element={<Navigate to="/onboarding" replace />} />
