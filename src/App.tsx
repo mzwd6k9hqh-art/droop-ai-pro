@@ -20,6 +20,8 @@ import Upgrade from "@/pages/Upgrade";
 import VoiceCall from "@/pages/VoiceCall";
 import CustomerChat from "@/pages/CustomerChat";
 import Earnings from "@/pages/Earnings";
+import PaymentSuccess from "@/pages/PaymentSuccess";
+import PaymentCanceled from "@/pages/PaymentCanceled";
 
 const queryClient = new QueryClient();
 
