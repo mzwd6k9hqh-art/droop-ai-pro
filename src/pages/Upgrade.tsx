@@ -120,18 +120,21 @@ export default function Upgrade() {
   const navigate = useNavigate();
   const { user, updatePlan, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
 
-  const handleUpgrade = (planId: PlanType) => {
+  const [loadingPlan, setLoadingPlan] = React.useState<PlanType | null>(null);
+
+  const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free') {
       updatePlan('free');
-      toast.success('Switched to the Free plan');
+      toast.success(t('plan.switchedFree'));
       return;
     }
-    window.open(`${WHOP_CHECKOUT_URL}?plan=${planId}`, '_blank');
-    toast.info('Redirecting to checkout…');
-    setTimeout(() => {
-      updatePlan(planId);
-      toast.success(`Upgraded to ${plans.find(p => p.id === planId)?.name}!`);
-    }, 1000);
+    try {
+      setLoadingPlan(planId);
+      await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+    } catch (e) {
+      setLoadingPlan(null);
+      toast.error((e as Error).message);
+    }
   };
 
   return (
