@@ -20,8 +20,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const WHOP_CHECKOUT_URL = 'https://whop.com/checkout/your-product-id';
+import { startCheckout } from '@/lib/payments';
 
 interface PlanFeature {
   name: string;
@@ -122,27 +121,25 @@ export default function Pricing() {
   const { user, updatePlan } = useAuth();
   const { t } = useLanguage();
 
-  const handleUpgrade = (planId: PlanType) => {
+  const [loadingPlan, setLoadingPlan] = React.useState<PlanType | null>(null);
+
+  const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free') {
       updatePlan('free');
-      toast.success('Downgraded to Free plan');
+      toast.success(t('plan.switchedFree'));
       return;
     }
-
-    // Redirect to Whop checkout
-    window.open(`${WHOP_CHECKOUT_URL}?plan=${planId}`, '_blank');
-    
-    // For demo purposes, we'll also update locally
-    // In production, this would be handled by webhook after payment
-    toast.info('Redirecting to checkout...');
-    setTimeout(() => {
-      updatePlan(planId);
-      toast.success(`Upgraded to ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan!`);
-    }, 1000);
+    try {
+      setLoadingPlan(planId);
+      await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+    } catch (e) {
+      setLoadingPlan(null);
+      toast.error((e as Error).message);
+    }
   };
 
   return (
-    <div className="py-4 animate-slide-up" dir="ltr" lang="en">
+    <div className="py-4 animate-slide-up">
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
