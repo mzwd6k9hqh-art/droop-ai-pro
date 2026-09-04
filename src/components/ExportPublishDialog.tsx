@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Download, Globe, Copy, Check, Code2, Rocket, Share2, Sparkles, ArrowLeft, Tag } from 'lucide-react';
+import { Download, Globe, Copy, Check, Code2, Rocket, Share2, Sparkles, Tag } from 'lucide-react';
 import { StoreConfig } from '@/components/StorePreview';
 import { downloadStoreHTML, generateStoreHTML, publishStorePreview } from '@/lib/exportStore';
 import { toast } from 'sonner';

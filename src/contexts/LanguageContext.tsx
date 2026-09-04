@@ -48,6 +48,25 @@ const translations: Translations = {
   'pricing.title': { en: 'Choose Your Plan', ar: 'اختر خطتك', fr: 'Choisissez votre forfait' },
   'pricing.current': { en: 'Current Plan', ar: 'الخطة الحالية', fr: 'Forfait actuel' },
   'pricing.upgrade': { en: 'Upgrade Now', ar: 'قم بالترقية الآن', fr: 'Mettre à niveau' },
+  'pricing.subtitle': { en: 'Scale your business with AI-powered insights. Start free and upgrade as you grow.', ar: 'طوّر عملك برؤى مدعومة بالذكاء الاصطناعي. ابدأ مجاناً وقم بالترقية مع نموك.', fr: 'Développez votre activité grâce à l\'IA. Commencez gratuitement et évoluez.' },
+  'pricing.allFeatures': { en: 'All Features', ar: 'كل المزايا', fr: 'Toutes les fonctionnalités' },
+
+  // Plans & payments
+  'plan.upgradeTitle': { en: 'Upgrade your plan', ar: 'قم بترقية خطتك', fr: 'Améliorez votre forfait' },
+  'plan.current': { en: 'Current plan', ar: 'الخطة الحالية', fr: 'Forfait actuel' },
+  'plan.choose': { en: 'Choose this plan', ar: 'اختر هذه الخطة', fr: 'Choisir ce forfait' },
+  'plan.redirecting': { en: 'Redirecting…', ar: 'جارٍ التحويل…', fr: 'Redirection…' },
+  'plan.switchedFree': { en: 'Switched to the Free plan', ar: 'تم التحويل إلى الخطة المجانية', fr: 'Passé au forfait gratuit' },
+  'plan.unlimitedMsgs': { en: 'Unlimited messages ✨', ar: 'رسائل غير محدودة ✨', fr: 'Messages illimités ✨' },
+  'pay.verifying': { en: 'Confirming your payment…', ar: 'جارٍ تأكيد الدفع…', fr: 'Confirmation du paiement…' },
+  'pay.successTitle': { en: 'Payment successful', ar: 'تم الدفع بنجاح', fr: 'Paiement réussi' },
+  'pay.successBody': { en: 'Everything is activated on your account.', ar: 'تم تفعيل كل شيء في حسابك.', fr: 'Tout est activé sur votre compte.' },
+  'pay.failedTitle': { en: 'Payment not completed', ar: 'لم يكتمل الدفع', fr: 'Paiement non finalisé' },
+  'pay.failedBody': { en: 'We could not confirm this payment. No charge was applied.', ar: 'تعذر تأكيد الدفع. لم يتم خصم أي مبلغ.', fr: 'Paiement non confirmé. Aucun montant débité.' },
+  'pay.canceledTitle': { en: 'Checkout canceled', ar: 'تم إلغاء الدفع', fr: 'Paiement annulé' },
+  'pay.canceledBody': { en: 'You closed the checkout before paying. You can try again anytime.', ar: 'أغلقت صفحة الدفع قبل إتمامها. يمكنك المحاولة في أي وقت.', fr: 'Vous avez quitté le paiement. Réessayez quand vous voulez.' },
+  'pay.tryAgain': { en: 'Try again', ar: 'حاول مرة أخرى', fr: 'Réessayer' },
+  'pay.backToChat': { en: 'Back to ZYRA', ar: 'العودة إلى زيرا', fr: 'Retour à ZYRA' },
 
   // Settings
   'settings.title': { en: 'Settings', ar: 'الإعدادات', fr: 'Paramètres' },
