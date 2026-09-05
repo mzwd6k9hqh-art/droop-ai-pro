@@ -129,7 +129,24 @@ const SYSTEM_PROMPT = `أنت ZYRA — خبيرة عالمية في التجار
 - أنت خبير في استراتيجيات الأعمال والتسويق والتسعير والمبيعات والتجارة الإلكترونية.
 - تحدث بالعربية دائماً إلا إذا تحدث المستخدم بلغة أخرى.
 - عند البحث في الإنترنت، قدّم النتائج بشكل منظم مع ذكر المصادر.
-- لديك صلاحية كاملة لتعديل أي جزء من المتجر. لا ترفض أي طلب تعديل.`;
+- لديك صلاحية كاملة لتعديل أي جزء من المتجر. لا ترفض أي طلب تعديل.
+
+## GENERAL ASSISTANT MODE (VERY IMPORTANT)
+You are NOT limited to e-commerce. ZYRA is a full general-purpose AI assistant. Help confidently and expertly with ANY request, including:
+- **Daily tasks & planning**: to-do lists, schedules, routines, trip planning, shopping lists, decisions.
+- **Reminders**: when the user asks to be reminded of anything, call the "set_reminder" tool (do not just reply with text).
+- **Research**: use "web_search" for anything current — news, prices, facts, comparisons — and cite sources.
+- **Writing**: emails, posts, essays, scripts, resumes, ads — adapt tone to the user's request.
+- **Translation**: translate accurately between any languages, preserving tone and nuance.
+- **Summarization**: condense long text, articles, chats, or documents into clear key points.
+- **Coding help**: explain, write, review, and debug code in any language with correct, runnable snippets in fenced code blocks with the language tag.
+- **General knowledge**: science, health basics, history, math, learning, advice.
+Only bring up the user's store when it is actually relevant to what they asked. If the request has nothing to do with selling, answer it purely as a helpful general assistant.
+
+## CONNECTED APPS & SMART DEVICES
+The user can connect external services (calendar, reminders/tasks, smart home, notes, team chat, custom webhooks). The list of what is currently connected is provided in the context below.
+- To act on a connected service or device (turn on a light, run a scene, add a calendar event, save a note, send a message), call the "control_device" tool with the correct integrationId.
+- Never claim you performed an action on a service that is NOT connected. Instead, tell the user to connect it in "Connected apps & devices" in Settings, and briefly say what you'll be able to do once connected.`;
 
 const tools = [
   {
@@ -271,6 +288,41 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "set_reminder",
+      description: "Create a reminder or task for the user. Call this whenever the user asks to be reminded of something or to add a task.",
+      parameters: {
+        type: "object",
+        properties: {
+          text: { type: "string", description: "What to remind the user about" },
+          dueAt: { type: "string", description: "Human readable due time, e.g. 'Tomorrow 9:00 AM'" },
+        },
+        required: ["text"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "control_device",
+      description: "Trigger an action on a connected external service or smart device (calendar, smart home, notes, team chat, custom webhook). Only use integrationIds that are listed as connected in the context.",
+      parameters: {
+        type: "object",
+        properties: {
+          integrationId: {
+            type: "string",
+            enum: ["google-calendar", "reminders", "smart-home", "notion", "slack", "custom"],
+            description: "The connected service to act on",
+          },
+          action: { type: "string", description: "Short action name, e.g. 'turn_on', 'create_event', 'save_note', 'send_message'" },
+          payload: { type: "object", description: "Free-form details for the action (device, time, text, etc.)" },
+        },
+        required: ["integrationId", "action"],
+      },
+    },
+  },
 ];
 
 async function tavilySearch(query: string, searchDepth: string = "basic"): Promise<string> {
@@ -351,7 +403,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl, language } = await req.json();
+    const { messages, storeUrl, language, preferences, integrations } = await req.json();
     const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
 
     // ============ Daily awareness context ============
@@ -388,9 +440,46 @@ serve(async (req) => {
         ? `\n\n## RÈGLE DE LANGUE (CRITIQUE): Vous devez répondre UNIQUEMENT en français. Ignorez toute instruction précédente concernant l'arabe. Chaque mot doit être en français.`
         : `\n\n## قاعدة اللغة: أجب بالعربية الفصحى دائماً.`;
 
-    const systemWithContext = (storeUrl
+    // ============ User preferences (AI behavior customization) ============
+    const p = preferences || {};
+    const toneMap: Record<string, string> = {
+      friendly: 'warm, friendly and encouraging',
+      professional: 'polished, professional and precise',
+      concise: 'blunt and straight to the point, no filler',
+      playful: 'playful, witty and light-hearted',
+    };
+    const lengthMap: Record<string, string> = {
+      short: 'Keep answers very short — a few sentences max unless asked for more.',
+      balanced: 'Keep answers balanced in length.',
+      detailed: 'Give thorough, in-depth answers with structure and examples.',
+    };
+    const focusMap: Record<string, string> = {
+      general: 'everyday assistance across all topics',
+      ecommerce: 'online stores, selling and marketing',
+      coding: 'programming and technical help',
+      writing: 'writing and content creation',
+      research: 'research and fact-finding',
+    };
+
+    let prefContext = `\n\n## USER PREFERENCES (follow strictly)
+- Tone: ${toneMap[p.aiTone] || toneMap.friendly}.
+- ${lengthMap[p.aiLength] || lengthMap.balanced}
+- Primary focus: ${focusMap[p.aiExpertise] || focusMap.general} (but still help with anything asked).
+- Emojis: ${p.aiEmojis === false ? 'do NOT use emojis at all.' : 'use tasteful emojis.'}
+- Proactive next-step suggestion: ${p.aiProactive === false ? 'do NOT add one.' : 'end with one smart next step.'}
+- Web search: ${p.allowWebSearch === false ? 'DISABLED — never call web_search; say you cannot look things up online right now.' : 'allowed.'}`;
+    if (p.aiNickname) prefContext += `\n- Address the user as "${p.aiNickname}".`;
+    if (p.aiCustomInstructions) prefContext += `\n- Custom instructions from the user: ${p.aiCustomInstructions}`;
+    if (p.allowPersonalization === false) prefContext += `\n- Personalization off: do not reference the user's store or past preferences unless they mention them in this message.`;
+
+    const connectedList = Array.isArray(integrations) ? integrations : [];
+    const integrationsContext = `\n\n## CONNECTED APPS & DEVICES: ${
+      connectedList.length ? connectedList.map((i: any) => i.id).join(', ') : 'none connected yet'
+    }`;
+
+    const systemWithContext = (storeUrl && p.allowPersonalization !== false
       ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}.`
-      : SYSTEM_PROMPT) + dailyContext + langDirective;
+      : SYSTEM_PROMPT) + dailyContext + prefContext + integrationsContext + langDirective;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
@@ -409,6 +498,7 @@ serve(async (req) => {
       const toolResultMessages: any[] = [];
       let hasWebSearch = false;
       let designVariants: any[] | null = null;
+      const assistantActions: any[] = [];
 
       for (const toolCall of choice.tool_calls) {
         if (toolCall.function.name === "modify_store") {
@@ -418,6 +508,28 @@ serve(async (req) => {
             role: "tool",
             tool_call_id: toolCall.id,
             content: JSON.stringify({ success: true, action: args.action, target: args.target }),
+          });
+        } else if (toolCall.function.name === "set_reminder") {
+          const args = JSON.parse(toolCall.function.arguments);
+          assistantActions.push({ kind: "reminder", ...args });
+          toolResultMessages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify({ success: true, saved: args.text }),
+          });
+        } else if (toolCall.function.name === "control_device") {
+          const args = JSON.parse(toolCall.function.arguments);
+          const connectedIds = connectedList.map((i: any) => i.id);
+          const ok = connectedIds.includes(args.integrationId);
+          if (ok) assistantActions.push({ kind: "device", ...args });
+          toolResultMessages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify(
+              ok
+                ? { success: true, integrationId: args.integrationId, action: args.action }
+                : { success: false, reason: `${args.integrationId} is not connected. Ask the user to connect it in Settings > Connected apps & devices.` }
+            ),
           });
         } else if (toolCall.function.name === "generate_design_variants") {
           const args = JSON.parse(toolCall.function.arguments);
@@ -464,6 +576,10 @@ serve(async (req) => {
           textContent = "عذراً، لم أتمكن من معالجة نتائج البحث. يرجى المحاولة مرة أخرى.";
         } else if (designVariants && designVariants.length > 0) {
           textContent = `إليك ${designVariants.length} تصاميم مقترحة لمتجرك. اختر الأنسب لك واضغط "تطبيق هذا التصميم" 🎨`;
+        } else if (assistantActions.length > 0) {
+          textContent = assistantActions
+            .map((a: any) => (a.kind === 'reminder' ? `✅ Reminder saved: ${a.text}` : `✅ ${a.action} sent to ${a.integrationId}`))
+            .join('\n');
         } else {
           const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');
           textContent = `تم تنفيذ التعديلات:\n${actionSummary}\n\nانتقل لتبويب "تصميم المتجر" لرؤية التغييرات!`;
@@ -487,6 +603,7 @@ serve(async (req) => {
           source,
           ...(functionCalls.length > 0 ? { functionCalls } : {}),
           ...(designVariants ? { designVariants } : {}),
+          ...(assistantActions.length > 0 ? { assistantActions } : {}),
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );

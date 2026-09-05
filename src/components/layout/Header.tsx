@@ -17,6 +17,7 @@ import {
   Bot,
   CreditCard,
   Settings,
+  Plug,
   LogOut,
   User,
   Sun,
@@ -161,6 +162,10 @@ export function Header() {
               <DropdownMenuItem onClick={() => navigate('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 {t('nav.settings')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/integrations')}>
+                <Plug className="mr-2 h-4 w-4" />
+                Connected apps
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-destructive">

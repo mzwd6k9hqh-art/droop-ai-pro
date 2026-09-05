@@ -22,6 +22,8 @@ import { StoreEditorPanel } from '@/components/StoreEditorPanel';
 import { ExportPublishDialog } from '@/components/ExportPublishDialog';
 import { useHistoryState } from '@/hooks/useHistoryState';
 import { ZyraMark } from '@/components/ZyraMark';
+import { loadPreferences } from '@/lib/preferences';
+import { loadIntegrations, addReminder, triggerIntegration } from '@/lib/integrations';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -139,7 +141,13 @@ Welcome them and present a store design concept with layout, categories, colors,
 
         const lang = localStorage.getItem('salesbooster_language') || 'en';
         const { data, error } = await supabase.functions.invoke('ai-chat', {
-          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '', language: lang },
+          body: {
+            messages: [{ role: 'user', content: initialPrompt }],
+            storeUrl: storeContext.storeUrl || '',
+            language: lang,
+            preferences: loadPreferences(),
+            integrations: loadIntegrations(),
+          },
         });
         if (error) throw error;
 
@@ -281,6 +289,8 @@ Welcome them and present a store design concept with layout, categories, colors,
           messages: allMessages,
           storeUrl: storeContext?.storeUrl || '',
           language: lang,
+          preferences: loadPreferences(),
+          integrations: loadIntegrations(),
         },
       });
 
@@ -294,6 +304,18 @@ Welcome them and present a store design concept with layout, categories, colors,
           handleStoreModification(data.functionCall);
         }
       }
+
+      if (Array.isArray(data.assistantActions)) {
+        data.assistantActions.forEach((a: any) => {
+          if (a.kind === 'reminder' && a.text) {
+            addReminder(a.text, a.dueAt);
+            toast.success(`Reminder saved: ${a.text}`);
+          } else if (a.kind === 'device' && a.integrationId) {
+            triggerIntegration(a.integrationId, { action: a.action, ...(a.payload || {}) });
+          }
+        });
+      }
+
 
       const replyContent =
         (typeof data.content === 'string' && data.content.trim()) ||
