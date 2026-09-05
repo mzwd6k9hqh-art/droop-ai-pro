@@ -287,6 +287,8 @@ Welcome them and present a store design concept with layout, categories, colors,
           messages: allMessages,
           storeUrl: storeContext?.storeUrl || '',
           language: lang,
+          preferences: loadPreferences(),
+          integrations: loadIntegrations(),
         },
       });
 
@@ -300,6 +302,18 @@ Welcome them and present a store design concept with layout, categories, colors,
           handleStoreModification(data.functionCall);
         }
       }
+
+      if (Array.isArray(data.assistantActions)) {
+        data.assistantActions.forEach((a: any) => {
+          if (a.kind === 'reminder' && a.text) {
+            addReminder(a.text, a.dueAt);
+            toast.success(`Reminder saved: ${a.text}`);
+          } else if (a.kind === 'device' && a.integrationId) {
+            triggerIntegration(a.integrationId, { action: a.action, ...(a.payload || {}) });
+          }
+        });
+      }
+
 
       const replyContent =
         (typeof data.content === 'string' && data.content.trim()) ||
