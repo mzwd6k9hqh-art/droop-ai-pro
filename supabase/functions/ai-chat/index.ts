@@ -498,6 +498,7 @@ serve(async (req) => {
       const toolResultMessages: any[] = [];
       let hasWebSearch = false;
       let designVariants: any[] | null = null;
+      const assistantActions: any[] = [];
 
       for (const toolCall of choice.tool_calls) {
         if (toolCall.function.name === "modify_store") {
