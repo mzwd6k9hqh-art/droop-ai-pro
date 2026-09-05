@@ -14,6 +14,7 @@ import Analytics from "@/pages/Analytics";
 import AIChat from "@/pages/AIChat";
 import Pricing from "@/pages/Pricing";
 import Settings from "@/pages/Settings";
+import Integrations from "@/pages/Integrations";
 import NotFound from "@/pages/NotFound";
 import Onboarding from "@/pages/Onboarding";
 import StoreAnalysis from "@/pages/StoreAnalysis";
@@ -56,6 +57,8 @@ const App = () => (
                   <Route path="/earnings" element={<Earnings />} />
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/integrations" element={<Integrations />} />
+
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
