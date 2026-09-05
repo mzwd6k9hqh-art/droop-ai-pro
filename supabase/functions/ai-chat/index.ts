@@ -403,7 +403,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl, language } = await req.json();
+    const { messages, storeUrl, language, preferences, integrations } = await req.json();
     const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
 
     // ============ Daily awareness context ============
