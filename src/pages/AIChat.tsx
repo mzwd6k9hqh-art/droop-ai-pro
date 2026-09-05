@@ -22,6 +22,8 @@ import { StoreEditorPanel } from '@/components/StoreEditorPanel';
 import { ExportPublishDialog } from '@/components/ExportPublishDialog';
 import { useHistoryState } from '@/hooks/useHistoryState';
 import { ZyraMark } from '@/components/ZyraMark';
+import { loadPreferences } from '@/lib/preferences';
+import { loadIntegrations, addReminder, triggerIntegration } from '@/lib/integrations';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
