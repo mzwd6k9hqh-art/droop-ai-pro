@@ -576,6 +576,10 @@ serve(async (req) => {
           textContent = "عذراً، لم أتمكن من معالجة نتائج البحث. يرجى المحاولة مرة أخرى.";
         } else if (designVariants && designVariants.length > 0) {
           textContent = `إليك ${designVariants.length} تصاميم مقترحة لمتجرك. اختر الأنسب لك واضغط "تطبيق هذا التصميم" 🎨`;
+        } else if (assistantActions.length > 0) {
+          textContent = assistantActions
+            .map((a: any) => (a.kind === 'reminder' ? `✅ Reminder saved: ${a.text}` : `✅ ${a.action} sent to ${a.integrationId}`))
+            .join('\n');
         } else {
           const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');
           textContent = `تم تنفيذ التعديلات:\n${actionSummary}\n\nانتقل لتبويب "تصميم المتجر" لرؤية التغييرات!`;
@@ -599,6 +603,7 @@ serve(async (req) => {
           source,
           ...(functionCalls.length > 0 ? { functionCalls } : {}),
           ...(designVariants ? { designVariants } : {}),
+          ...(assistantActions.length > 0 ? { assistantActions } : {}),
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
