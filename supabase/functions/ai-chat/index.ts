@@ -288,6 +288,41 @@ const tools = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "set_reminder",
+      description: "Create a reminder or task for the user. Call this whenever the user asks to be reminded of something or to add a task.",
+      parameters: {
+        type: "object",
+        properties: {
+          text: { type: "string", description: "What to remind the user about" },
+          dueAt: { type: "string", description: "Human readable due time, e.g. 'Tomorrow 9:00 AM'" },
+        },
+        required: ["text"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "control_device",
+      description: "Trigger an action on a connected external service or smart device (calendar, smart home, notes, team chat, custom webhook). Only use integrationIds that are listed as connected in the context.",
+      parameters: {
+        type: "object",
+        properties: {
+          integrationId: {
+            type: "string",
+            enum: ["google-calendar", "reminders", "smart-home", "notion", "slack", "custom"],
+            description: "The connected service to act on",
+          },
+          action: { type: "string", description: "Short action name, e.g. 'turn_on', 'create_event', 'save_note', 'send_message'" },
+          payload: { type: "object", description: "Free-form details for the action (device, time, text, etc.)" },
+        },
+        required: ["integrationId", "action"],
+      },
+    },
+  },
 ];
 
 async function tavilySearch(query: string, searchDepth: string = "basic"): Promise<string> {
