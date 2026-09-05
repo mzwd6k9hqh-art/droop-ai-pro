@@ -17,6 +17,7 @@ import {
   Bot,
   CreditCard,
   Settings,
+  Plug,
   LogOut,
   User,
   Sun,
