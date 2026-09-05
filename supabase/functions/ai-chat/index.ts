@@ -440,9 +440,46 @@ serve(async (req) => {
         ? `\n\n## RÈGLE DE LANGUE (CRITIQUE): Vous devez répondre UNIQUEMENT en français. Ignorez toute instruction précédente concernant l'arabe. Chaque mot doit être en français.`
         : `\n\n## قاعدة اللغة: أجب بالعربية الفصحى دائماً.`;
 
-    const systemWithContext = (storeUrl
+    // ============ User preferences (AI behavior customization) ============
+    const p = preferences || {};
+    const toneMap: Record<string, string> = {
+      friendly: 'warm, friendly and encouraging',
+      professional: 'polished, professional and precise',
+      concise: 'blunt and straight to the point, no filler',
+      playful: 'playful, witty and light-hearted',
+    };
+    const lengthMap: Record<string, string> = {
+      short: 'Keep answers very short — a few sentences max unless asked for more.',
+      balanced: 'Keep answers balanced in length.',
+      detailed: 'Give thorough, in-depth answers with structure and examples.',
+    };
+    const focusMap: Record<string, string> = {
+      general: 'everyday assistance across all topics',
+      ecommerce: 'online stores, selling and marketing',
+      coding: 'programming and technical help',
+      writing: 'writing and content creation',
+      research: 'research and fact-finding',
+    };
+
+    let prefContext = `\n\n## USER PREFERENCES (follow strictly)
+- Tone: ${toneMap[p.aiTone] || toneMap.friendly}.
+- ${lengthMap[p.aiLength] || lengthMap.balanced}
+- Primary focus: ${focusMap[p.aiExpertise] || focusMap.general} (but still help with anything asked).
+- Emojis: ${p.aiEmojis === false ? 'do NOT use emojis at all.' : 'use tasteful emojis.'}
+- Proactive next-step suggestion: ${p.aiProactive === false ? 'do NOT add one.' : 'end with one smart next step.'}
+- Web search: ${p.allowWebSearch === false ? 'DISABLED — never call web_search; say you cannot look things up online right now.' : 'allowed.'}`;
+    if (p.aiNickname) prefContext += `\n- Address the user as "${p.aiNickname}".`;
+    if (p.aiCustomInstructions) prefContext += `\n- Custom instructions from the user: ${p.aiCustomInstructions}`;
+    if (p.allowPersonalization === false) prefContext += `\n- Personalization off: do not reference the user's store or past preferences unless they mention them in this message.`;
+
+    const connectedList = Array.isArray(integrations) ? integrations : [];
+    const integrationsContext = `\n\n## CONNECTED APPS & DEVICES: ${
+      connectedList.length ? connectedList.map((i: any) => i.id).join(', ') : 'none connected yet'
+    }`;
+
+    const systemWithContext = (storeUrl && p.allowPersonalization !== false
       ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}.`
-      : SYSTEM_PROMPT) + dailyContext + langDirective;
+      : SYSTEM_PROMPT) + dailyContext + prefContext + integrationsContext + langDirective;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
