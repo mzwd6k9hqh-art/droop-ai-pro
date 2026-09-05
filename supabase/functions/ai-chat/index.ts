@@ -509,6 +509,28 @@ serve(async (req) => {
             tool_call_id: toolCall.id,
             content: JSON.stringify({ success: true, action: args.action, target: args.target }),
           });
+        } else if (toolCall.function.name === "set_reminder") {
+          const args = JSON.parse(toolCall.function.arguments);
+          assistantActions.push({ kind: "reminder", ...args });
+          toolResultMessages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify({ success: true, saved: args.text }),
+          });
+        } else if (toolCall.function.name === "control_device") {
+          const args = JSON.parse(toolCall.function.arguments);
+          const connectedIds = connectedList.map((i: any) => i.id);
+          const ok = connectedIds.includes(args.integrationId);
+          if (ok) assistantActions.push({ kind: "device", ...args });
+          toolResultMessages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify(
+              ok
+                ? { success: true, integrationId: args.integrationId, action: args.action }
+                : { success: false, reason: `${args.integrationId} is not connected. Ask the user to connect it in Settings > Connected apps & devices.` }
+            ),
+          });
         } else if (toolCall.function.name === "generate_design_variants") {
           const args = JSON.parse(toolCall.function.arguments);
           designVariants = args.variants || [];
