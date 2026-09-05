@@ -139,7 +139,13 @@ Welcome them and present a store design concept with layout, categories, colors,
 
         const lang = localStorage.getItem('salesbooster_language') || 'en';
         const { data, error } = await supabase.functions.invoke('ai-chat', {
-          body: { messages: [{ role: 'user', content: initialPrompt }], storeUrl: storeContext.storeUrl || '', language: lang },
+          body: {
+            messages: [{ role: 'user', content: initialPrompt }],
+            storeUrl: storeContext.storeUrl || '',
+            language: lang,
+            preferences: loadPreferences(),
+            integrations: loadIntegrations(),
+          },
         });
         if (error) throw error;
 
