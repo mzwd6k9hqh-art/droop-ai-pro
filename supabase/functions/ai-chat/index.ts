@@ -306,6 +306,25 @@ const tools = [
   {
     type: "function",
     function: {
+      name: "remember",
+      description: "Save an important long-term fact about the user so you remember it in future sessions (their name, store details, preferences, goals). Only save durable facts, never trivia from small talk.",
+      parameters: {
+        type: "object",
+        properties: {
+          kind: {
+            type: "string",
+            enum: ["profile", "store", "preference", "goal", "fact"],
+            description: "Category of the memory",
+          },
+          text: { type: "string", description: "The fact to remember, written concisely in third person" },
+        },
+        required: ["text"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "control_device",
       description: "Trigger an action on a connected external service or smart device (calendar, smart home, notes, team chat, custom webhook). Only use integrationIds that are listed as connected in the context.",
       parameters: {
@@ -364,14 +383,28 @@ async function tavilySearch(query: string, searchDepth: string = "basic"): Promi
   return searchResult || "لم يتم العثور على نتائج.";
 }
 
-async function callAI(messages: any[], useTools: boolean = true) {
+const ALLOWED_MODELS = [
+  "google/gemini-3.7-flash",
+  "google/gemini-3.1-pro-preview",
+  "google/gemini-3.1-flash-lite",
+  "openai/gpt-5.5",
+  "openai/gpt-5.6-terra",
+  "openai/gpt-5.4-mini",
+  "google/gemini-2.5-pro",
+];
+const FALLBACK_MODEL = "google/gemini-3.7-flash";
+
+async function callAI(messages: any[], useTools: boolean = true, model?: string) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+  const chosen = model && ALLOWED_MODELS.includes(model) ? model : FALLBACK_MODEL;
   const body: any = {
-    model: "google/gemini-2.5-pro",
+    model: chosen,
     messages,
   };
+  // GPT-5.6 models reject tool calls unless reasoning is off.
+  if (chosen.startsWith("openai/gpt-5.6")) body.reasoning_effort = "none";
   if (useTools) {
     body.tools = tools;
     body.tool_choice = "auto";
@@ -403,7 +436,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl, language, preferences, integrations } = await req.json();
+    const { messages, storeUrl, language, preferences, integrations, memory, model } = await req.json();
     const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
 
     // ============ Daily awareness context ============
@@ -472,6 +505,19 @@ serve(async (req) => {
     if (p.aiCustomInstructions) prefContext += `\n- Custom instructions from the user: ${p.aiCustomInstructions}`;
     if (p.allowPersonalization === false) prefContext += `\n- Personalization off: do not reference the user's store or past preferences unless they mention them in this message.`;
 
+    const styleMap: Record<string, string> = {
+      simple: 'Use plain, simple wording anyone can understand. Avoid jargon.',
+      natural: 'Write naturally and conversationally, like a smart friend.',
+      technical: 'Be precise and technical; use correct terminology and numbers.',
+      creative: 'Be expressive and creative with vivid, engaging phrasing.',
+    };
+    prefContext += `\n- Language style: ${styleMap[p.aiLanguageStyle] || styleMap.natural}`;
+
+    const memoryList = Array.isArray(memory) ? memory.filter((x: any) => typeof x === 'string').slice(-60) : [];
+    const memoryContext = memoryList.length
+      ? `\n\n## LONG-TERM MEMORY ABOUT THIS USER (from previous sessions — use naturally, never dump it back at them):\n${memoryList.map((x: string) => `- ${x}`).join('\n')}`
+      : `\n\n## LONG-TERM MEMORY: empty so far. When the user shares a durable fact about themselves, their store, preferences or goals, call the "remember" tool.`;
+
     const connectedList = Array.isArray(integrations) ? integrations : [];
     const integrationsContext = `\n\n## CONNECTED APPS & DEVICES: ${
       connectedList.length ? connectedList.map((i: any) => i.id).join(', ') : 'none connected yet'
@@ -479,14 +525,14 @@ serve(async (req) => {
 
     const systemWithContext = (storeUrl && p.allowPersonalization !== false
       ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}.`
-      : SYSTEM_PROMPT) + dailyContext + prefContext + integrationsContext + langDirective;
+      : SYSTEM_PROMPT) + dailyContext + prefContext + memoryContext + integrationsContext + langDirective;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
       ...messages,
     ];
 
-    const data = await callAI(apiMessages);
+    const data = await callAI(apiMessages, true, model);
     const choice = data.choices?.[0]?.message;
 
     if (!choice) {
@@ -517,7 +563,15 @@ serve(async (req) => {
             tool_call_id: toolCall.id,
             content: JSON.stringify({ success: true, saved: args.text }),
           });
-        } else if (toolCall.function.name === "control_device") {
+        } else if (toolCall.function.name === "remember") {
+        const args = JSON.parse(toolCall.function.arguments);
+        assistantActions.push({ kind: "memory", memoryKind: args.kind || "fact", text: args.text });
+        toolResultMessages.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: JSON.stringify({ success: true, remembered: args.text }),
+        });
+      } else if (toolCall.function.name === "control_device") {
           const args = JSON.parse(toolCall.function.arguments);
           const connectedIds = connectedList.map((i: any) => i.id);
           const ok = connectedIds.includes(args.integrationId);
@@ -564,7 +618,7 @@ serve(async (req) => {
       if (toolResultMessages.length > 0) {
         try {
           const followUpMessages = [...apiMessages, choice, ...toolResultMessages];
-          const followUpData = await callAI(followUpMessages, false);
+          const followUpData = await callAI(followUpMessages, false, model);
           textContent = followUpData.choices?.[0]?.message?.content || "";
         } catch (e) {
           console.error("Follow-up call error:", e);
@@ -578,7 +632,13 @@ serve(async (req) => {
           textContent = `إليك ${designVariants.length} تصاميم مقترحة لمتجرك. اختر الأنسب لك واضغط "تطبيق هذا التصميم" 🎨`;
         } else if (assistantActions.length > 0) {
           textContent = assistantActions
-            .map((a: any) => (a.kind === 'reminder' ? `✅ Reminder saved: ${a.text}` : `✅ ${a.action} sent to ${a.integrationId}`))
+            .map((a: any) =>
+              a.kind === 'reminder'
+                ? `✅ Reminder saved: ${a.text}`
+                : a.kind === 'memory'
+                ? `🧠 Got it — I'll remember that: ${a.text}`
+                : `✅ ${a.action} sent to ${a.integrationId}`
+            )
             .join('\n');
         } else {
           const actionSummary = functionCalls.map(fc => `✅ ${fc.action}: ${fc.target || ''}`).join('\n');

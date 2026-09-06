@@ -4,7 +4,8 @@ import { User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DesignVariants, type DesignVariant } from './DesignVariants';
 import { MessageSourceBadge, type MessageSource } from './MessageSourceBadge';
-import { ZyraMark } from '@/components/ZyraMark';
+import { ZyraAvatar } from '@/components/ZyraAvatar';
+import { useAppearance } from '@/hooks/useAppearance';
 
 interface MessageAttachment {
   url: string;
@@ -25,19 +26,34 @@ interface ChatMessageProps {
 
 export function ChatMessage({ role, content, attachments, designVariants, appliedVariantIndex, source, onApplyVariant, onRegenerateVariants, onCustomizeStore }: ChatMessageProps) {
   const isUser = role === 'user';
+  const appearance = useAppearance();
+
+  const bubbleClass = {
+    flat: '',
+    rounded: cn(
+      'rounded-2xl px-4 py-3',
+      isUser ? 'bg-primary/10' : 'bg-background border border-border/60'
+    ),
+    bubbles: cn(
+      'px-4 py-3 shadow-sm',
+      isUser
+        ? 'bg-primary text-primary-foreground rounded-[1.4rem] rounded-br-md'
+        : 'bg-background border border-border rounded-[1.4rem] rounded-bl-md'
+    ),
+    outlined: 'rounded-xl border border-border px-4 py-3',
+  }[appearance.bubbleStyle];
 
   return (
     <div className={cn('group w-full', isUser ? '' : 'bg-muted/30')}>
       <div className="max-w-3xl mx-auto flex gap-4 px-4 py-6 md:px-6">
         {/* Avatar */}
-        <div className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
-          isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-white/95 shadow-sm'
-        )}>
-          {isUser ? <User className="h-4 w-4" /> : <ZyraMark className="h-5 w-5" />}
-        </div>
+        {isUser ? (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <User className="h-4 w-4" />
+          </div>
+        ) : (
+          <ZyraAvatar />
+        )}
 
         {/* Content */}
         <div className="flex-1 min-w-0 space-y-2">
@@ -67,7 +83,15 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
             </div>
           )}
 
-          <div className="prose prose-sm dark:prose-invert max-w-none text-foreground leading-relaxed">
+          <div
+            className={cn(
+              'prose prose-sm dark:prose-invert max-w-none leading-relaxed',
+              bubbleClass,
+              appearance.bubbleStyle === 'bubbles' && isUser
+                ? 'prose-invert text-primary-foreground'
+                : 'text-foreground'
+            )}
+          >
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
 
