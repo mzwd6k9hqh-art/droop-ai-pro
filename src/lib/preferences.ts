@@ -3,6 +3,7 @@
 export type AiTone = 'friendly' | 'professional' | 'concise' | 'playful';
 export type AiLength = 'short' | 'balanced' | 'detailed';
 export type AiExpertise = 'general' | 'ecommerce' | 'coding' | 'writing' | 'research';
+export type AiLanguageStyle = 'simple' | 'natural' | 'technical' | 'creative';
 
 export interface Preferences {
   // Notifications
