@@ -62,7 +62,7 @@ export function ZyraAvatar({
 
   return (
     <div className={cn('flex shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm', box, className)}>
-      <ZyraMark className={inner} style={{ color: accent }} />
+      <ZyraMark className={inner} />
     </div>
   );
 }
