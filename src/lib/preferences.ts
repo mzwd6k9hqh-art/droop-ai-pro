@@ -1,4 +1,5 @@
 // User preferences for ZYRA — persisted locally.
+import { DEFAULT_MODEL } from './aiModels';
 
 export type AiTone = 'friendly' | 'professional' | 'concise' | 'playful';
 export type AiLength = 'short' | 'balanced' | 'detailed';
@@ -22,6 +23,9 @@ export interface Preferences {
   aiProactive: boolean;
   aiCustomInstructions: string;
   aiNickname: string;
+  aiLanguageStyle: AiLanguageStyle;
+  aiModel: string;
+  aiMemory: boolean;
   // Privacy
   allowAnalytics: boolean;
   allowPersonalization: boolean;
@@ -42,6 +46,9 @@ export const DEFAULT_PREFERENCES: Preferences = {
   aiProactive: true,
   aiCustomInstructions: '',
   aiNickname: '',
+  aiLanguageStyle: 'natural',
+  aiModel: DEFAULT_MODEL,
+  aiMemory: true,
   allowAnalytics: true,
   allowPersonalization: true,
   allowWebSearch: true,
