@@ -87,12 +87,17 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     try {
       setPurchasing(true);
       localStorage.setItem('droop_pending_domain', `${name}${selectedTld}`);
-      await startCheckout({ kind: 'domain', domain: `${name}${selectedTld}` });
+      const url = await startCheckout({ kind: 'domain', domain: `${name}${selectedTld}` });
+      toast.success('Secure payment page opened in a new tab', {
+        action: { label: 'Open again', onClick: () => window.open(url, '_blank', 'noopener,noreferrer') },
+      });
     } catch (e) {
+      toast.error((e as Error).message || 'Payment could not be started');
+    } finally {
       setPurchasing(false);
-      toast.error((e as Error).message);
     }
   };
+
 
   const handleSkipDomain = () => {
     setStep('success');

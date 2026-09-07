@@ -122,6 +122,8 @@ export default function Upgrade() {
   const { user, updatePlan, getAiMessagesRemaining, getDailyLimit, isUnlimitedPlan } = useAuth();
 
   const [loadingPlan, setLoadingPlan] = React.useState<PlanType | null>(null);
+  const [checkoutError, setCheckoutError] = React.useState<string | null>(null);
+  const [checkoutUrl, setCheckoutUrl] = React.useState<string | null>(null);
 
   const handleUpgrade = async (planId: PlanType) => {
     if (planId === 'free') {
@@ -130,13 +132,21 @@ export default function Upgrade() {
       return;
     }
     try {
+      setCheckoutError(null);
+      setCheckoutUrl(null);
       setLoadingPlan(planId);
-      await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+      const url = await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+      setCheckoutUrl(url);
+      toast.success('Secure payment page opened in a new tab');
     } catch (e) {
+      const msg = (e as Error).message || 'Payment could not be started';
+      setCheckoutError(msg);
+      toast.error(msg);
+    } finally {
       setLoadingPlan(null);
-      toast.error((e as Error).message);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-background">
