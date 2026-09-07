@@ -10,11 +10,18 @@ export interface AiModelOption {
 
 export const AI_MODELS: AiModelOption[] = [
   {
+    id: 'openai/gpt-5.6-sol',
+    name: 'ZYRA Max (GPT-5.6)',
+    vendor: 'OpenAI',
+    description: 'Flagship model — strongest reasoning and all-round quality.',
+    badge: 'Default',
+  },
+  {
     id: 'google/gemini-3.7-flash',
     name: 'ZYRA Flash (Gemini 3.7)',
     vendor: 'Google',
     description: 'Fast and smart. Best everyday choice.',
-    badge: 'Recommended',
+    badge: 'Fast',
   },
   {
     id: 'google/gemini-3.1-pro-preview',

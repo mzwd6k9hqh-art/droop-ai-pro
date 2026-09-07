@@ -24,6 +24,7 @@ import { useHistoryState } from '@/hooks/useHistoryState';
 import { ZyraMark } from '@/components/ZyraMark';
 import { loadPreferences } from '@/lib/preferences';
 import { loadIntegrations, addReminder, triggerIntegration } from '@/lib/integrations';
+import { addMemory, memoryForPrompt } from '@/lib/memory';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -147,6 +148,8 @@ Welcome them and present a store design concept with layout, categories, colors,
             language: lang,
             preferences: loadPreferences(),
             integrations: loadIntegrations(),
+            model: loadPreferences().aiModel,
+            memory: loadPreferences().aiMemory ? memoryForPrompt() : [],
           },
         });
         if (error) throw error;
@@ -291,6 +294,8 @@ Welcome them and present a store design concept with layout, categories, colors,
           language: lang,
           preferences: loadPreferences(),
           integrations: loadIntegrations(),
+          model: loadPreferences().aiModel,
+          memory: loadPreferences().aiMemory ? memoryForPrompt() : [],
         },
       });
 
@@ -310,6 +315,8 @@ Welcome them and present a store design concept with layout, categories, colors,
           if (a.kind === 'reminder' && a.text) {
             addReminder(a.text, a.dueAt);
             toast.success(`Reminder saved: ${a.text}`);
+          } else if (a.kind === 'memory' && a.text) {
+            if (loadPreferences().aiMemory) addMemory(a.text, a.memoryKind || 'fact');
           } else if (a.kind === 'device' && a.integrationId) {
             triggerIntegration(a.integrationId, { action: a.action, ...(a.payload || {}) });
           }
