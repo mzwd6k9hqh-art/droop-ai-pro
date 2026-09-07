@@ -131,12 +131,17 @@ export default function Pricing() {
     }
     try {
       setLoadingPlan(planId);
-      await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+      const url = await startCheckout({ kind: 'plan', plan: planId as 'starter' | 'pro' | 'premium' });
+      toast.success('Secure payment page opened in a new tab', {
+        action: { label: 'Open again', onClick: () => window.open(url, '_blank', 'noopener,noreferrer') },
+      });
     } catch (e) {
+      toast.error((e as Error).message || 'Payment could not be started');
+    } finally {
       setLoadingPlan(null);
-      toast.error((e as Error).message);
     }
   };
+
 
   return (
     <div className="py-4 animate-slide-up">
