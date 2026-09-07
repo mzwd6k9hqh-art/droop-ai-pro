@@ -33,6 +33,9 @@ import {
   Plug,
   Trash2,
   Download,
+  Brain,
+  Cpu,
+  Paintbrush,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -43,6 +46,27 @@ import {
   savePreferences,
 } from '@/lib/preferences';
 import { loadIntegrations } from '@/lib/integrations';
+import { AI_MODELS } from '@/lib/aiModels';
+import {
+  MEMORY_KIND_LABELS,
+  MemoryItem,
+  addMemory,
+  clearMemory,
+  loadMemory,
+  removeMemory,
+} from '@/lib/memory';
+import {
+  ACCENT_PRESETS,
+  Appearance,
+  BubbleStyle,
+  AvatarStyle,
+  FONT_LABELS,
+  FontChoice,
+  DEFAULT_APPEARANCE,
+  loadAppearance,
+  saveAppearance,
+} from '@/lib/appearance';
+import { ZyraAvatar } from '@/components/ZyraAvatar';
 
 const planBadgeStyles: Record<PlanType, string> = {
   free: 'bg-muted text-muted-foreground',
@@ -112,6 +136,21 @@ export default function Settings() {
   const navigate = useNavigate();
 
   const [prefs, setPrefs] = useState<Preferences>(() => loadPreferences());
+  const [memory, setMemory] = useState<MemoryItem[]>(() => loadMemory());
+  const [newMemory, setNewMemory] = useState('');
+  const [appearance, setAppearance] = useState<Appearance>(() => loadAppearance());
+
+  useEffect(() => {
+    const sync = () => setMemory(loadMemory());
+    window.addEventListener('zyra-memory-changed', sync);
+    return () => window.removeEventListener('zyra-memory-changed', sync);
+  }, []);
+
+  const updateAppearance = <K extends keyof Appearance>(key: K, value: Appearance[K]) => {
+    const next = { ...appearance, [key]: value };
+    setAppearance(next);
+    saveAppearance(next);
+  };
   const connectedCount = loadIntegrations().length;
 
   useEffect(() => {
@@ -227,6 +266,20 @@ export default function Settings() {
               </SelectContent>
             </Select>
           </Row>
+          <Row title="Language style" description="How she words things">
+            <Select
+              value={prefs.aiLanguageStyle}
+              onValueChange={(v) => update('aiLanguageStyle', v as Preferences['aiLanguageStyle'])}
+            >
+              <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="simple">Simple & clear</SelectItem>
+                <SelectItem value="natural">Natural</SelectItem>
+                <SelectItem value="technical">Technical & precise</SelectItem>
+                <SelectItem value="creative">Creative</SelectItem>
+              </SelectContent>
+            </Select>
+          </Row>
           <Row title="Use emojis" description="Tasteful emojis in answers">
             <Switch checked={prefs.aiEmojis} onCheckedChange={(c) => update('aiEmojis', c)} />
           </Row>
@@ -255,6 +308,238 @@ export default function Settings() {
               ZYRA keeps this in mind in every conversation.
             </p>
           </div>
+        </div>
+      </Section>
+
+      {/* AI model */}
+      <Section
+        icon={<Cpu className="h-5 w-5" />}
+        tone="icon-primary"
+        title="AI model"
+        description="Pick the brain ZYRA thinks with"
+      >
+        <div className="space-y-3">
+          {AI_MODELS.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => update('aiModel', m.id)}
+              className={cn(
+                'w-full text-left rounded-xl border p-4 transition-colors',
+                prefs.aiModel === m.id
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:bg-muted/50'
+              )}
+            >
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-medium">{m.name}</p>
+                <span className="text-xs text-muted-foreground">{m.vendor}</span>
+                {m.badge && (
+                  <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
+                    {m.badge}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">{m.description}</p>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      {/* Memory */}
+      <Section
+        icon={<Brain className="h-5 w-5" />}
+        tone="icon-accent"
+        title="ZYRA's memory"
+        description="What she remembers about you between conversations"
+      >
+        <div className="space-y-1">
+          <Row title="Remember things about me" description="Name, store, preferences and goals">
+            <Switch checked={prefs.aiMemory} onCheckedChange={(c) => update('aiMemory', c)} />
+          </Row>
+
+          <div className="pt-4 space-y-2">
+            <Label htmlFor="new-memory">Teach her something</Label>
+            <div className="flex gap-2">
+              <Input
+                id="new-memory"
+                value={newMemory}
+                placeholder="e.g. I sell skincare and my goal is 100 orders a month"
+                onChange={(e) => setNewMemory(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newMemory.trim()) {
+                    addMemory(newMemory, 'fact');
+                    setNewMemory('');
+                    toast.success('Saved to memory');
+                  }
+                }}
+              />
+              <Button
+                onClick={() => {
+                  if (!newMemory.trim()) return;
+                  addMemory(newMemory, 'fact');
+                  setNewMemory('');
+                  toast.success('Saved to memory');
+                }}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+
+          <div className="pt-4 space-y-2">
+            {memory.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Nothing remembered yet. As you chat, ZYRA saves the important things here.
+              </p>
+            ) : (
+              memory
+                .slice()
+                .reverse()
+                .map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start justify-between gap-3 rounded-lg border border-border p-3"
+                  >
+                    <div className="min-w-0">
+                      <span className="text-[10px] uppercase tracking-wide text-primary font-semibold">
+                        {MEMORY_KIND_LABELS[item.kind] || 'Other'}
+                      </span>
+                      <p className="text-sm">{item.text}</p>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        removeMemory(item.id);
+                        toast.success('Forgotten');
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))
+            )}
+          </div>
+
+          {memory.length > 0 && (
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  clearMemory();
+                  toast.success('Memory cleared');
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-1.5" />
+                Forget everything
+              </Button>
+            </div>
+          )}
+        </div>
+      </Section>
+
+      {/* App appearance */}
+      <Section
+        icon={<Paintbrush className="h-5 w-5" />}
+        tone="icon-info"
+        title="Make it yours"
+        description="Colors, fonts, chat bubbles and ZYRA's look"
+      >
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <Label>Accent color</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              {ACCENT_PRESETS.map((c) => (
+                <button
+                  key={c.value}
+                  title={c.name}
+                  onClick={() => updateAppearance('accent', c.value)}
+                  className={cn(
+                    'h-9 w-9 rounded-full border-2 transition-transform hover:scale-105',
+                    appearance.accent.toLowerCase() === c.value.toLowerCase()
+                      ? 'border-foreground'
+                      : 'border-transparent'
+                  )}
+                  style={{ backgroundColor: c.value }}
+                />
+              ))}
+              <input
+                type="color"
+                value={appearance.accent}
+                onChange={(e) => updateAppearance('accent', e.target.value)}
+                className="h-9 w-12 rounded-md border border-border bg-transparent cursor-pointer"
+                aria-label="Custom accent color"
+              />
+            </div>
+          </div>
+
+          <Row title="Font" description="Used across the whole app">
+            <Select
+              value={appearance.font}
+              onValueChange={(v) => updateAppearance('font', v as FontChoice)}
+            >
+              <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {(Object.keys(FONT_LABELS) as FontChoice[]).map((f) => (
+                  <SelectItem key={f} value={f}>{FONT_LABELS[f]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Row>
+
+          <Row title="Chat bubbles" description="How messages look">
+            <Select
+              value={appearance.bubbleStyle}
+              onValueChange={(v) => updateAppearance('bubbleStyle', v as BubbleStyle)}
+            >
+              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="flat">Flat</SelectItem>
+                <SelectItem value="rounded">Soft cards</SelectItem>
+                <SelectItem value="bubbles">Bubbles</SelectItem>
+                <SelectItem value="outlined">Outlined</SelectItem>
+              </SelectContent>
+            </Select>
+          </Row>
+
+          <div className="space-y-3">
+            <Label>ZYRA's avatar</Label>
+            <div className="flex flex-wrap items-center gap-3">
+              {(['mark', 'sparkle', 'orb', 'initial'] as AvatarStyle[]).map((a) => (
+                <button
+                  key={a}
+                  onClick={() => updateAppearance('avatar', a)}
+                  className={cn(
+                    'flex flex-col items-center gap-1 rounded-xl border p-3 transition-colors',
+                    appearance.avatar === a ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'
+                  )}
+                >
+                  <ZyraAvatar style={a} color={appearance.avatarColor} size="lg" />
+                  <span className="text-xs capitalize">{a}</span>
+                </button>
+              ))}
+              <input
+                type="color"
+                value={appearance.avatarColor}
+                onChange={(e) => updateAppearance('avatarColor', e.target.value)}
+                className="h-9 w-12 rounded-md border border-border bg-transparent cursor-pointer"
+                aria-label="Avatar color"
+              />
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setAppearance({ ...DEFAULT_APPEARANCE });
+              saveAppearance({ ...DEFAULT_APPEARANCE });
+              toast.success('Appearance reset');
+            }}
+          >
+            Reset appearance
+          </Button>
         </div>
       </Section>
 
