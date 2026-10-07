@@ -199,6 +199,21 @@ export default function Upgrade() {
           </div>
         )}
 
+        {checkoutError && (
+          <div role="alert" className="mb-6 p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive">
+            <p className="font-semibold">Payment could not be started</p>
+            <p className="mt-1 opacity-90">{checkoutError}</p>
+          </div>
+        )}
+        {checkoutUrl && !checkoutError && (
+          <div className="mb-6 p-4 rounded-xl border border-primary/20 bg-primary/5 text-sm">
+            The secure payment page opened in a new tab.{' '}
+            <a href={checkoutUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary underline">
+              Didn't open? Click here to pay
+            </a>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {plans.map((plan) => {
             const Icon = plan.icon;

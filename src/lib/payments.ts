@@ -38,7 +38,9 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 export async function startCheckout(req: CheckoutRequest): Promise<string> {
   let tab: Window | null = null;
   try {
-    tab = window.open('', '_blank', 'noopener,noreferrer');
+    // Note: passing 'noopener' makes window.open return null, so we detach manually.
+    tab = window.open('', '_blank');
+    if (tab) tab.opener = null;
   } catch {
     tab = null;
   }
