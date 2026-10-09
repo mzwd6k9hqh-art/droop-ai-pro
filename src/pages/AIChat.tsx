@@ -7,6 +7,7 @@ import { StoreConfig } from '@/components/StorePreview';
 import StorePreview from '@/components/StorePreview';
 import { ChatMessage } from '@/components/chat/ChatMessage';
 import { ChatInput, ChatAttachment } from '@/components/chat/ChatInput';
+import { Conversation, ConversationContent, ConversationScrollButton } from '@/components/ai-elements/conversation';
 import { ChatWelcome } from '@/components/chat/ChatWelcome';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { ConversationSidebar } from '@/components/chat/ConversationSidebar';
@@ -351,7 +352,7 @@ Welcome them and present a store design concept with layout, categories, colors,
   const hasMessages = messages.length > 0 || isTyping;
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-[100dvh] overflow-hidden bg-background">
       {/* Conversation Sidebar */}
       <ConversationSidebar
         conversations={conversations.map(c => ({
@@ -370,11 +371,11 @@ Welcome them and present a store design concept with layout, categories, colors,
 
       {/* Main Chat Area */}
       <div className={cn(
-        'flex flex-col flex-1 min-w-0 transition-all duration-300',
+        'flex flex-col flex-1 min-w-0 min-h-0 transition-all duration-300',
         showPreview && 'lg:mr-[420px]'
       )}>
         {/* Top Bar */}
-        <div className="flex items-center justify-between h-14 px-4 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="flex items-center justify-between h-16 shrink-0 px-4 md:px-6 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -434,7 +435,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem onClick={() => setShowExport(true)} className="cursor-pointer">
-                  <Rocket className="h-4 w-4 mr-2 text-emerald-600" />
+                  <Rocket className="h-4 w-4 mr-2 text-primary" />
                   <span className="font-medium">Publish Store</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowEditor(true)} className="cursor-pointer">
@@ -464,7 +465,7 @@ Welcome them and present a store design concept with layout, categories, colors,
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/upgrade')} className="cursor-pointer">
-                      <Crown className="h-4 w-4 mr-2 text-amber-500" />
+                      <Crown className="h-4 w-4 mr-2 text-primary" />
                       <span className="font-semibold text-primary">Upgrade Plan</span>
                     </DropdownMenuItem>
                   </>
@@ -475,7 +476,8 @@ Welcome them and present a store design concept with layout, categories, colors,
         </div>
 
         {/* Messages / Welcome */}
-        <div className="flex-1 overflow-y-auto">
+        <Conversation className="min-h-0">
+          <ConversationContent className="gap-0 p-0">
           {!hasMessages ? (
             <ChatWelcome onSuggestionClick={setInput} />
           ) : (
@@ -501,7 +503,9 @@ Welcome them and present a store design concept with layout, categories, colors,
               <div ref={messagesEndRef} />
             </div>
           )}
-        </div>
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
 
         {/* Limit reached banner */}
         {user && !isUnlimitedPlan() && getAiMessagesRemaining() === 0 && (
@@ -521,7 +525,7 @@ Welcome them and present a store design concept with layout, categories, colors,
         )}
 
         {/* Input */}
-        <div className="border-t border-border/30 bg-background pt-3">
+        <div className="shrink-0 bg-background px-1 pt-3">
           <ChatInput
             value={input}
             onChange={setInput}

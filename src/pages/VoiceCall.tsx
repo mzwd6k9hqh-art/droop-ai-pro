@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Mic, MicOff, Plus, X, Send, Phone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getStoreStats } from '@/lib/storeStats';
@@ -261,10 +262,10 @@ export default function VoiceCall() {
 
       {/* liquid blob */}
       <div className="relative flex flex-col items-center justify-center">
-        <button
+        <Button type="button" variant="action"
           onClick={status === 'idle' || status === 'ended' ? startCall : undefined}
           aria-label={isActive ? 'ZYRA' : 'Start call'}
-          className={cn('relative h-52 w-52', isActive ? 'cursor-default' : 'cursor-pointer')}
+          className={cn('relative h-52 w-52 bg-transparent hover:bg-transparent shadow-none p-0', isActive ? 'cursor-default' : 'cursor-pointer')}
           style={{ animation: 'zyra-liquid-float 6s ease-in-out infinite' }}
         >
           {/* pulsing rings while listening */}
@@ -280,18 +281,18 @@ export default function VoiceCall() {
 
           {/* layered liquid metaballs */}
           <span
-            className="absolute inset-4 bg-[radial-gradient(circle_at_30%_28%,#ddd6fe,#8b5cf6_52%,#4c1d95)] blur-[1px]"
+            className="absolute inset-4 liquid-main blur-[1px]"
             style={{ animation: `zyra-liquid-a ${isSpeaking ? '3s' : '9s'} ease-in-out infinite` }}
           />
           <span
-            className="absolute inset-8 bg-[radial-gradient(circle_at_70%_65%,rgba(255,255,255,0.85),rgba(167,139,250,0.55)_45%,transparent_72%)] mix-blend-screen"
+            className="absolute inset-8 liquid-highlight mix-blend-screen"
             style={{ animation: `zyra-liquid-b ${isSpeaking ? '2.2s' : '7s'} ease-in-out infinite` }}
           />
           <span
-            className="absolute inset-12 bg-[radial-gradient(circle_at_40%_35%,rgba(255,255,255,0.9),transparent_65%)] opacity-70"
+            className="absolute inset-12 liquid-shine opacity-70"
             style={{ animation: `zyra-liquid-a ${isSpeaking ? '1.6s' : '5s'} ease-in-out infinite reverse` }}
           />
-        </button>
+        </Button>
         <p className="mt-6 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{caption}</p>
       </div>
 
@@ -303,13 +304,13 @@ export default function VoiceCall() {
           <div className="mx-auto mb-3 flex max-w-xl items-center gap-2">
             <div className="relative">
               <img src={pendingImage.preview} alt="attached" className="h-16 w-16 rounded-xl border border-border object-cover" />
-              <button
+              <Button type="button" variant="action"
                 onClick={() => setPendingImage(null)}
                 className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background"
                 aria-label="Remove image"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </div>
             <span className="text-xs text-muted-foreground">Image ready — add a message or tap send.</span>
           </div>
@@ -317,52 +318,52 @@ export default function VoiceCall() {
 
         <div className="mx-auto flex max-w-xl items-center gap-3">
           <div className="flex h-14 flex-1 items-center gap-2 rounded-full border border-border/70 bg-card/70 px-2 shadow-sm backdrop-blur-md">
-            <button
+            <Button type="button" variant="action"
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
               aria-label="Send an image"
             >
               <Plus className="h-5 w-5" />
-            </button>
+            </Button>
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitText(); } }}
               placeholder={pendingImage ? 'Add a message about the image…' : 'Or type a message'}
-              className="flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
+              className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
               dir="auto"
             />
             {(text.trim() || pendingImage) && (
-              <button
+              <Button type="button" variant="action"
                 onClick={submitText}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full gradient-button text-primary-foreground transition-opacity hover:opacity-90"
                 aria-label="Send"
               >
                 <Send className="h-4 w-4" />
-              </button>
+              </Button>
             )}
           </div>
 
-          <button
+          <Button type="button" variant="action"
             onClick={toggleMute}
             disabled={!isActive}
             className={cn(
-              'flex h-14 w-14 items-center justify-center rounded-full border border-border/70 transition-colors disabled:opacity-40',
+              'flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border/70 transition-colors disabled:opacity-40',
               muted ? 'bg-muted text-muted-foreground' : 'bg-card text-foreground hover:bg-muted'
             )}
             aria-label={muted ? 'Unmute microphone' : 'Mute microphone'}
           >
             {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-          </button>
+          </Button>
 
-          <button
+          <Button type="button" variant="action"
             onClick={endCall}
-            className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-lg transition-opacity hover:opacity-90"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-lg transition-opacity hover:opacity-90"
             aria-label="End call"
           >
             <Phone className="h-5 w-5 rotate-[135deg]" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

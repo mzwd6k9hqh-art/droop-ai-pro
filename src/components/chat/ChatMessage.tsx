@@ -1,6 +1,6 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
-import { User, Sparkles } from 'lucide-react';
+import { Message, MessageContent, MessageResponse } from '@/components/ai-elements/message';
+import { User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DesignVariants, type DesignVariant } from './DesignVariants';
 import { MessageSourceBadge, type MessageSource } from './MessageSourceBadge';
@@ -28,24 +28,17 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
   const isUser = role === 'user';
   const appearance = useAppearance();
 
-  const bubbleClass = {
-    flat: '',
-    rounded: cn(
-      'rounded-2xl px-4 py-3',
-      isUser ? 'bg-primary/10' : 'bg-background border border-border/60'
-    ),
-    bubbles: cn(
-      'px-4 py-3 shadow-sm',
-      isUser
-        ? 'bg-primary text-primary-foreground rounded-[1.4rem] rounded-br-md'
-        : 'bg-background border border-border rounded-[1.4rem] rounded-bl-md'
-    ),
-    outlined: 'rounded-xl border border-border px-4 py-3',
-  }[appearance.bubbleStyle];
+  const bubbleClass = isUser ? {
+    flat: 'group-[.is-user]:bg-transparent group-[.is-user]:text-foreground group-[.is-user]:px-0',
+    rounded: 'rounded-2xl bg-primary text-primary-foreground',
+    bubbles: 'rounded-[1.4rem] rounded-br-md bg-primary text-primary-foreground shadow-sm',
+    outlined: 'rounded-xl border border-primary/20 group-[.is-user]:bg-transparent group-[.is-user]:text-foreground',
+  }[appearance.bubbleStyle] : 'bg-transparent p-0';
+  const filled = isUser && (appearance.bubbleStyle === 'rounded' || appearance.bubbleStyle === 'bubbles');
 
   return (
-    <div className={cn('group w-full', isUser ? '' : 'bg-muted/30')}>
-      <div className="max-w-3xl mx-auto flex gap-4 px-4 py-6 md:px-6">
+    <Message from={role} className="w-full max-w-none">
+      <div className="max-w-3xl mx-auto w-full flex gap-3 px-4 py-5 md:px-6">
         {/* Avatar */}
         {isUser ? (
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -83,17 +76,17 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
             </div>
           )}
 
-          <div
+          <MessageContent
             className={cn(
-              'prose prose-sm dark:prose-invert max-w-none leading-relaxed',
+              'w-full max-w-none leading-relaxed text-[15px]',
               bubbleClass,
-              appearance.bubbleStyle === 'bubbles' && isUser
-                ? 'prose-invert text-primary-foreground'
+              filled
+                ? 'text-primary-foreground [&_a]:text-primary-foreground [&_strong]:text-primary-foreground'
                 : 'text-foreground'
             )}
           >
-            <ReactMarkdown>{content}</ReactMarkdown>
-          </div>
+            <MessageResponse>{content}</MessageResponse>
+          </MessageContent>
 
           {/* Design Variants */}
           {designVariants && designVariants.length > 0 && onApplyVariant && (
@@ -107,6 +100,6 @@ export function ChatMessage({ role, content, attachments, designVariants, applie
           )}
         </div>
       </div>
-    </div>
+    </Message>
   );
 }

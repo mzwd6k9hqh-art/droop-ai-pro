@@ -21,7 +21,7 @@ export function ZyraMark({ className, tile = false }: ZyraMarkProps) {
   if (!tile) return img;
 
   return (
-    <div className={cn('flex items-center justify-center rounded-xl bg-white/95 shadow-sm', className)}>
+    <div className={cn('flex items-center justify-center rounded-xl bg-card shadow-sm', className)}>
       {img}
     </div>
   );

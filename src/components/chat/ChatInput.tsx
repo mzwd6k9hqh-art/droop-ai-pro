@@ -1,16 +1,21 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Send, ImagePlus, X, Film, Pencil, Mic, Square, AudioWaveform } from 'lucide-react';
+import { ArrowUp, ImagePlus, X, Film, Mic, Square, AudioWaveform, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  PromptInput, PromptInputTextarea, PromptInputFooter, PromptInputSubmit,
+  PromptInputActionMenu, PromptInputActionMenuTrigger, PromptInputActionMenuContent,
+  PromptInputActionMenuItem,
+} from '@/components/ai-elements/prompt-input';
 
 export interface ChatAttachment {
   file: File;
   preview: string;
   type: 'image' | 'video';
 }
-
 interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -23,10 +28,17 @@ interface ChatInputProps {
 
 export function ChatInput({ value, onChange, onSubmit, disabled, attachments, onAddAttachments, onRemoveAttachment }: ChatInputProps) {
   const navigate = useNavigate();
+  const { language, t } = useLanguage();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const copy = {
+    en: { actions: 'Add to chat', image: 'Upload image or video', voice: 'Voice message', call: 'Voice call', stop: 'Stop recording', recording: 'Listening…', remove: 'Remove attachment', notice: 'ZYRA can make mistakes. Verify important information.' },
+    ar: { actions: 'إضافة للمحادثة', image: 'رفع صورة أو فيديو', voice: 'رسالة صوتية', call: 'محادثة صوتية', stop: 'إيقاف التسجيل', recording: 'جارٍ الاستماع…', remove: 'حذف المرفق', notice: 'قد تخطئ ZYRA. تحقق من المعلومات المهمة.' },
+    fr: { actions: 'Ajouter au chat', image: 'Importer une image ou vidéo', voice: 'Message vocal', call: 'Appel vocal', stop: 'Arrêter l’enregistrement', recording: 'À l’écoute…', remove: 'Supprimer la pièce jointe', notice: 'ZYRA peut se tromper. Vérifiez les informations importantes.' },
+  }[language];
 
   const startVoiceInput = () => {
     const w = window as any;
@@ -36,13 +48,13 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
     const rec = new SR();
     rec.continuous = false;
     rec.interimResults = true;
-    rec.lang = 'en-US';
+    rec.lang = language === 'ar' ? 'ar-SA' : language === 'fr' ? 'fr-FR' : 'en-US';
     let finalText = '';
     rec.onresult = (e: any) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalText += t; else interim += t;
+        const text = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += text; else interim += text;
       }
       onChange((value ? value + ' ' : '') + finalText + interim);
     };
@@ -55,147 +67,71 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
     try { rec.start(); setIsRecording(true); } catch { setIsRecording(false); }
   };
 
+  useEffect(() => () => { recognitionRef.current?.abort(); }, []);
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
-    }
+    if (disabled) recognitionRef.current?.stop();
+  }, [disabled]);
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = 'auto';
+    textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 200) + 'px';
   }, [value]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if ((value.trim() || attachments.length > 0) && !disabled) onSubmit();
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      onAddAttachments(e.target.files);
-      e.target.value = '';
-    }
-  };
-
   const hasContent = value.trim().length > 0 || attachments.length > 0;
-
   return (
-    <div className="max-w-3xl mx-auto w-full px-4 pb-4">
-      <div
-        className={cn(
-          'flex flex-col rounded-2xl border border-border bg-background',
-          'focus-within:border-primary/40 transition-colors'
-        )}
-      >
-        {/* Attachment previews */}
-        {attachments.length > 0 && (
-          <div className="flex gap-2 p-3 pb-0 flex-wrap">
-            {attachments.map((att, i) => (
-              <div key={i} className="relative group/att w-16 h-16 rounded-xl overflow-hidden border border-border bg-muted">
-                {att.type === 'image' ? (
-                  <img src={att.preview} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-muted">
-                    <Film className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                )}
-                <button
-                  onClick={() => onRemoveAttachment(i)}
-                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover/att:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="flex items-end gap-1 px-2 py-1.5">
-          <div className="relative flex-1">
-            <Pencil className="absolute left-3 top-[18px] h-4 w-4 text-muted-foreground/60 pointer-events-none" />
-            <textarea
-              ref={textareaRef}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask ZYRA anything..."
-              disabled={disabled}
-              rows={1}
-              className={cn(
-                'w-full resize-none bg-transparent py-4 pr-2 pl-9 text-[15px] leading-snug',
-                'placeholder:text-muted-foreground/60',
-                'focus:outline-none disabled:opacity-50',
-                'max-h-[200px] min-h-[52px]'
-              )}
-              dir="auto"
-            />
-          </div>
-          <div className="flex items-center gap-0.5 p-1.5">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,video/*"
-              multiple
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            {/* Image upload */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
-              title="Attach image or video"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={disabled}
-            >
-              <ImagePlus className="h-[18px] w-[18px]" />
-            </Button>
-            {/* Voice message — record speech to text */}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={cn(
-                'h-9 w-9 rounded-full transition-colors',
-                isRecording
-                  ? 'bg-rose-500 text-white hover:bg-rose-600 animate-pulse'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-              title={isRecording ? 'Stop recording' : 'Record voice message'}
-              onClick={startVoiceInput}
-              disabled={disabled}
-            >
-              {isRecording ? <Square className="h-[14px] w-[14px] fill-current" /> : <Mic className="h-[18px] w-[18px]" />}
-            </Button>
-            {/* Voice call — circular purple waveform button */}
-            <button
-              type="button"
-              title="Start voice call with ZYRA"
-              onClick={() => navigate('/voice-call')}
-              className="h-9 w-9 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center transition-colors shadow-sm"
-            >
-              <AudioWaveform className="h-[18px] w-[18px]" />
-            </button>
-            {/* Send */}
-            <Button
-              onClick={onSubmit}
-              disabled={!hasContent || disabled}
-              size="icon"
-              className={cn(
-                'h-9 w-9 rounded-full ml-0.5 transition-colors',
-                hasContent
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                  : 'bg-muted text-muted-foreground/60 hover:bg-muted'
-              )}
-            >
-              <Send className="h-[16px] w-[16px]" />
-            </Button>
-          </div>
+    <div className="max-w-3xl mx-auto w-full px-3 md:px-6 pb-3">
+      <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden"
+        onChange={e => { if (e.target.files?.length) onAddAttachments(e.target.files); e.target.value = ''; }} />
+      {attachments.length > 0 && (
+        <div className="flex gap-2 pb-3 flex-wrap">
+          {attachments.map((att, i) => (
+            <div key={i} className="relative w-16 h-16 rounded-lg border border-border bg-muted">
+              {att.type === 'image' ? <img src={att.preview} alt={att.file.name} className="w-full h-full object-cover rounded-lg" /> :
+                <div className="h-full flex items-center justify-center"><Film className="h-6 w-6 text-primary" /></div>}
+              <Button type="button" variant="secondary" size="icon-xs" onClick={() => onRemoveAttachment(i)} aria-label={copy.remove}
+                className="absolute -top-2 -right-2 border border-border shadow-sm"><X className="h-3 w-3" /></Button>
+            </div>
+          ))}
         </div>
-      </div>
-      <p className="text-[10px] text-muted-foreground/50 text-center mt-2">
-        ZYRA can make mistakes. Verify important information.
-      </p>
+      )}
+      <PromptInput className="chat-composer" onSubmit={() => { if (hasContent && !disabled) onSubmit(); }}>
+        <PromptInputTextarea ref={textareaRef} value={value} onChange={e => onChange(e.target.value)}
+          placeholder={t('ai.placeholder')} aria-label={t('ai.placeholder')} disabled={disabled} rows={1} dir="auto"
+          className="min-h-[56px] max-h-[200px] w-full px-5 pt-4 pb-2 text-[15px] leading-relaxed placeholder:text-muted-foreground/70"
+          onPaste={e => { if (e.clipboardData.files.length) { e.preventDefault(); onAddAttachments(e.clipboardData.files); } }} />
+        <PromptInputFooter className="px-3 pb-3 pt-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <PromptInputActionMenu open={menuOpen} onOpenChange={setMenuOpen}>
+              <PromptInputActionMenuTrigger aria-label={copy.actions} tooltip={copy.actions} disabled={disabled}
+                className={cn('h-10 w-10 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-transform', menuOpen && 'rotate-45')} />
+              <PromptInputActionMenuContent side="top" align="start" sideOffset={12} className="w-64 rounded-xl p-2 border-border shadow-xl">
+                <PromptInputActionMenuItem onSelect={() => fileInputRef.current?.click()} className="gap-3 rounded-lg p-3 cursor-pointer">
+                  <span className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><ImagePlus className="h-4 w-4" /></span>
+                  {copy.image}
+                </PromptInputActionMenuItem>
+                <PromptInputActionMenuItem onSelect={startVoiceInput} className="gap-3 rounded-lg p-3 cursor-pointer">
+                  <span className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Mic className="h-4 w-4" /></span>
+                  {isRecording ? copy.stop : copy.voice}
+                </PromptInputActionMenuItem>
+                <PromptInputActionMenuItem onSelect={() => navigate('/voice-call')} className="gap-3 rounded-lg p-3 cursor-pointer">
+                  <span className="h-8 w-8 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center"><AudioWaveform className="h-4 w-4" /></span>
+                  {copy.call}
+                </PromptInputActionMenuItem>
+              </PromptInputActionMenuContent>
+            </PromptInputActionMenu>
+            {isRecording && (
+              <Button type="button" variant="action" size="sm" onClick={() => recognitionRef.current?.stop()} aria-label={copy.stop} className="gap-2 text-xs">
+                <Square className="h-3 w-3 fill-current" /><span className="motion-safe:animate-pulse">{copy.recording}</span>
+              </Button>
+            )}
+          </div>
+          <PromptInputSubmit status={disabled ? 'submitted' : 'ready'} disabled={!hasContent || disabled}
+            variant="premium" aria-label={t('common.send')} title={t('common.send')} className="h-10 w-10 rounded-full p-0">
+            {disabled ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-5 w-5" />}
+          </PromptInputSubmit>
+        </PromptInputFooter>
+      </PromptInput>
+      <p className="text-[10px] text-muted-foreground text-center mt-3">{copy.notice}</p>
     </div>
   );
 }
