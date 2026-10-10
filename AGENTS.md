@@ -1,0 +1,2 @@
+Use shared semantic theme tokens and Button variants for app chrome, while keeping generated storefront palettes independent so category-specific store designs stay intact.
+Compose chat with the installed AI Elements primitives; use a ref-forwarding Button directly as the dropdown trigger so the action menu anchors correctly.

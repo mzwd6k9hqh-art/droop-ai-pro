@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUp, ImagePlus, X, Film, Mic, Square, AudioWaveform, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -102,8 +103,12 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
         <PromptInputFooter className="px-3 pb-3 pt-0">
           <div className="flex items-center gap-3 min-w-0">
             <PromptInputActionMenu open={menuOpen} onOpenChange={setMenuOpen}>
-              <PromptInputActionMenuTrigger aria-label={copy.actions} tooltip={copy.actions} disabled={disabled}
-                className={cn('h-10 w-10 rounded-full bg-primary/5 text-primary hover:bg-primary/10 transition-transform', menuOpen && 'rotate-45')} />
+               <DropdownMenuTrigger asChild>
+                 <Button type="button" variant="action" size="icon" aria-label={copy.actions} title={copy.actions} disabled={disabled}
+                   className={cn('h-10 w-10 transition-transform', menuOpen && 'rotate-45')}>
+                   <span className="text-xl leading-none">+</span>
+                 </Button>
+               </DropdownMenuTrigger>
               <PromptInputActionMenuContent side="top" align="start" sideOffset={12} className="w-64 rounded-xl p-2 border-border shadow-xl">
                 <PromptInputActionMenuItem onSelect={() => fileInputRef.current?.click()} className="gap-3 rounded-lg p-3 cursor-pointer">
                   <span className="h-8 w-8 shrink-0 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><ImagePlus className="h-4 w-4" /></span>
