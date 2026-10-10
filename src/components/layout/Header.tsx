@@ -64,53 +64,53 @@ export function Header() {
           <Link to="/" className="flex items-center gap-2.5 group">
             <div className="relative">
               <ZyraMark className="h-9 w-9 transition-transform group-hover:scale-105" tile />
-              <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-white/80" />
+              <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-primary-foreground/80" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold tracking-tight text-white leading-tight">ZYRA</span>
-              <span className="text-[10px] text-white/60 leading-none">Sales Booster</span>
+              <span className="text-lg font-bold tracking-tight text-primary-foreground leading-tight">ZYRA</span>
+              <span className="text-[10px] text-primary-foreground/60 leading-none">Sales Booster</span>
             </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
             <Link to="/dashboard">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <LayoutDashboard className="h-4 w-4" />
                 {t('nav.dashboard')}
               </Button>
             </Link>
             <Link to="/analytics">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <BarChart3 className="h-4 w-4" />
                 {t('nav.analytics')}
               </Button>
             </Link>
             <Link to="/ai">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <Bot className="h-4 w-4" />
                 {t('nav.droopai')}
               </Button>
             </Link>
             <Link to="/voice-call">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <PhoneCall className="h-4 w-4" />
                 Voice
               </Button>
             </Link>
             <Link to="/customers">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <MessageSquare className="h-4 w-4" />
                 Customers
               </Button>
             </Link>
             <Link to="/earnings">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <DollarSign className="h-4 w-4" />
                 Earnings
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button variant="ghost" size="sm" className="gap-2 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="sm" className="gap-2 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <CreditCard className="h-4 w-4" />
                 {t('nav.pricing')}
               </Button>
@@ -134,7 +134,7 @@ export function Header() {
             variant="ghost"
             size="icon"
             onClick={toggleTheme}
-            className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10"
+            className="h-9 w-9 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10"
           >
             {theme === 'light' ? (
               <Moon className="h-4 w-4" />
@@ -145,7 +145,7 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <User className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -177,7 +177,7 @@ export function Header() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-white/90 hover:text-white hover:bg-white/10">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <Menu className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

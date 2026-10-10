@@ -319,7 +319,6 @@ export default function VoiceCall() {
         <div className="mx-auto flex max-w-xl items-center gap-3">
           <div className="flex h-14 flex-1 items-center gap-2 rounded-full border border-border/70 bg-card/70 px-2 shadow-sm backdrop-blur-md">
             <Button type="button" variant="action"
-              type="button"
               onClick={() => fileInputRef.current?.click()}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
               aria-label="Send an image"

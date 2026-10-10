@@ -58,8 +58,8 @@ export default function PaymentSuccess() {
 
         {state === 'paid' && (
           <>
-            <div className="h-14 w-14 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center">
-              <Check className="h-7 w-7 text-emerald-600" />
+            <div className="h-14 w-14 mx-auto rounded-full bg-primary/15 flex items-center justify-center">
+              <Check className="h-7 w-7 text-primary" />
             </div>
             <h1 className="text-2xl font-bold">{t('pay.successTitle')}</h1>
             <p className="text-sm text-muted-foreground">
@@ -78,8 +78,8 @@ export default function PaymentSuccess() {
 
         {state === 'failed' && (
           <>
-            <div className="h-14 w-14 mx-auto rounded-full bg-amber-500/15 flex items-center justify-center">
-              <AlertTriangle className="h-7 w-7 text-amber-600" />
+            <div className="h-14 w-14 mx-auto rounded-full bg-primary/15 flex items-center justify-center">
+              <AlertTriangle className="h-7 w-7 text-primary" />
             </div>
             <h1 className="text-2xl font-bold">{t('pay.failedTitle')}</h1>
             <p className="text-sm text-muted-foreground">{t('pay.failedBody')}</p>

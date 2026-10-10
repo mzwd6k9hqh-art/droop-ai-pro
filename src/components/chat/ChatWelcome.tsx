@@ -19,20 +19,20 @@ const suggestions = [
 
 export function ChatWelcome({ onSuggestionClick }: ChatWelcomeProps) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-full px-4 py-10">
-      <ZyraMark className="h-16 w-16 mb-6" tile />
+    <div className="flex flex-col items-center justify-center min-h-full px-4 py-6 sm:py-10">
+      <ZyraMark className="h-12 w-12 sm:h-16 sm:w-16 mb-4 sm:mb-6" tile />
       <p className="text-xs font-bold text-primary mb-3">ZYRA</p>
-      <h1 className="text-3xl font-semibold text-foreground mb-3 text-center">What’s on your mind?</h1>
-      <p className="text-muted-foreground text-sm mb-8 max-w-md text-center">Let’s make your next idea happen.</p>
+      <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-3 text-center">What’s on your mind?</h1>
+      <p className="text-muted-foreground text-sm mb-5 sm:mb-8 max-w-md text-center">Let’s make your next idea happen.</p>
 
       {/* Suggestion Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl w-full">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 max-w-2xl w-full">
         {suggestions.map((s, i) => (
           <Button variant="outline"
             key={i}
             onClick={() => onSuggestionClick(s.text)}
             className={cn(
-              'group flex items-center justify-start gap-3 p-4 h-auto rounded-lg text-left whitespace-normal',
+              'group flex items-center justify-start gap-2 sm:gap-3 p-3 sm:p-4 h-auto rounded-lg text-left whitespace-normal',
               'bg-card border border-border/60 hover:border-primary/30',
               'transition-all hover:shadow-md hover:-translate-y-0.5',
               'text-sm text-foreground'

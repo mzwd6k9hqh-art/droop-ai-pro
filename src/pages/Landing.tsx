@@ -267,8 +267,8 @@ export default function Landing() {
             <div className="absolute inset-0 gradient-header" />
             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
             
-            <div className="relative py-16 px-8 text-center text-white">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur mb-6">
+            <div className="relative py-16 px-8 text-center text-primary-foreground">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur mb-6">
                 <Shield className="h-4 w-4" />
                 <span className="text-sm font-medium">14-day free trial • No credit card required</span>
               </div>
@@ -276,7 +276,7 @@ export default function Landing() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 Ready to Boost Your Sales?
               </h2>
-              <p className="text-lg text-white/80 max-w-xl mx-auto mb-8">
+              <p className="text-lg text-primary-foreground/80 max-w-xl mx-auto mb-8">
                 Join thousands of entrepreneurs using ZYRA to grow their businesses smarter.
               </p>
               
@@ -288,7 +288,7 @@ export default function Landing() {
                   </Button>
                 </Link>
                 <Link to="/pricing">
-                  <Button size="lg" variant="ghost" className="gap-2 h-12 px-8 text-white hover:bg-white/10">
+                  <Button size="lg" variant="ghost" className="gap-2 h-12 px-8 text-primary-foreground hover:bg-primary-foreground/10">
                     View Pricing <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

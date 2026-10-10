@@ -40,7 +40,7 @@ const plans: PlanCard[] = [
     dailyMessages: 5,
     description: 'Get started with the basics',
     icon: Zap,
-    gradient: 'from-slate-500 to-slate-600',
+    gradient: 'from-primary to-primary',
     features: [
       { name: '5 daily AI messages', included: true },
       { name: 'Basic store preview', included: true },
@@ -60,7 +60,7 @@ const plans: PlanCard[] = [
     dailyMessages: 25,
     description: 'For solo entrepreneurs',
     icon: Star,
-    gradient: 'from-blue-500 to-cyan-500',
+    gradient: 'from-primary to-primary',
     features: [
       { name: '25 daily AI messages', included: true, highlight: true },
       { name: 'Unlimited conversations', included: true },
@@ -102,7 +102,7 @@ const plans: PlanCard[] = [
     dailyMessages: 'unlimited',
     description: 'For established businesses',
     icon: Sparkles,
-    gradient: 'from-amber-500 to-orange-500',
+    gradient: 'from-primary to-primary',
     features: [
       { name: 'Unlimited AI messages', included: true, highlight: true },
       { name: 'All Pro features', included: true },
@@ -224,13 +224,13 @@ export default function Upgrade() {
                 className={cn(
                   'relative rounded-2xl p-5 transition-all',
                   plan.highlight
-                    ? 'bg-gradient-to-br from-primary to-accent text-white ring-2 ring-primary shadow-xl sm:scale-105'
+                    ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground ring-2 ring-primary shadow-xl sm:scale-105'
                     : 'elevated-card'
                 )}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-warning text-warning-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+                    <span className="bg-secondary text-secondary-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-md whitespace-nowrap">
                       {plan.badge}
                     </span>
                   </div>
@@ -239,26 +239,26 @@ export default function Upgrade() {
                 <div className="mb-4">
                   <div className={cn(
                     'inline-flex p-2.5 rounded-xl mb-3',
-                    plan.highlight ? 'bg-white/20' : 'bg-gradient-to-br ' + plan.gradient
+                    plan.highlight ? 'bg-primary-foreground/20' : 'bg-gradient-to-br ' + plan.gradient
                   )}>
-                    <Icon className="h-6 w-6 text-white" />
+                    <Icon className="h-6 w-6 text-primary-foreground" />
                   </div>
-                  <h3 className={cn('text-lg font-bold', plan.highlight && 'text-white')}>{plan.name}</h3>
-                  <p className={cn('text-xs mt-0.5', plan.highlight ? 'text-white/70' : 'text-muted-foreground')}>
+                  <h3 className={cn('text-lg font-bold', plan.highlight && 'text-primary-foreground')}>{plan.name}</h3>
+                  <p className={cn('text-xs mt-0.5', plan.highlight ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                     {plan.description}
                   </p>
                 </div>
 
                 <div className="mb-4">
-                  <span className={cn('text-3xl font-bold', plan.highlight && 'text-white')}>{plan.price}</span>
-                  <span className={cn('text-sm', plan.highlight ? 'text-white/70' : 'text-muted-foreground')}>
+                  <span className={cn('text-3xl font-bold', plan.highlight && 'text-primary-foreground')}>{plan.price}</span>
+                  <span className={cn('text-sm', plan.highlight ? 'text-primary-foreground/70' : 'text-muted-foreground')}>
                     {plan.period}
                   </span>
                 </div>
 
                 <div className={cn(
                   'mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold',
-                  plan.highlight ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary border border-primary/20'
+                  plan.highlight ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary border border-primary/20'
                 )}>
                   <MessageSquare className="h-3.5 w-3.5" />
                   {plan.dailyMessages === 'unlimited' ? 'Unlimited messages' : `${plan.dailyMessages} messages/day`}
@@ -266,11 +266,11 @@ export default function Upgrade() {
 
                 <ul className="space-y-2 mb-5">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className={cn('flex items-start gap-2 text-xs', plan.highlight && 'text-white')}>
+                    <li key={i} className={cn('flex items-start gap-2 text-xs', plan.highlight && 'text-primary-foreground')}>
                       {feature.included ? (
                         <Check className={cn('h-3.5 w-3.5 mt-0.5 flex-shrink-0', feature.highlight ? (plan.highlight ? 'text-warning' : 'text-secondary') : '')} />
                       ) : (
-                        <Lock className={cn('h-3.5 w-3.5 mt-0.5 flex-shrink-0 opacity-40', plan.highlight ? 'text-white/50' : 'text-muted-foreground')} />
+                        <Lock className={cn('h-3.5 w-3.5 mt-0.5 flex-shrink-0 opacity-40', plan.highlight ? 'text-primary-foreground/50' : 'text-muted-foreground')} />
                       )}
                       <span className={cn(!feature.included && 'opacity-50', feature.highlight && 'font-semibold')}>
                         {feature.name}

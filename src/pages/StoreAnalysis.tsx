@@ -159,22 +159,22 @@ export default function StoreAnalysis() {
   }, [storeUrl, navigate]);
 
   const getScoreColor = (score: number) => {
-    if (score >= 75) return 'text-green-500';
-    if (score >= 50) return 'text-yellow-500';
-    return 'text-red-500';
+    if (score >= 75) return 'text-primary';
+    if (score >= 50) return 'text-primary';
+    return 'text-primary';
   };
 
   const getScoreBg = (score: number) => {
-    if (score >= 75) return 'bg-green-500/10 border-green-500/20';
-    if (score >= 50) return 'bg-yellow-500/10 border-yellow-500/20';
-    return 'bg-red-500/10 border-red-500/20';
+    if (score >= 75) return 'bg-primary/10 border-primary/20';
+    if (score >= 50) return 'bg-primary/10 border-primary/20';
+    return 'bg-primary/10 border-primary/20';
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'excellent': return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case 'good': return <Info className="h-4 w-4 text-yellow-500" />;
-      default: return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case 'excellent': return <CheckCircle2 className="h-4 w-4 text-primary" />;
+      case 'good': return <Info className="h-4 w-4 text-primary" />;
+      default: return <AlertTriangle className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -216,7 +216,7 @@ export default function StoreAnalysis() {
                   key={i}
                   className={cn(
                     'flex items-center gap-3 px-4 py-2 rounded-lg text-sm transition-all',
-                    isComplete && 'text-green-500',
+                    isComplete && 'text-primary',
                     isCurrent && 'text-primary font-medium',
                     !isComplete && !isCurrent && 'text-muted-foreground/50'
                   )}

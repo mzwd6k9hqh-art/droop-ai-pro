@@ -149,8 +149,8 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                 onClick={handleDownload}
                 className="w-full text-left rounded-xl border border-border bg-card hover:bg-muted/50 p-4 flex items-center gap-3 transition-colors"
               >
-                <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Download className="h-5 w-5 text-emerald-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Download className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-sm">Download HTML File</h3>
@@ -163,8 +163,8 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                 onClick={handlePreview}
                 className="w-full text-left rounded-xl border border-border bg-card hover:bg-muted/50 p-4 flex items-center gap-3 transition-colors"
               >
-                <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                  <Globe className="h-5 w-5 text-blue-600" />
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Globe className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-sm">Live Preview</h3>
@@ -177,8 +177,8 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                 onClick={handleCopyCode}
                 className="w-full text-left rounded-xl border border-border bg-card hover:bg-muted/50 p-4 flex items-center gap-3 transition-colors"
               >
-                <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                  {copied ? <Check className="h-5 w-5 text-purple-600" /> : <Code2 className="h-5 w-5 text-purple-600" />}
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  {copied ? <Check className="h-5 w-5 text-primary" /> : <Code2 className="h-5 w-5 text-primary" />}
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-sm">{copied ? 'Copied ✓' : 'Copy HTML Code'}</h3>
@@ -194,7 +194,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl">
-                <Sparkles className="h-5 w-5 text-amber-500" />
+                <Sparkles className="h-5 w-5 text-primary" />
                 Get a Professional Domain
               </DialogTitle>
               <DialogDescription>
@@ -210,16 +210,16 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
               </div>
 
               {/* Offer card */}
-              <div className="relative rounded-2xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-pink-500/10 p-5 overflow-hidden">
+              <div className="relative rounded-2xl border-2 border-primary/40 bg-gradient-to-br from-primary/10 via-primary/5 to-primary/10 p-5 overflow-hidden">
                 <div className="absolute -top-1 -right-1">
-                  <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 font-bold shadow-lg">
+                  <Badge className="bg-gradient-to-r from-primary to-primary text-primary-foreground border-0 font-bold shadow-lg">
                     🔥 Limited Offer
                   </Badge>
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
-                  <Tag className="h-4 w-4 text-amber-600" />
-                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+                  <Tag className="h-4 w-4 text-primary" />
+                  <span className="text-xs font-semibold text-primary dark:text-primary uppercase tracking-wide">
                     Special Launch Price
                   </span>
                 </div>
@@ -230,14 +230,14 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                 <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-4xl font-black text-foreground">$1</span>
                   <span className="text-sm text-muted-foreground line-through">$14.99</span>
-                  <span className="text-xs font-bold text-emerald-600">SAVE 93%</span>
+                  <span className="text-xs font-bold text-primary">SAVE 93%</span>
                 </div>
 
                 <ul className="space-y-1.5 mb-4 text-xs text-foreground/80">
-                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Custom .com / .store / .shop domain</li>
-                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Free SSL certificate (HTTPS)</li>
-                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Instant connection — no setup</li>
-                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Builds customer trust & SEO</li>
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Custom .com / .store / .shop domain</li>
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Free SSL certificate (HTTPS)</li>
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Instant connection — no setup</li>
+                  <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 text-primary shrink-0" /> Builds customer trust & SEO</li>
                 </ul>
 
                 {/* Domain search */}
@@ -267,7 +267,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                 <Button
                   onClick={handleBuyDomain}
                   disabled={purchasing || !customDomain.trim()}
-                  className="w-full mt-4 h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold rounded-lg gap-2 shadow-lg"
+                  className="w-full mt-4 h-11 bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-primary-foreground font-bold rounded-lg gap-2 shadow-lg"
                 >
                   {purchasing ? (
                     <>Redirecting to secure checkout…</>
@@ -298,7 +298,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-xl">
-                <Check className="h-5 w-5 text-emerald-500" />
+                <Check className="h-5 w-5 text-primary" />
                 Your Store is Live! 🎉
               </DialogTitle>
               <DialogDescription>
@@ -307,8 +307,8 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
             </DialogHeader>
 
             <div className="space-y-4 py-2">
-              <div className="rounded-xl border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 p-5 text-center">
-                <Globe className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
+              <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 p-5 text-center">
+                <Globe className="h-10 w-10 text-primary mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground mb-1">Your store URL:</p>
                 <p className="text-base font-bold font-mono text-foreground break-all mb-3">{publishedUrl}</p>
                 <div className="flex gap-2">

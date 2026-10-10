@@ -216,7 +216,7 @@ export default function CustomerChat() {
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center font-semibold shrink-0">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground flex items-center justify-center font-semibold shrink-0">
                     {c.customer_name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">

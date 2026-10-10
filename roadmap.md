@@ -1,3 +1,3 @@
-- [ ] Unify app colors and shared action button styles without changing generated store designs.
-- [ ] Polish ZYRA chat and consolidate input actions into an expandable plus menu.
-- [ ] Verify chat actions and layouts in the running app.
+- [x] Unify app colors and shared action button styles without changing generated store designs.
+- [x] Polish ZYRA chat and consolidate input actions into an expandable plus menu.
+- [x] Verify chat actions and layouts in the running app.
