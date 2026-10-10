@@ -61,14 +61,14 @@ export default function Earnings() {
     <div className="space-y-6 animate-slide-up">
       <div>
         <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <DollarSign className="h-7 w-7 text-emerald-600" /> Earnings
+          <DollarSign className="h-7 w-7 text-primary" /> Earnings
         </h1>
         <p className="text-muted-foreground mt-1">
           Real numbers from your store — nothing fabricated.
         </p>
       </div>
 
-      <div className="elevated-card p-5 bg-gradient-to-br from-emerald-500/5 to-primary/5 border-emerald-500/20">
+      <div className="elevated-card p-5 bg-gradient-to-br from-primary/5 to-primary/5 border-primary/20">
         <div className="flex items-start gap-3">
           <div className="icon-feature icon-success">
             <TrendingUp className="h-5 w-5" />
@@ -114,12 +114,12 @@ function Card({
   accent: 'emerald' | 'primary' | 'accent' | 'amber' | 'info' | 'warning';
 }) {
   const accentMap = {
-    emerald: 'bg-emerald-500/10 text-emerald-600',
+    emerald: 'bg-primary/10 text-primary',
     primary: 'bg-primary/10 text-primary',
     accent: 'bg-accent/10 text-accent',
-    amber: 'bg-amber-500/10 text-amber-600',
-    info: 'bg-sky-500/10 text-sky-600',
-    warning: 'bg-orange-500/10 text-orange-600',
+    amber: 'bg-primary/10 text-primary',
+    info: 'bg-primary/10 text-primary',
+    warning: 'bg-primary/10 text-primary',
   } as const;
   return (
     <div className="elevated-card p-5 h-full">
@@ -133,7 +133,7 @@ function Card({
       {delta && (
         <div className={cn(
           'flex items-center gap-1 text-xs mt-1',
-          deltaUp ? 'text-emerald-600' : 'text-muted-foreground',
+          deltaUp ? 'text-primary' : 'text-muted-foreground',
         )}>
           {deltaUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
           {delta}

@@ -177,7 +177,7 @@ export default function Pricing() {
             >
               {plan.badge && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-warning text-warning-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+                  <span className="bg-secondary text-secondary-foreground text-xs font-semibold px-3 py-1 rounded-full shadow-md">
                     {plan.badge}
                   </span>
                 </div>
@@ -188,26 +188,26 @@ export default function Pricing() {
                   className={cn(
                     'inline-flex rounded-2xl mb-4',
                     plan.highlight
-                      ? 'p-3 bg-white/20'
+                      ? 'p-3 bg-primary-foreground/20'
                       : 'icon-action icon-primary'
                   )}
                 >
                   <Icon
                     className={cn(
                       'h-7 w-7',
-                      plan.highlight ? 'text-white' : ''
+                      plan.highlight ? 'text-primary-foreground' : ''
                     )}
                   />
                 </div>
                 <h3 className={cn(
                   'text-xl font-semibold',
-                  plan.highlight && 'text-white'
+                  plan.highlight && 'text-primary-foreground'
                 )}>{plan.name}</h3>
                 <p
                   className={cn(
                     'text-sm mt-1',
                     plan.highlight
-                      ? 'text-white/80'
+                      ? 'text-primary-foreground/80'
                       : 'text-muted-foreground'
                   )}
                 >
@@ -218,13 +218,13 @@ export default function Pricing() {
               <div className="mb-6">
                 <span className={cn(
                   'text-4xl font-bold',
-                  plan.highlight && 'text-white'
+                  plan.highlight && 'text-primary-foreground'
                 )}>{plan.price}</span>
                 <span
                   className={cn(
                     'text-sm',
                     plan.highlight
-                      ? 'text-white/80'
+                      ? 'text-primary-foreground/80'
                       : 'text-muted-foreground'
                   )}
                 >
@@ -236,7 +236,7 @@ export default function Pricing() {
                 {plan.features.map((feature, i) => (
                   <li key={i} className={cn(
                     'flex items-start gap-2 text-sm',
-                    plan.highlight && 'text-white'
+                    plan.highlight && 'text-primary-foreground'
                   )}>
                     {feature.included ? (
                       <Check
@@ -254,7 +254,7 @@ export default function Pricing() {
                         className={cn(
                           'h-4 w-4 mt-0.5 flex-shrink-0 opacity-40',
                           plan.highlight
-                            ? 'text-white/50'
+                            ? 'text-primary-foreground/50'
                             : 'text-muted-foreground'
                         )}
                       />

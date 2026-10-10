@@ -31,7 +31,7 @@ export function ZyraAvatar({
   if (variant === 'sparkle') {
     return (
       <div
-        className={cn('flex shrink-0 items-center justify-center rounded-full text-white shadow-sm', box, className)}
+        className={cn('flex shrink-0 items-center justify-center rounded-full text-primary-foreground shadow-sm', box, className)}
         style={{ background: `linear-gradient(135deg, ${accent}, ${accent}99)` }}
       >
         <Sparkles className={inner} />
@@ -52,7 +52,7 @@ export function ZyraAvatar({
   if (variant === 'initial') {
     return (
       <div
-        className={cn('flex shrink-0 items-center justify-center rounded-full font-bold text-white shadow-sm', box, className)}
+        className={cn('flex shrink-0 items-center justify-center rounded-full font-bold text-primary-foreground shadow-sm', box, className)}
         style={{ backgroundColor: accent, fontSize: size === 'lg' ? 18 : 12 }}
       >
         Z
@@ -61,7 +61,7 @@ export function ZyraAvatar({
   }
 
   return (
-    <div className={cn('flex shrink-0 items-center justify-center rounded-full bg-white/95 shadow-sm', box, className)}>
+    <div className={cn('flex shrink-0 items-center justify-center rounded-full bg-primary-foreground/95 shadow-sm', box, className)}>
       <ZyraMark className={inner} />
     </div>
   );

@@ -120,7 +120,7 @@ export default function Dashboard() {
         const isPublished = typeof window !== 'undefined' && localStorage.getItem('droop_store_published') === 'true';
         if (isPublished && user?.storeUrl) {
           return (
-            <div className="elevated-card p-4 bg-gradient-to-r from-emerald-500/10 to-primary/10 border-emerald-500/20">
+            <div className="elevated-card p-4 bg-gradient-to-r from-primary/10 to-primary/10 border-primary/20">
               <div className="flex items-center gap-3">
                 <div className="icon-feature icon-success"><Store className="h-5 w-5" /></div>
                 <div className="flex-1">
@@ -134,7 +134,7 @@ export default function Dashboard() {
           );
         }
         return (
-          <div className="elevated-card p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30">
+          <div className="elevated-card p-5 bg-gradient-to-r from-primary/10 to-primary/10 border-primary/30">
             <div className="flex items-start gap-3">
               <div className="icon-feature icon-warning"><Rocket className="h-5 w-5" /></div>
               <div className="flex-1">

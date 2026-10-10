@@ -95,7 +95,7 @@ export default function Analytics() {
       </div>
 
       {!isPublished && (
-        <div className="elevated-card p-5 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30">
+        <div className="elevated-card p-5 bg-gradient-to-r from-primary/10 to-primary/10 border-primary/30">
           <div className="flex items-start gap-3">
             <div className="icon-feature icon-warning"><Rocket className="h-5 w-5" /></div>
             <div className="flex-1">
@@ -150,7 +150,7 @@ export default function Analytics() {
           <ul className="space-y-2">
             {stats.ratingReasons.map((r, i) => (
               <li key={i} className="text-sm text-muted-foreground flex gap-2">
-                <span className="text-amber-500">•</span>{r}
+                <span className="text-primary">•</span>{r}
               </li>
             ))}
           </ul>
