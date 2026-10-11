@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Mic, MicOff, Plus, X, Send, Phone } from 'lucide-react';
+import { Mic, MicOff, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -16,10 +16,7 @@ export default function VoiceCall() {
   const [status, setStatus] = useState<CallStatus>('idle');
   const [turns, setTurns] = useState<VoiceTurn[]>([]);
   const [partial, setPartial] = useState('');
-  const [text, setText] = useState('');
   const [muted, setMuted] = useState(false);
-  const [seconds, setSeconds] = useState(0);
-  const [pendingImage, setPendingImage] = useState<{ preview: string; base64: string } | null>(null);
 
   const recognitionRef = useRef<any>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -33,17 +30,8 @@ export default function VoiceCall() {
   mutedRef.current = muted;
 
   const stats = getStoreStats();
-  const lastAssistant = [...turns].reverse().find(t => t.role === 'assistant');
+  const lastUser = [...turns].reverse().find(t => t.role === 'user' && !t.content.startsWith('🖼️'));
   const isActive = status !== 'idle' && status !== 'ended';
-
-  /* ---------------- timer ---------------- */
-  useEffect(() => {
-    if (!isActive) return;
-    const id = setInterval(() => setSeconds(s => s + 1), 1000);
-    return () => clearInterval(id);
-  }, [isActive]);
-
-  const clock = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 
   /* ---------------- listening ---------------- */
   const stopRecognition = useCallback(() => {
@@ -57,7 +45,7 @@ export default function VoiceCall() {
     const w = window as AnyWindow;
     const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
     if (!SR) {
-      toast.error('Voice recognition needs Chrome, Edge or Safari. You can still type.');
+      toast.error('Voice recognition needs Chrome, Edge or Safari.');
       return;
     }
     stopRecognition();
@@ -164,11 +152,13 @@ export default function VoiceCall() {
 
   /* ---------------- call controls ---------------- */
   const startCall = async () => {
-    try { await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+    }
     catch { toast.error('Microphone permission is required for a voice call.'); return; }
     setStatus('connecting');
     setTurns([]);
-    setSeconds(0);
     setTimeout(() => {
       const greeting = "Hey! It's ZYRA. How's your store doing today — what should we work on?";
       setTurns([{ id: crypto.randomUUID(), role: 'assistant', content: greeting }]);
@@ -178,11 +168,12 @@ export default function VoiceCall() {
   };
 
   const endCall = () => {
+    statusRef.current = 'ended';
     setStatus('ended');
     stopRecognition();
     if (audioRef.current) { try { audioRef.current.pause(); } catch {} }
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    navigate(-1);
+    navigate('/ai');
   };
 
   const toggleMute = () => {
@@ -195,16 +186,6 @@ export default function VoiceCall() {
     });
   };
 
-  const submitText = () => {
-    const t = text.trim();
-    const img = pendingImage;
-    if (!t && !img) return;
-    setText('');
-    setPendingImage(null);
-    if (status === 'idle' || status === 'ended') setTurns([]);
-    sendToAI(t || 'Take a look at this image', img?.base64);
-  };
-
   const handleImagePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
@@ -213,8 +194,7 @@ export default function VoiceCall() {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result as string;
-      setPendingImage({ preview: base64, base64 });
-      toast.success('Image attached — add a message or send');
+      sendToAI('Take a look at this image', base64);
     };
     reader.readAsDataURL(file);
   };
@@ -229,139 +209,41 @@ export default function VoiceCall() {
   const isSpeaking = status === 'speaking';
   const isListening = status === 'listening';
 
-  const caption =
-    status === 'idle' ? 'Tap the orb to start talking with ZYRA'
-    : status === 'connecting' ? 'Connecting…'
-    : status === 'processing' ? 'Thinking…'
-    : status === 'speaking' ? 'ZYRA is speaking'
-    : muted ? 'Microphone muted'
-    : 'Listening — just speak';
-
-  const topText = lastAssistant?.content || (status === 'idle' ? 'Talk to ZYRA about your store, your sales, anything.' : '');
+  const caption = status === 'idle' ? 'Start call'
+    : status === 'connecting' ? 'Connecting'
+    : status === 'processing' ? 'Thinking'
+    : status === 'speaking' ? 'Speaking'
+    : muted ? 'Microphone muted' : 'Listening';
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden bg-background text-foreground">
-      {/* soft ambient wash */}
-      <div className="pointer-events-none absolute inset-0 opacity-70 [background:radial-gradient(55%_45%_at_50%_18%,hsl(var(--primary)/0.14),transparent_70%),radial-gradient(45%_40%_at_80%_85%,hsl(var(--accent)/0.12),transparent_70%)]" />
-
-      {/* header */}
-      <div className="relative flex items-center justify-between px-5 pt-5">
-        <span className="text-sm font-bold tracking-tight">ZYRA</span>
-        <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium tabular-nums text-muted-foreground">
-          {isActive ? clock : 'Voice call'}
-        </span>
+    <div className="fixed inset-0 grid grid-rows-[minmax(100px,1fr)_auto_minmax(120px,1fr)] overflow-hidden bg-background text-foreground">
+      <div className="flex justify-center px-8 pt-12 sm:pt-16">
+        <p dir="auto" aria-label="Your transcript" aria-live="polite" className="max-h-28 max-w-lg overflow-y-auto text-center text-sm font-normal leading-relaxed text-muted-foreground/80">
+          {partial || lastUser?.content || ''}
+        </p>
       </div>
 
-      {/* transcript */}
-      <div className="relative flex flex-1 items-end justify-center px-6 pb-6 pt-8">
-        <div className="w-full max-w-xl text-center">
-          {partial && <p className="mb-4 text-sm italic text-muted-foreground">"{partial}"</p>}
-          <p className="text-2xl font-light leading-relaxed tracking-tight md:text-3xl">{topText}</p>
+      <div className="flex flex-col items-center justify-center" role="img" aria-label={`ZYRA — ${caption}`}>
+        <div className={cn('voice-liquid relative h-56 w-56 sm:h-72 sm:w-72', isSpeaking && 'voice-liquid-speaking', muted && 'opacity-60')} aria-hidden="true">
+          {isListening && !muted && <span className="voice-liquid-ring absolute inset-4 rounded-full border border-primary/15" />}
+          <span className="voice-liquid-main liquid-main absolute inset-4" />
+          <span className="voice-liquid-highlight liquid-highlight absolute inset-7 mix-blend-screen" />
+          <span className="voice-liquid-shine liquid-shine absolute inset-10 opacity-70" />
         </div>
+        <span role="status" className="sr-only">{caption}</span>
       </div>
 
-      {/* liquid blob */}
-      <div className="relative flex flex-col items-center justify-center">
-        <Button type="button" variant="action"
-          onClick={status === 'idle' || status === 'ended' ? startCall : undefined}
-          aria-label={isActive ? 'ZYRA' : 'Start call'}
-          className={cn('relative h-52 w-52 bg-transparent hover:bg-transparent shadow-none p-0', isActive ? 'cursor-default' : 'cursor-pointer')}
-          style={{ animation: 'zyra-liquid-float 6s ease-in-out infinite' }}
-        >
-          {/* pulsing rings while listening */}
-          {isListening && !muted && [0, 1, 2].map(i => (
-            <span
-              key={i}
-              className="absolute inset-4 rounded-full border border-primary/40"
-              style={{ animation: `zyra-ring 2.6s ease-out ${i * 0.85}s infinite` }}
-            />
-          ))}
-
-          <span className="absolute inset-0 rounded-full bg-primary/25 blur-3xl" />
-
-          {/* layered liquid metaballs */}
-          <span
-            className="absolute inset-4 liquid-main blur-[1px]"
-            style={{ animation: `zyra-liquid-a ${isSpeaking ? '3s' : '9s'} ease-in-out infinite` }}
-          />
-          <span
-            className="absolute inset-8 liquid-highlight mix-blend-screen"
-            style={{ animation: `zyra-liquid-b ${isSpeaking ? '2.2s' : '7s'} ease-in-out infinite` }}
-          />
-          <span
-            className="absolute inset-12 liquid-shine opacity-70"
-            style={{ animation: `zyra-liquid-a ${isSpeaking ? '1.6s' : '5s'} ease-in-out infinite reverse` }}
-          />
-        </Button>
-        <p className="mt-6 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{caption}</p>
-      </div>
-
-      {/* controls */}
-      <div className="relative px-4 pb-8 pt-8">
+      <div className="flex items-end justify-center px-6 pb-[max(2.5rem,env(safe-area-inset-bottom))] sm:pb-14">
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImagePicked} />
-
-        {pendingImage && (
-          <div className="mx-auto mb-3 flex max-w-xl items-center gap-2">
-            <div className="relative">
-              <img src={pendingImage.preview} alt="attached" className="h-16 w-16 rounded-xl border border-border object-cover" />
-              <Button type="button" variant="action"
-                onClick={() => setPendingImage(null)}
-                className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background"
-                aria-label="Remove image"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
-            <span className="text-xs text-muted-foreground">Image ready — add a message or tap send.</span>
-          </div>
-        )}
-
-        <div className="mx-auto flex max-w-xl items-center gap-3">
-          <div className="flex h-14 flex-1 items-center gap-2 rounded-full border border-border/70 bg-card/70 px-2 shadow-sm backdrop-blur-md">
-            <Button type="button" variant="action"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted"
-              aria-label="Send an image"
-            >
-              <Plus className="h-5 w-5" />
-            </Button>
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submitText(); } }}
-              placeholder={pendingImage ? 'Add a message about the image…' : 'Or type a message'}
-              className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
-              dir="auto"
-            />
-            {(text.trim() || pendingImage) && (
-              <Button type="button" variant="action"
-                onClick={submitText}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full gradient-button text-primary-foreground transition-opacity hover:opacity-90"
-                aria-label="Send"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-
-          <Button type="button" variant="action"
-            onClick={toggleMute}
-            disabled={!isActive}
-            className={cn(
-              'flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border/70 transition-colors disabled:opacity-40',
-              muted ? 'bg-muted text-muted-foreground' : 'bg-card text-foreground hover:bg-muted'
-            )}
-            aria-label={muted ? 'Unmute microphone' : 'Mute microphone'}
-          >
-            {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+        <div className="flex items-center gap-6 sm:gap-8">
+          <Button type="button" variant="action" size="icon" onClick={() => fileInputRef.current?.click()} disabled={status === 'processing' || status === 'speaking' || status === 'connecting'} aria-label="Send an image" title="Send an image" className="h-12 w-12 border border-border bg-muted/70 text-primary hover:bg-secondary [&_svg]:size-5">
+            <Plus />
           </Button>
-
-          <Button type="button" variant="action"
-            onClick={endCall}
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow-lg transition-opacity hover:opacity-90"
-            aria-label="End call"
-          >
-            <Phone className="h-5 w-5 rotate-[135deg]" />
+          <Button type="button" variant={muted ? 'secondary' : 'premium'} size="icon" onClick={isActive ? toggleMute : startCall} aria-label={!isActive ? 'Start call' : muted ? 'Unmute microphone' : 'Mute microphone'} aria-pressed={isActive && muted} title={!isActive ? 'Start call' : muted ? 'Unmute microphone' : 'Mute microphone'} className="h-16 w-16 rounded-full [&_svg]:size-6">
+            {muted ? <MicOff /> : <Mic />}
+          </Button>
+          <Button type="button" variant="action" size="icon" onClick={endCall} aria-label="End call" title="End call" className="h-12 w-12 border border-border bg-muted/70 text-muted-foreground hover:bg-secondary [&_svg]:size-5">
+            <X />
           </Button>
         </div>
       </div>
