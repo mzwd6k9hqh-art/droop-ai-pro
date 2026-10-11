@@ -319,7 +319,11 @@ Welcome them and present a store design concept with layout, categories, colors,
           } else if (a.kind === 'memory' && a.text) {
             if (loadPreferences().aiMemory) addMemory(a.text, a.memoryKind || 'fact');
           } else if (a.kind === 'device' && a.integrationId) {
-            triggerIntegration(a.integrationId, { action: a.action, ...(a.payload || {}) });
+            triggerIntegration(a.integrationId, { action: a.action, ...(a.payload || {}) }).then(ok => {
+              if (!ok) toast.error('The connected service did not confirm the request. Check its URL and CORS settings.');
+            });
+          } else if (a.kind === 'connection' && a.service) {
+            toast(`Connect ${a.service}`, { action: { label: 'Open connections', onClick: () => navigate('/integrations') }, duration: 12000 });
           }
         });
       }

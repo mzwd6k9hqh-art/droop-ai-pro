@@ -39,14 +39,14 @@ export default function Integrations() {
 
   const handleConnect = () => {
     if (!active) return;
-    if (!/^https?:\/\//i.test(endpoint.trim())) {
+    if (!/^https:\/\//i.test(endpoint.trim())) {
       toast.error('Please paste a valid link starting with https://');
       return;
     }
     connectIntegration(active.id, endpoint.trim());
     setConnected(loadIntegrations());
     setActive(null);
-    toast.success(`${active.name} connected`);
+    toast.success(`${active.name} saved — test to verify access`);
   };
 
   const handleDisconnect = (id: string, name: string) => {
@@ -57,7 +57,7 @@ export default function Integrations() {
 
   const handleTest = async (id: string, name: string) => {
     const ok = await triggerIntegration(id, { type: 'test', message: 'Hello from ZYRA 👋' });
-    ok ? toast.success(`Test sent to ${name}`) : toast.error('Could not reach that link');
+    ok ? toast.success(`${name} accepted the test request`) : toast.error('Request failed. Check your bridge URL and allow this app through CORS.');
   };
 
   const toggleReminder = (id: string) => {
@@ -95,7 +95,7 @@ export default function Integrations() {
               </div>
               {isConnected(def.id) && (
                 <Badge className="bg-success/15 text-success border-0">
-                  <Check className="h-3 w-3 mr-1" /> Connected
+                  <Check className="h-3 w-3 mr-1" /> Configured
                 </Badge>
               )}
             </div>

@@ -67,6 +67,16 @@ export const INTEGRATIONS: IntegrationDef[] = [
     fieldPlaceholder: 'https://hooks.slack.com/services/…',
   },
   {
+    id: 'ai-service',
+    name: 'AI tool / service',
+    category: 'custom',
+    description: 'Use your own secure webhook bridge to call an AI service. Keep the provider API key on your server, never in this app.',
+    emoji: '✨',
+    abilities: ['Send prompts to your bridge', 'Run AI workflows'],
+    fieldLabel: 'HTTPS webhook bridge URL (not an API key)',
+    fieldPlaceholder: 'https://…',
+  },
+  {
     id: 'custom',
     name: 'Custom API / Device',
     category: 'custom',
@@ -114,13 +124,13 @@ export async function triggerIntegration(id: string, payload: Record<string, unk
   const conn = loadIntegrations().find((i) => i.id === id);
   if (!conn?.endpoint) return false;
   try {
-    await fetch(conn.endpoint, {
+    const response = await fetch(conn.endpoint, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ source: 'ZYRA', at: new Date().toISOString(), ...payload }),
     });
-    return true;
+    return response.ok;
   } catch {
     return false;
   }
