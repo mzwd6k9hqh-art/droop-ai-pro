@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { languageDirective } from '../_shared/language.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -149,6 +150,8 @@ Only bring up the user's store when it is actually relevant to what they asked. 
 ## CONNECTED APPS & SMART DEVICES
 The user can connect external services (calendar, reminders/tasks, smart home, notes, team chat, custom webhooks). The list of what is currently connected is provided in the context below.
 - To act on a connected service or device (turn on a light, run a scene, add a calendar event, save a note, send a message), call the "control_device" tool with the correct integrationId.
+- AI tools and services use the existing user-authorized webhook connection path. For requests to connect an AI service, call request_connection. Ask which service if unspecified. Never request private API keys in chat; the user must keep them on their own server/automation bridge. A webhook bridge must accept POST JSON and allow this app's origin through CORS. Do not claim direct provider APIs or OAuth are configured.
+- Tool actions are pending client execution, not verified external success. Never claim a remote action completed based only on a queued tool result.
 - Never claim you performed an action on a service that is NOT connected. Instead, tell the user to connect it in "Connected apps & devices" in Settings, and briefly say what you'll be able to do once connected.`;
 
 const tools = [
@@ -335,13 +338,25 @@ const tools = [
         properties: {
           integrationId: {
             type: "string",
-            enum: ["google-calendar", "reminders", "smart-home", "notion", "slack", "custom"],
+            enum: ["google-calendar", "reminders", "smart-home", "notion", "slack", "custom", "ai-service"],
             description: "The connected service to act on",
           },
           action: { type: "string", description: "Short action name, e.g. 'turn_on', 'create_event', 'save_note', 'send_message'" },
           payload: { type: "object", description: "Free-form details for the action (device, time, text, etc.)" },
         },
         required: ["integrationId", "action"],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'request_connection',
+      description: 'Offer the authorized connection setup when the user asks to connect another AI tool or service. Does not itself connect the service.',
+      parameters: {
+        type: 'object',
+        properties: { service: { type: 'string', description: 'Name of the service requested by the user' } },
+        required: ['service'],
       },
     },
   },
@@ -469,13 +484,7 @@ serve(async (req) => {
 
     const dailyContext = `\n\n## سياق اليوم: ${weekdayAr[now.getUTCDay()]} ${d} ${monthAr[m]} ${now.getUTCFullYear()} (${seasonAr}). ${todayInsight}`;
 
-    // Hard language directive — overrides the Arabic default in SYSTEM_PROMPT.
-    const langDirective =
-      lang === 'en'
-        ? `\n\n## LANGUAGE RULE (CRITICAL): You MUST reply ONLY in English. Ignore any previous instructions about Arabic. Every word, including action confirmations and product suggestions, must be in English.`
-        : lang === 'fr'
-        ? `\n\n## RÈGLE DE LANGUE (CRITIQUE): Vous devez répondre UNIQUEMENT en français. Ignorez toute instruction précédente concernant l'arabe. Chaque mot doit être en français.`
-        : `\n\n## قاعدة اللغة: أجب بالعربية الفصحى دائماً.`;
+    const langDirective = `\n\n${languageDirective(lang)}`;
 
     // ============ User preferences (AI behavior customization) ============
     const p = preferences || {};
@@ -575,6 +584,10 @@ serve(async (req) => {
           tool_call_id: toolCall.id,
           content: JSON.stringify({ success: true, remembered: args.text }),
         });
+      } else if (toolCall.function.name === 'request_connection') {
+          const args = JSON.parse(toolCall.function.arguments);
+          assistantActions.push({ kind: 'connection', service: args.service });
+          toolResultMessages.push({ role: 'tool', tool_call_id: toolCall.id, content: JSON.stringify({ status: 'authorization_required', service: args.service, setup: '/integrations', method: 'user-owned HTTPS webhook bridge; no private API keys in chat' }) });
       } else if (toolCall.function.name === "control_device") {
           const args = JSON.parse(toolCall.function.arguments);
           const connectedIds = connectedList.map((i: any) => i.id);
@@ -585,7 +598,7 @@ serve(async (req) => {
             tool_call_id: toolCall.id,
             content: JSON.stringify(
               ok
-                ? { success: true, integrationId: args.integrationId, action: args.action }
+                ? { status: 'pending_client_execution', integrationId: args.integrationId, action: args.action }
                 : { success: false, reason: `${args.integrationId} is not connected. Ask the user to connect it in Settings > Connected apps & devices.` }
             ),
           });
@@ -641,7 +654,8 @@ serve(async (req) => {
                 ? `✅ Reminder saved: ${a.text}`
                 : a.kind === 'memory'
                 ? `🧠 Got it — I'll remember that: ${a.text}`
-                : `✅ ${a.action} sent to ${a.integrationId}`
+                 : a.kind === 'connection' ? `Connection setup required for ${a.service}.`
+                 : `${a.action} queued for ${a.integrationId}; completion is not yet verified.`
             )
             .join('\n');
         } else {

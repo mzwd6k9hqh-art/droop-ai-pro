@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getStoreStats } from '@/lib/storeStats';
+import { detectSpeechLanguage, initialSpeechLanguage } from '@/lib/speechLanguage';
 
 type CallStatus = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'ended';
 interface VoiceTurn { id: string; role: 'user' | 'assistant'; content: string; }
@@ -25,6 +26,7 @@ export default function VoiceCall() {
   const statusRef = useRef<CallStatus>('idle');
   const mutedRef = useRef(false);
   const listenRef = useRef<() => void>(() => {});
+  const speechLanguageRef = useRef(initialSpeechLanguage(localStorage.getItem('salesbooster_language') || 'en', navigator.language));
   turnsRef.current = turns;
   statusRef.current = status;
   mutedRef.current = muted;
@@ -52,7 +54,7 @@ export default function VoiceCall() {
     const rec = new SR();
     rec.continuous = true;
     rec.interimResults = true;
-    rec.lang = 'en-US';
+    rec.lang = speechLanguageRef.current;
 
     rec.onresult = (e: any) => {
       let interim = '', final = '';
@@ -91,7 +93,9 @@ export default function VoiceCall() {
       const synth = window.speechSynthesis;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(textToSay);
-      const preferred = synth.getVoices().find(v => /samantha|google us english|female|zira/i.test(v.name));
+      u.lang = detectSpeechLanguage(textToSay, speechLanguageRef.current);
+      const preferred = synth.getVoices().find(v => v.lang.toLowerCase() === u.lang.toLowerCase())
+        || synth.getVoices().find(v => v.lang.split('-')[0] === u.lang.split('-')[0]);
       if (preferred) u.voice = preferred;
       u.rate = 1.03;
       u.pitch = 1.05;
@@ -139,6 +143,7 @@ export default function VoiceCall() {
       });
       if (error) throw error;
       const reply = data?.reply || "Sorry, I didn't catch that.";
+      speechLanguageRef.current = detectSpeechLanguage(userText, speechLanguageRef.current);
       setTurns(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
       setStatus('speaking');
       speak(reply);
@@ -159,12 +164,7 @@ export default function VoiceCall() {
     catch { toast.error('Microphone permission is required for a voice call.'); return; }
     setStatus('connecting');
     setTurns([]);
-    setTimeout(() => {
-      const greeting = "Hey! It's ZYRA. How's your store doing today — what should we work on?";
-      setTurns([{ id: crypto.randomUUID(), role: 'assistant', content: greeting }]);
-      setStatus('speaking');
-      speak(greeting);
-    }, 500);
+    startListening();
   };
 
   const endCall = () => {
