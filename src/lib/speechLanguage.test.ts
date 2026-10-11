@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { detectSpeechLanguage, initialSpeechLanguage } from './speechLanguage';
-import { languageDirective } from '../../supabase/functions/_shared/language';
 
 describe('multilingual speech', () => {
   it('keeps Algerian Arabic recognition locale', () => {
