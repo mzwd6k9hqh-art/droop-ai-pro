@@ -3,3 +3,6 @@
 - [x] Verify chat actions and layouts in the running app.
 - [x] Make Voice Call minimal and voice-only with user transcript, liquid animation, and three controls.
 - [x] Verify call layout, microphone controls, and image picker.
+- [ ] Automatically match user languages and Arabic dialects in chat and calls.
+- [ ] Extend the existing connection path for AI services without exposing private API keys.
+- [ ] Test multilingual replies and report speech/service limitations.
