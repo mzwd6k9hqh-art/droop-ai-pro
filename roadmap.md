@@ -1,5 +1,5 @@
 - [x] Unify app colors and shared action button styles without changing generated store designs.
 - [x] Polish ZYRA chat and consolidate input actions into an expandable plus menu.
 - [x] Verify chat actions and layouts in the running app.
-- [ ] Make Voice Call minimal and voice-only with user transcript, liquid animation, and three controls.
-- [ ] Verify call layout, microphone controls, and image picker.
+- [x] Make Voice Call minimal and voice-only with user transcript, liquid animation, and three controls.
+- [x] Verify call layout, microphone controls, and image picker.
