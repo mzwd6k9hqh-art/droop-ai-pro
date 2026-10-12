@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { ModelSelector } from '@/components/chat/ModelSelector';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -396,6 +397,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               <p className="text-[11px] text-muted-foreground">Your smart assistant</p>
             </div>
           </div>
+          <ModelSelector />
           <div className="flex items-center gap-1.5">
             {/* Message counter */}
             {user && !isUnlimitedPlan() && (

@@ -402,16 +402,11 @@ async function tavilySearch(query: string, searchDepth: string = "basic"): Promi
 }
 
 const ALLOWED_MODELS = [
-  "openai/gpt-5.6-sol",
-  "google/gemini-3.7-flash",
-  "google/gemini-3.1-pro-preview",
-  "google/gemini-3.1-flash-lite",
-  "openai/gpt-5.5",
+  "openai/gpt-5.6-luna",
   "openai/gpt-5.6-terra",
-  "openai/gpt-5.4-mini",
-  "google/gemini-2.5-pro",
+  "openai/gpt-5.6-sol",
 ];
-const FALLBACK_MODEL = "openai/gpt-5.6-sol";
+const FALLBACK_MODEL = "openai/gpt-5.6-terra";
 
 async function callAI(messages: any[], useTools: boolean = true, model?: string) {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
