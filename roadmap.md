@@ -3,6 +3,7 @@
 - [x] Verify chat actions and layouts in the running app.
 - [x] Make Voice Call minimal and voice-only with user transcript, liquid animation, and three controls.
 - [x] Verify call layout, microphone controls, and image picker.
-- [ ] Automatically match user languages and Arabic dialects in chat and calls.
-- [ ] Extend the existing connection path for AI services without exposing private API keys.
-- [ ] Test multilingual replies and report speech/service limitations.
+- [x] Automatically match user languages and Arabic dialects in assistant text and call replies; browser recognition remains locale-based.
+- [x] Extend existing connections with AI-service bridge setup and honest request results, without frontend API keys.
+- [x] Verify live Spanish chat, Algerian/Moroccan responses, connection setup action, and six targeted tests.
+- [ ] Verify an actual external AI workflow — waiting for the user's service and authorized HTTPS bridge URL.
