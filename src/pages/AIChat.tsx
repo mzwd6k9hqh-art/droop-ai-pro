@@ -396,6 +396,7 @@ Welcome them and present a store design concept with layout, categories, colors,
               <p className="text-[11px] text-muted-foreground">Your smart assistant</p>
             </div>
           </div>
+          <ModelSelector />
           <div className="flex items-center gap-1.5">
             {/* Message counter */}
             {user && !isUnlimitedPlan() && (

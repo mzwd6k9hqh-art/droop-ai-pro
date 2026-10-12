@@ -1,4 +1,4 @@
-// Selectable AI models for ZYRA (served through Lovable AI).
+// Selectable ZYRA models (served through Lovable AI).
 
 export interface AiModelOption {
   id: string;
@@ -6,57 +6,42 @@ export interface AiModelOption {
   vendor: string;
   description: string;
   badge?: string;
+  pro?: boolean;
 }
 
 export const AI_MODELS: AiModelOption[] = [
   {
-    id: 'openai/gpt-5.6-sol',
-    name: 'ZYRA Max (GPT-5.6)',
-    vendor: 'OpenAI',
-    description: 'Flagship model — strongest reasoning and all-round quality.',
-    badge: 'Default',
-  },
-  {
-    id: 'google/gemini-3.7-flash',
-    name: 'ZYRA Flash (Gemini 3.7)',
-    vendor: 'Google',
-    description: 'Fast and smart. Best everyday choice.',
-    badge: 'Fast',
-  },
-  {
-    id: 'google/gemini-3.1-pro-preview',
-    name: 'ZYRA Pro (Gemini 3.1 Pro)',
-    vendor: 'Google',
-    description: 'Deeper reasoning for complex strategy and analysis.',
-  },
-  {
-    id: 'google/gemini-3.1-flash-lite',
-    name: 'ZYRA Lite (Gemini 3.1 Lite)',
-    vendor: 'Google',
-    description: 'Lightning quick for simple questions.',
-  },
-  {
-    id: 'openai/gpt-5.5',
-    name: 'GPT-5.5',
-    vendor: 'OpenAI',
-    description: 'Excellent writing, coding and instruction following.',
+    id: 'openai/gpt-5.6-luna',
+    name: 'Zero 1.6',
+    vendor: 'ZYRA',
+    description: 'Light, fast and simple tasks. Short, quick answers.',
+    badge: 'Free',
   },
   {
     id: 'openai/gpt-5.6-terra',
-    name: 'GPT-5.6 Terra',
-    vendor: 'OpenAI',
-    description: 'Balanced GPT-5.6 for everyday work.',
+    name: 'Ano 2.2',
+    vendor: 'ZYRA',
+    description: 'The standard model — best for everyday tasks.',
+    badge: 'Default',
   },
   {
-    id: 'openai/gpt-5.4-mini',
-    name: 'GPT-5.4 Mini',
-    vendor: 'OpenAI',
-    description: 'Quick and affordable for high-volume chats.',
+    id: 'openai/gpt-5.6-sol',
+    name: 'Rot 1.0',
+    vendor: 'ZYRA',
+    description: 'Smartest and most powerful — coding, deep analysis, hard problems.',
+    badge: 'Pro',
+    pro: true,
   },
 ];
 
-export const DEFAULT_MODEL = AI_MODELS[0].id;
+export const DEFAULT_MODEL = AI_MODELS[1].id;
 
 export function getModel(id?: string): AiModelOption {
-  return AI_MODELS.find((m) => m.id === id) || AI_MODELS[0];
+  return AI_MODELS.find((m) => m.id === id) || AI_MODELS[1];
+}
+
+/** Resolves the model actually allowed for this user's plan. */
+export function resolveModel(id: string | undefined, isPaid: boolean): AiModelOption {
+  const m = getModel(id);
+  return m.pro && !isPaid ? AI_MODELS[1] : m;
 }
