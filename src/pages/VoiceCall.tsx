@@ -88,12 +88,12 @@ export default function VoiceCall() {
   listenRef.current = startListening;
 
   /* ---------------- speaking ---------------- */
-  const browserSpeak = useCallback((textToSay: string) => {
+  const browserSpeak = useCallback(async (textToSay: string) => {
     try {
       const synth = window.speechSynthesis;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(textToSay);
-      u.lang = detectSpeechLanguage(textToSay, speechLanguageRef.current);
+      u.lang = await detectSpeechLanguage(textToSay, speechLanguageRef.current);
       const preferred = synth.getVoices().find(v => v.lang.toLowerCase() === u.lang.toLowerCase())
         || synth.getVoices().find(v => v.lang.split('-')[0] === u.lang.split('-')[0]);
       if (preferred) u.voice = preferred;
@@ -143,7 +143,7 @@ export default function VoiceCall() {
       });
       if (error) throw error;
       const reply = data?.reply || "Sorry, I didn't catch that.";
-      speechLanguageRef.current = detectSpeechLanguage(userText, speechLanguageRef.current);
+      speechLanguageRef.current = await detectSpeechLanguage(userText, speechLanguageRef.current);
       setTurns(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
       setStatus('speaking');
       speak(reply);
