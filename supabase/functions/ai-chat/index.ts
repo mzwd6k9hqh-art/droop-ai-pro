@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { languageDirective } from '../_shared/language.ts';
+import { BUILDER_IDENTITY, builderReply } from '../_shared/identity.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -451,6 +452,12 @@ serve(async (req) => {
 
   try {
     const { messages, storeUrl, language, preferences, integrations, memory, model } = await req.json();
+    const identityReply = builderReply(messages);
+    if (identityReply) {
+      return new Response(JSON.stringify({ type: 'text', content: identityReply, source: 'knowledge' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
 
     // ============ Daily awareness context ============
@@ -533,7 +540,7 @@ serve(async (req) => {
 
     const systemWithContext = (storeUrl && p.allowPersonalization !== false
       ? `${SYSTEM_PROMPT}\n\nرابط متجر المستخدم: ${storeUrl}.`
-      : SYSTEM_PROMPT) + dailyContext + prefContext + memoryContext + integrationsContext + langDirective;
+      : SYSTEM_PROMPT) + dailyContext + prefContext + memoryContext + integrationsContext + langDirective + `\n\n${BUILDER_IDENTITY}`;
 
     const apiMessages = [
       { role: "system", content: systemWithContext },
