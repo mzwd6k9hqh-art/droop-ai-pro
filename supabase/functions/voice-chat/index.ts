@@ -1,6 +1,7 @@
 // Voice chat edge function — turns user transcripts into spoken AI replies
 // (text-only via Lovable AI Gateway; the browser handles TTS/STT).
 import { languageDirective } from '../_shared/language.ts';
+import { BUILDER_IDENTITY, builderReply } from '../_shared/identity.ts';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
@@ -26,6 +27,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    const identityReply = builderReply(messages);
+    if (identityReply) {
+      return new Response(JSON.stringify({ reply: identityReply }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY missing');
 
@@ -33,7 +41,8 @@ Deno.serve(async (req) => {
 Speak naturally — short, warm, conversational sentences (2-3 sentences max per reply, no markdown, no bullet lists).
 You're on a live voice call, so avoid lists, code, or emoji. Be encouraging and proactive.
 ${languageDirective(typeof language === 'string' ? language : 'en')}
-${storeContext ? `Store context: ${JSON.stringify(storeContext).slice(0, 500)}` : ''}`;
+${storeContext ? `Store context: ${JSON.stringify(storeContext).slice(0, 500)}` : ''}
+${BUILDER_IDENTITY}`;
 
     const aiResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
