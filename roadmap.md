@@ -7,4 +7,4 @@
 - [x] Extend existing connections with AI-service bridge setup and honest request results, without frontend API keys.
 - [x] Verify live Spanish chat, Algerian/Moroccan responses, connection setup action, and six targeted tests.
 - [ ] Verify an actual external AI workflow — waiting for the user's service and authorized HTTPS bridge URL.
-- [ ] Update app attribution and shared text/voice builder identity; verify both answers.
+- [x] Audit app attribution and update shared text/voice builder identity; verify all three requested questions in live chat and routing tests.
