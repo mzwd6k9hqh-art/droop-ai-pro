@@ -11,6 +11,7 @@ import { loadPreferences } from '@/lib/preferences';
 import { resolveModel } from '@/lib/aiModels';
 import { useAuth } from '@/contexts/AuthContext';
 import { readVoiceStream } from '@/lib/voiceStream';
+import { ZyraMark } from '@/components/ZyraMark';
 
 type CallStatus = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'ended';
 interface VoiceTurn { id: string; role: 'user' | 'assistant'; content: string; }
@@ -270,7 +271,8 @@ export default function VoiceCall() {
 
   return (
     <div className="fixed inset-0 grid grid-rows-[minmax(100px,1fr)_auto_minmax(120px,1fr)] overflow-hidden bg-background text-foreground">
-      <div className="flex justify-center px-8 pt-12 sm:pt-16">
+      <div className="relative flex justify-center px-8 pt-12 sm:pt-16">
+        <ZyraMark className="absolute left-6 top-6 h-8 w-8 sm:left-8 sm:top-8" tile />
         <p dir="auto" aria-label="Your transcript" aria-live="polite" className="max-h-28 max-w-lg overflow-y-auto text-center text-sm font-normal leading-relaxed text-muted-foreground/80">
           {partial || lastUser?.content || ''}
         </p>

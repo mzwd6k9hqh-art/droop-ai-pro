@@ -21,6 +21,7 @@ import {
   Bot,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ZyraMark } from '@/components/ZyraMark';
 
 export interface OnboardingResult {
   hasStore: boolean;
@@ -137,9 +138,7 @@ export default function StoreOnboarding({ onComplete }: StoreOnboardingProps) {
     <div className="flex flex-col items-center justify-center h-full animate-fade-in px-4">
       {/* AI Avatar */}
       <div className="relative mb-8">
-        <div className="p-5 rounded-2xl gradient-button shadow-xl">
-          <Bot className="h-10 w-10 text-primary-foreground" />
-        </div>
+        <ZyraMark className="h-20 w-20" tile />
         <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-accent" />
       </div>
 
