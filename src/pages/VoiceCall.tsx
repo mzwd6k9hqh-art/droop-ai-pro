@@ -33,6 +33,7 @@ export default function VoiceCall() {
   const listenRef = useRef<() => void>(() => {});
   const speechLanguageRef = useRef(initialSpeechLanguage(localStorage.getItem('salesbooster_language') || 'en', navigator.language));
   const requestRef = useRef<AbortController | null>(null);
+  const hasEnded = () => statusRef.current === 'ended';
   turnsRef.current = turns;
   statusRef.current = status;
   mutedRef.current = muted;
@@ -184,7 +185,7 @@ export default function VoiceCall() {
         const match = pending.match(/^([\s\S]*?[.!?؟。](?:\s|$))/);
         if (match) { say(match[1]); pending = pending.slice(match[1].length); }
       }) : (await response.json()).reply;
-      if (controller.signal.aborted || statusRef.current === 'ended') return;
+      if (controller.signal.aborted || hasEnded()) return;
       setTurns(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
       if (canStreamSpeech && streaming) {
         say(pending);
@@ -196,7 +197,7 @@ export default function VoiceCall() {
         if (canStreamSpeech) browserSpeak(reply); else speak(reply);
       }
     } catch (e: any) {
-      if (e?.name === 'AbortError' || statusRef.current === 'ended') return;
+      if (e?.name === 'AbortError' || hasEnded()) return;
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       toast.error(e?.message || 'Failed to reach ZYRA');
       startListening();
