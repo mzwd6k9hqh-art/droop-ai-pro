@@ -1,4 +1,5 @@
 Use shared semantic theme tokens and Button variants for app chrome, while keeping generated storefront palettes independent so category-specific store designs stay intact.
+Render app identity through the theme-aware ZyraMark component and synchronize the favicon in ThemeProvider so every placement follows the same active theme.
 Compose chat with the installed AI Elements primitives; use a ref-forwarding Button directly as the dropdown trigger so the action menu anchors correctly.
 Share assistant language policy between text and voice functions; interface locale is fallback only so assistant replies can match the latest user language.
 Share builder identity and direct-question routing between text and voice functions so app attribution stays consistent across models and call replies.
