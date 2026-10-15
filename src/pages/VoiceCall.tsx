@@ -7,6 +7,10 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getStoreStats } from '@/lib/storeStats';
 import { detectSpeechLanguage, initialSpeechLanguage } from '@/lib/speechLanguage';
+import { loadPreferences } from '@/lib/preferences';
+import { resolveModel } from '@/lib/aiModels';
+import { useAuth } from '@/contexts/AuthContext';
+import { readVoiceStream } from '@/lib/voiceStream';
 
 type CallStatus = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'ended';
 interface VoiceTurn { id: string; role: 'user' | 'assistant'; content: string; }
@@ -14,6 +18,7 @@ type AnyWindow = Window & { SpeechRecognition?: any; webkitSpeechRecognition?: a
 
 export default function VoiceCall() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [status, setStatus] = useState<CallStatus>('idle');
   const [turns, setTurns] = useState<VoiceTurn[]>([]);
   const [partial, setPartial] = useState('');
@@ -27,6 +32,8 @@ export default function VoiceCall() {
   const mutedRef = useRef(false);
   const listenRef = useRef<() => void>(() => {});
   const speechLanguageRef = useRef(initialSpeechLanguage(localStorage.getItem('salesbooster_language') || 'en', navigator.language));
+  const requestRef = useRef<AbortController | null>(null);
+  const hasEnded = () => statusRef.current === 'ended';
   turnsRef.current = turns;
   statusRef.current = status;
   mutedRef.current = muted;
@@ -93,13 +100,14 @@ export default function VoiceCall() {
       const synth = window.speechSynthesis;
       synth.cancel();
       const u = new SpeechSynthesisUtterance(textToSay);
-      u.lang = await detectSpeechLanguage(textToSay, speechLanguageRef.current);
+      u.lang = speechLanguageRef.current;
       const preferred = synth.getVoices().find(v => v.lang.toLowerCase() === u.lang.toLowerCase())
         || synth.getVoices().find(v => v.lang.split('-')[0] === u.lang.split('-')[0]);
       if (preferred) u.voice = preferred;
       u.rate = 1.03;
       u.pitch = 1.05;
       u.onend = () => { if (statusRef.current !== 'ended') listenRef.current(); };
+      u.onerror = () => { if (statusRef.current !== 'ended') listenRef.current(); };
       synth.speak(u);
     } catch {
       listenRef.current();
@@ -123,7 +131,9 @@ export default function VoiceCall() {
 
   /* ---------------- AI turn ---------------- */
   const sendToAI = useCallback(async (userText: string, imageBase64?: string) => {
+    if (statusRef.current === 'processing' || statusRef.current === 'speaking' || statusRef.current === 'ended') return;
     stopRecognition();
+    statusRef.current = 'processing';
     setStatus('processing');
     const displayContent = imageBase64 ? `🖼️ ${userText || 'What do you think?'}` : userText;
     setTurns(prev => [...prev, { id: crypto.randomUUID(), role: 'user', content: displayContent }]);
@@ -138,20 +148,61 @@ export default function VoiceCall() {
 
     try {
       const lang = localStorage.getItem('salesbooster_language') || 'en';
-      const { data, error } = await supabase.functions.invoke('voice-chat', {
-        body: { messages: [...history, { role: 'user', content: latestContent }], storeContext: stats, language: lang },
+      const controller = new AbortController();
+      requestRef.current = controller;
+      const model = resolveModel(loadPreferences().aiModel, Boolean(user && user.plan !== 'free'));
+      const languageReady = detectSpeechLanguage(userText, speechLanguageRef.current).then(value => { speechLanguageRef.current = value; });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-chat`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json', apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        body: JSON.stringify({ messages: [...history, { role: 'user', content: latestContent }], storeContext: stats, language: lang, model: model.id }),
       });
-      if (error) throw error;
-      const reply = data?.reply || "Sorry, I didn't catch that.";
-      speechLanguageRef.current = await detectSpeechLanguage(userText, speechLanguageRef.current);
+      if (!response.ok) {
+        const failure = await response.json().catch(() => ({}));
+        throw new Error(failure.error || 'Failed to reach ZYRA');
+      }
+      await languageReady;
+      const canStreamSpeech = 'speechSynthesis' in window && window.speechSynthesis.getVoices().some(voice => voice.lang.split('-')[0] === speechLanguageRef.current.split('-')[0]);
+      let pending = '', streamFinished = false, queued = 0;
+      const resume = () => { if (streamFinished && queued === 0 && statusRef.current !== 'ended') listenRef.current(); };
+      const say = (text: string) => {
+        if (!text.trim() || statusRef.current === 'ended') return;
+        const utterance = new SpeechSynthesisUtterance(text.trim());
+        utterance.lang = speechLanguageRef.current;
+        utterance.voice = window.speechSynthesis.getVoices().find(v => v.lang.toLowerCase() === utterance.lang.toLowerCase()) || window.speechSynthesis.getVoices().find(v => v.lang.split('-')[0] === utterance.lang.split('-')[0]) || null;
+        utterance.rate = model.name === 'Zero 1.6' ? 1.08 : 1.03;
+        queued++;
+        utterance.onstart = () => { if (statusRef.current !== 'ended') { statusRef.current = 'speaking'; setStatus('speaking'); } };
+        utterance.onend = utterance.onerror = () => { queued--; resume(); };
+        window.speechSynthesis.speak(utterance);
+      };
+      const streaming = response.headers.get('Content-Type')?.includes('text/event-stream');
+      const reply = streaming ? await readVoiceStream(response, delta => {
+        if (!canStreamSpeech) return;
+        pending += delta;
+        const match = pending.match(/^([\s\S]*?[.!?؟。](?:\s|$))/);
+        if (match) { say(match[1]); pending = pending.slice(match[1].length); }
+      }) : (await response.json()).reply;
+      if (controller.signal.aborted || hasEnded()) return;
       setTurns(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: reply }]);
-      setStatus('speaking');
-      speak(reply);
+      if (canStreamSpeech && streaming) {
+        say(pending);
+        streamFinished = true;
+        resume();
+      } else {
+        statusRef.current = 'speaking';
+        setStatus('speaking');
+        if (canStreamSpeech) browserSpeak(reply); else speak(reply);
+      }
     } catch (e: any) {
+      if (e?.name === 'AbortError' || hasEnded()) return;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       toast.error(e?.message || 'Failed to reach ZYRA');
       startListening();
     }
-  }, [speak, stats, startListening, stopRecognition]);
+  }, [speak, browserSpeak, stats, user, startListening, stopRecognition]);
   const sendToAIRef = useRef(sendToAI);
   sendToAIRef.current = sendToAI;
 
@@ -169,6 +220,7 @@ export default function VoiceCall() {
 
   const endCall = () => {
     statusRef.current = 'ended';
+    requestRef.current?.abort();
     setStatus('ended');
     stopRecognition();
     if (audioRef.current) { try { audioRef.current.pause(); } catch {} }
@@ -201,6 +253,7 @@ export default function VoiceCall() {
 
   useEffect(() => () => {
     statusRef.current = 'ended';
+    requestRef.current?.abort();
     if (recognitionRef.current) { try { recognitionRef.current.onend = null; recognitionRef.current.stop(); } catch {} }
     if (audioRef.current) { try { audioRef.current.pause(); } catch {} }
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
@@ -224,11 +277,10 @@ export default function VoiceCall() {
       </div>
 
       <div className="flex flex-col items-center justify-center" role="img" aria-label={`ZYRA — ${caption}`}>
-        <div className={cn('voice-liquid relative h-56 w-56 sm:h-72 sm:w-72', isSpeaking && 'voice-liquid-speaking', muted && 'opacity-60')} aria-hidden="true">
-          {isListening && !muted && <span className="voice-liquid-ring absolute inset-4 rounded-full border border-primary/15" />}
-          <span className="voice-liquid-main liquid-main absolute inset-4" />
-          <span className="voice-liquid-highlight liquid-highlight absolute inset-7 mix-blend-screen" />
-          <span className="voice-liquid-shine liquid-shine absolute inset-10 opacity-70" />
+        <div className={cn('voice-circle relative h-56 w-56 sm:h-72 sm:w-72', isSpeaking && 'voice-circle-speaking', isListening && 'voice-circle-listening', status === 'processing' && 'voice-circle-thinking', muted && 'opacity-60')} aria-hidden="true">
+          <span className="voice-circle-body absolute inset-4" />
+          <span className="voice-circle-flow absolute inset-5" />
+          <span className="voice-circle-pearl absolute inset-8" />
         </div>
         <span role="status" className="sr-only">{caption}</span>
       </div>

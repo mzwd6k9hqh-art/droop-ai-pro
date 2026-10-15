@@ -499,6 +499,10 @@
     --gradient-liquid: radial-gradient(circle at 30% 28%, hsl(var(--secondary)), hsl(var(--primary)) 52%, hsl(var(--accent)));
     --gradient-liquid-highlight: radial-gradient(circle at 70% 65%, hsl(var(--primary-foreground) / 0.85), hsl(var(--accent) / 0.55) 45%, transparent 72%);
     --gradient-liquid-shine: radial-gradient(circle at 40% 35%, hsl(var(--primary-foreground) / 0.9), transparent 65%);
+    --gradient-voice-circle: radial-gradient(ellipse at 32% 24%, hsl(var(--primary-foreground) / 0.96), hsl(var(--secondary)) 18%, hsl(var(--accent)) 45%, hsl(var(--primary)) 78%);
+    --gradient-voice-flow: conic-gradient(from 30deg, transparent, hsl(var(--primary-foreground) / 0.75), transparent 40%, hsl(var(--primary-foreground) / 0.35), transparent 85%);
+    --gradient-voice-pearl: radial-gradient(ellipse at 65% 62%, hsl(var(--primary-foreground) / 0.85), hsl(var(--primary-foreground) / 0.1) 38%, transparent 68%);
+    --shadow-voice-circle: inset 0 -10px 30px hsl(var(--primary) / 0.28), inset 0 2px 8px hsl(var(--primary-foreground) / 0.6), 0 22px 50px hsl(var(--primary) / 0.16);
   }
   button, a { letter-spacing: 0; }
 }
@@ -530,7 +534,26 @@
   .voice-liquid-speaking .voice-liquid-highlight { animation-duration: 2.2s; }
   .voice-liquid-speaking .voice-liquid-shine { animation-duration: 1.6s; }
   .voice-liquid-ring { animation: zyra-ring 2.6s ease-out infinite; }
+  .voice-circle { animation: voice-breathe 5s ease-in-out infinite; }
+  .voice-circle-body { border-radius: 50%; background: var(--gradient-voice-circle); box-shadow: var(--shadow-voice-circle); animation: voice-morph 8s ease-in-out infinite; }
+  .voice-circle-flow { border-radius: 50%; background: var(--gradient-voice-flow); filter: blur(9px); animation: voice-flow 12s linear infinite; }
+  .voice-circle-pearl { border-radius: 50%; background: var(--gradient-voice-pearl); filter: blur(5px); animation: voice-morph 7s ease-in-out infinite reverse; }
+  .voice-circle-speaking { animation-duration: 1.8s; }
+  .voice-circle-speaking .voice-circle-body { animation-duration: 3s; }
+  .voice-circle-speaking .voice-circle-flow { animation-duration: 5s; }
+  .voice-circle-thinking .voice-circle-flow { animation-duration: 7s; }
+  .voice-circle-listening .voice-circle-pearl { animation-duration: 4s; }
 }
+@keyframes voice-breathe {
+  0%, 100% { transform: translateY(0) scale(0.98); }
+  50% { transform: translateY(-7px) scale(1.035); }
+}
+@keyframes voice-morph {
+  0%, 100% { border-radius: 50% 50% 49% 51% / 51% 49% 51% 49%; transform: rotate(0deg) scale(1); }
+  33% { border-radius: 48% 52% 51% 49% / 49% 52% 48% 51%; transform: rotate(7deg) scale(1.025, 0.985); }
+  66% { border-radius: 52% 48% 49% 51% / 52% 48% 51% 49%; transform: rotate(-5deg) scale(0.985, 1.02); }
+}
+@keyframes voice-flow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }

@@ -2,5 +2,6 @@ Use shared semantic theme tokens and Button variants for app chrome, while keepi
 Compose chat with the installed AI Elements primitives; use a ref-forwarding Button directly as the dropdown trigger so the action menu anchors correctly.
 Share assistant language policy between text and voice functions; interface locale is fallback only so assistant replies can match the latest user language.
 Share builder identity and direct-question routing between text and voice functions so app attribution stays consistent across models and call replies.
+Voice calls stream selected-model Responses output and queue sentence-level browser speech when a matching voice exists; retain hosted TTS as fallback to minimize first-audio delay without request deadlines.
 Use franc and ISO language metadata for browser speech voice matching; browser recognition starts with the user's locale because browser SpeechRecognition cannot reliably auto-detect arbitrary spoken languages.
 Extend the existing user-owned webhook bridge for AI-service actions; require CORS-readable success and never send private provider keys from the browser.

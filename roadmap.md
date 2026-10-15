@@ -8,4 +8,4 @@
 - [x] Verify live Spanish chat, Algerian/Moroccan responses, connection setup action, and six targeted tests.
 - [ ] Verify an actual external AI workflow — waiting for the user's service and authorized HTTPS bridge URL.
 - [x] Audit app attribution and update shared text/voice builder identity; verify all three requested questions in live chat and routing tests.
-- [ ] Improve model-aware voice response speed and fluid circular animation; verify call flow and layouts.
+- [x] Improve model-aware streamed voice replies and fluid circular animation; verify all three live model responses with instrumented speech, follow-up listening, phone/desktop layouts, and 12 tests. Physical microphone/audio quality remains device-dependent.
