@@ -7,5 +7,6 @@
 - [x] Extend existing connections with AI-service bridge setup and honest request results, without frontend API keys.
 - [x] Verify live Spanish chat, Algerian/Moroccan responses, connection setup action, and six targeted tests.
 - [ ] Verify an actual external AI workflow — waiting for the user's service and authorized HTTPS bridge URL.
+- [ ] Apply uploaded dark and white-backed light ZYRA logos everywhere and verify automatic theme and favicon switching.
 - [x] Audit app attribution and update shared text/voice builder identity; verify all three requested questions in live chat and routing tests.
 - [x] Improve model-aware streamed voice replies and fluid circular animation; verify all three live model responses with instrumented speech, follow-up listening, phone/desktop layouts, and 12 tests. Physical microphone/audio quality remains device-dependent.
