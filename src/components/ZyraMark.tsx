@@ -20,7 +20,7 @@ export function ZyraMark({ className, tile = false }: ZyraMarkProps) {
         if (!event.currentTarget.src.endsWith(fallback)) event.currentTarget.src = fallback;
       }}
       alt="ZYRA logo"
-      className={cn('object-contain rounded-[inherit]', tile ? 'h-full w-full' : 'h-full w-full', !tile && className)}
+      className={cn('h-full w-full object-contain rounded-[inherit]', !tile && className)}
       loading="eager"
     />
   );
