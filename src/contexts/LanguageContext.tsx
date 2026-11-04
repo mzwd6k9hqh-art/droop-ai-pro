@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-type Language = 'en' | 'ar' | 'fr';
+import React, { createContext, useContext, useState, useLayoutEffect, ReactNode } from 'react';
+import { applyUiLanguage, isLanguage, isRtlLanguage, LANGUAGE_KEY, LANGUAGE_SELECTED_KEY, translateUiText, type Language, type LanguagePack } from '@/lib/uiLanguage';
+import en from '@/locales/en.json';
+import fr from '@/locales/fr.json';
+import ar from '@/locales/ar.json';
+import dz from '@/locales/ar-DZ.json';
+import ma from '@/locales/ar-MA.json';
+import eg from '@/locales/ar-EG.json';
+const packs: Record<Language, LanguagePack> = { en, fr, ar, 'ar-DZ': dz, 'ar-MA': ma, 'ar-EG': eg };
 
 interface Translations {
   [key: string]: { en: string; ar: string; fr: string };
@@ -107,8 +113,6 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const LANGUAGE_KEY = 'salesbooster_language';
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
@@ -119,20 +123,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('lang_migrated_to_en_v1', '1');
         return 'en';
       }
-      if (stored === 'en' || stored === 'ar' || stored === 'fr') return stored;
+      if (isLanguage(stored)) return stored;
     }
     return 'en';
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     localStorage.setItem(LANGUAGE_KEY, language);
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = isRtlLanguage(language) ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
+    applyUiLanguage(language, packs[language], en);
   }, [language]);
 
-  const setLanguage = (lang: Language) => setLanguageState(lang);
-  const t = (key: string): string => translations[key]?.[language] || translations[key]?.en || key;
-  const isRTL = language === 'ar';
+  const setLanguage = (lang: Language) => {
+    if (!isLanguage(lang)) return;
+    localStorage.setItem(LANGUAGE_KEY, lang);
+    localStorage.setItem(LANGUAGE_SELECTED_KEY, 'true');
+    applyUiLanguage(lang, packs[lang], en);
+    setLanguageState(lang);
+  };
+  const t = (key: string): string => translateUiText(translations[key]?.en || key);
+  const isRTL = isRtlLanguage(language);
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, isRTL }}>

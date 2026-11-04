@@ -6,6 +6,7 @@ import { DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { initialSpeechLanguage } from '@/lib/speechLanguage';
 import {
   PromptInput, PromptInputTextarea, PromptInputFooter, PromptInputSubmit,
   PromptInputActionMenu, PromptInputActionMenuTrigger, PromptInputActionMenuContent,
@@ -39,7 +40,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
     en: { actions: 'Add to chat', image: 'Upload image or video', voice: 'Voice message', call: 'Voice call', stop: 'Stop recording', recording: 'Listening…', remove: 'Remove attachment', notice: 'ZYRA can make mistakes. Verify important information.' },
     ar: { actions: 'إضافة للمحادثة', image: 'رفع صورة أو فيديو', voice: 'رسالة صوتية', call: 'محادثة صوتية', stop: 'إيقاف التسجيل', recording: 'جارٍ الاستماع…', remove: 'حذف المرفق', notice: 'قد تخطئ ZYRA. تحقق من المعلومات المهمة.' },
     fr: { actions: 'Ajouter au chat', image: 'Importer une image ou vidéo', voice: 'Message vocal', call: 'Appel vocal', stop: 'Arrêter l’enregistrement', recording: 'À l’écoute…', remove: 'Supprimer la pièce jointe', notice: 'ZYRA peut se tromper. Vérifiez les informations importantes.' },
-  }[language];
+  }[language === 'fr' ? 'fr' : language.startsWith('ar') ? 'ar' : 'en'];
 
   const startVoiceInput = () => {
     const w = window as any;
@@ -49,7 +50,7 @@ export function ChatInput({ value, onChange, onSubmit, disabled, attachments, on
     const rec = new SR();
     rec.continuous = false;
     rec.interimResults = true;
-    rec.lang = language === 'ar' ? 'ar-SA' : language === 'fr' ? 'fr-FR' : 'en-US';
+    rec.lang = initialSpeechLanguage(language, navigator.language);
     let finalText = '';
     rec.onresult = (e: any) => {
       let interim = '';

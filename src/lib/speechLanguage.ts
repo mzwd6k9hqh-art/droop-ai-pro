@@ -1,4 +1,5 @@
 export function initialSpeechLanguage(fallback: string, browserLanguage: string): string {
+  if (/^ar-(DZ|MA|EG)$/i.test(fallback)) return fallback;
   if (browserLanguage.toLowerCase().startsWith(`${fallback.toLowerCase()}-`)) return browserLanguage;
   return { ar: 'ar-DZ', fr: 'fr-FR', en: 'en-US' }[fallback] || browserLanguage || fallback;
 }

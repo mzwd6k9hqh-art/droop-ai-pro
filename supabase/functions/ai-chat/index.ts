@@ -451,14 +451,14 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, storeUrl, language, preferences, integrations, memory, model } = await req.json();
+    const { messages, storeUrl, language, languageSelected, preferences, integrations, memory, model } = await req.json();
     const identityReply = builderReply(messages);
     if (identityReply) {
       return new Response(JSON.stringify({ type: 'text', content: identityReply, source: 'knowledge' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    const lang = (language === 'ar' || language === 'fr' || language === 'en') ? language : 'en';
+    const lang = typeof language === 'string' && /^[a-z]{2,3}(?:-[A-Za-z]{2,8})?$/.test(language) ? language : 'en';
 
     // ============ Daily awareness context ============
     const now = new Date();
@@ -486,7 +486,7 @@ serve(async (req) => {
 
     const dailyContext = `\n\n## سياق اليوم: ${weekdayAr[now.getUTCDay()]} ${d} ${monthAr[m]} ${now.getUTCFullYear()} (${seasonAr}). ${todayInsight}`;
 
-    const langDirective = `\n\n${languageDirective(lang)}`;
+    const langDirective = `\n\n${languageDirective(lang, languageSelected === true)}`;
 
     // ============ User preferences (AI behavior customization) ============
     const p = preferences || {};

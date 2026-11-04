@@ -3,12 +3,7 @@ export const LANGUAGE_OPTIONS = [
   { code: 'ar-DZ', name: 'الدارجة الجزائرية' },
   { code: 'ar-MA', name: 'الدارجة المغربية' },
   { code: 'ar-EG', name: 'العربية المصرية' },
-  { code: 'fr', name: 'Français' }, { code: 'es', name: 'Español' },
-  { code: 'de', name: 'Deutsch' }, { code: 'pt', name: 'Português' },
-  { code: 'it', name: 'Italiano' }, { code: 'tr', name: 'Türkçe' },
-  { code: 'zh', name: '中文' }, { code: 'ja', name: '日本語' },
-  { code: 'ko', name: '한국어' }, { code: 'hi', name: 'हिन्दी' },
-  { code: 'ru', name: 'Русский' }, { code: 'id', name: 'Bahasa Indonesia' },
+  { code: 'fr', name: 'Français' },
 ] as const;
 
 export type Language = typeof LANGUAGE_OPTIONS[number]['code'];
