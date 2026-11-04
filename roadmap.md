@@ -10,3 +10,5 @@
 - [x] Apply uploaded dark and white-backed light ZYRA logos everywhere and verify automatic theme and favicon switching.
 - [x] Audit app attribution and update shared text/voice builder identity; verify all three requested questions in live chat and routing tests.
 - [x] Improve model-aware streamed voice replies and fluid circular animation; verify all three live model responses with instrumented speech, follow-up listening, phone/desktop layouts, and 12 tests. Physical microphone/audio quality remains device-dependent.
+- [ ] Localize all app chrome with synchronized language switching, Arabic dialects and unchanged ZYRA identity.
+- [ ] Make new text and voice replies follow the selected language; verify live switching and targeted tests.
