@@ -12,6 +12,7 @@ import { resolveModel } from '@/lib/aiModels';
 import { useAuth } from '@/contexts/AuthContext';
 import { readVoiceStream } from '@/lib/voiceStream';
 import { ZyraMark } from '@/components/ZyraMark';
+import { selectedAssistantLanguage } from '@/lib/uiLanguage';
 
 type CallStatus = 'idle' | 'connecting' | 'listening' | 'processing' | 'speaking' | 'ended';
 interface VoiceTurn { id: string; role: 'user' | 'assistant'; content: string; }
@@ -152,13 +153,15 @@ export default function VoiceCall() {
       const controller = new AbortController();
       requestRef.current = controller;
       const model = resolveModel(loadPreferences().aiModel, Boolean(user && user.plan !== 'free'));
-      const languageReady = detectSpeechLanguage(userText, speechLanguageRef.current).then(value => { speechLanguageRef.current = value; });
+      const languageReady = selectedAssistantLanguage()
+        ? Promise.resolve().then(() => { speechLanguageRef.current = initialSpeechLanguage(lang, navigator.language); })
+        : detectSpeechLanguage(userText, speechLanguageRef.current).then(value => { speechLanguageRef.current = value; });
       const { data: sessionData } = await supabase.auth.getSession();
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/voice-chat`, {
         method: 'POST',
         signal: controller.signal,
         headers: { 'Content-Type': 'application/json', apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${sessionData.session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({ messages: [...history, { role: 'user', content: latestContent }], storeContext: stats, language: lang, model: model.id }),
+        body: JSON.stringify({ messages: [...history, { role: 'user', content: latestContent }], storeContext: stats, language: lang, languageSelected: selectedAssistantLanguage(), model: model.id }),
       });
       if (!response.ok) {
         const failure = await response.json().catch(() => ({}));

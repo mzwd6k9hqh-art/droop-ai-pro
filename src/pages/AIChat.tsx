@@ -27,6 +27,7 @@ import { ZyraMark } from '@/components/ZyraMark';
 import { loadPreferences } from '@/lib/preferences';
 import { loadIntegrations, addReminder, triggerIntegration } from '@/lib/integrations';
 import { addMemory, memoryForPrompt } from '@/lib/memory';
+import { selectedAssistantLanguage, translateUiText } from '@/lib/uiLanguage';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -148,6 +149,7 @@ Welcome them and present a store design concept with layout, categories, colors,
             messages: [{ role: 'user', content: initialPrompt }],
             storeUrl: storeContext.storeUrl || '',
             language: lang,
+            languageSelected: selectedAssistantLanguage(),
             preferences: loadPreferences(),
             integrations: loadIntegrations(),
             model: loadPreferences().aiModel,
@@ -294,6 +296,7 @@ Welcome them and present a store design concept with layout, categories, colors,
           messages: allMessages,
           storeUrl: storeContext?.storeUrl || '',
           language: lang,
+          languageSelected: selectedAssistantLanguage(),
           preferences: loadPreferences(),
           integrations: loadIntegrations(),
           model: loadPreferences().aiModel,
@@ -348,7 +351,7 @@ Welcome them and present a store design concept with layout, categories, colors,
         : err?.message?.includes('402')
         ? 'AI credits exhausted. Please add credits in Settings → Workspace → Usage.'
         : 'Sorry, something went wrong. Please try again.';
-      addMessage(convId, { role: 'assistant', content: msg });
+      addMessage(convId, { role: 'assistant', content: translateUiText(msg) });
     } finally {
       setIsTyping(false);
     }

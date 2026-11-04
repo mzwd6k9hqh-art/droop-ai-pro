@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth, PlanType } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { LANGUAGE_OPTIONS, type Language } from '@/lib/uiLanguage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -643,12 +644,10 @@ export default function Settings() {
       {/* Language */}
       <Section icon={<Globe className="h-5 w-5" />} tone="icon-info" title={t('settings.language')}>
         <Row title={t('settings.displayLanguage')} description={t('settings.displayLanguageDesc')}>
-          <Select value={language} onValueChange={(v) => setLanguage(v as 'en' | 'ar' | 'fr')}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+          <Select value={language} onValueChange={(v) => setLanguage(v as Language)}>
+            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="en">🇺🇸 English</SelectItem>
-              <SelectItem value="ar">🇸🇦 العربية</SelectItem>
-              <SelectItem value="fr">🇫🇷 Français</SelectItem>
+              {LANGUAGE_OPTIONS.map(option => <SelectItem key={option.code} value={option.code}>{option.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </Row>

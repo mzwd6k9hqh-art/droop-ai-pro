@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { messages, storeContext, language, model } = await req.json();
+    const { messages, storeContext, language, languageSelected, model } = await req.json();
     const profile = voiceModelProfile(model);
     if (!Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'messages must be an array' }), {
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
 Speak naturally — warm, conversational sentences, no markdown or bullet lists.
 ${profile.direction}
 You're on a live voice call, so avoid lists, code, or emoji. Be encouraging and proactive.
-${languageDirective(typeof language === 'string' ? language : 'en')}
+${languageDirective(typeof language === 'string' && /^[a-z]{2,3}(?:-[A-Za-z]{2,8})?$/.test(language) ? language : 'en', languageSelected === true)}
 ${storeContext ? `Store context: ${JSON.stringify(storeContext).slice(0, 500)}` : ''}
 ${BUILDER_IDENTITY}`;
 
