@@ -18,7 +18,7 @@ export function localizationPlugin(): Plugin {
         if (node.start != null && node.end != null) edits.push({ start: node.start, end: node.end, value });
       };
       const copyAttributes = new Set(['title', 'description', 'placeholder', 'aria-label', 'alt', 'label']);
-      const preserve = /(?:\b(?:user|conv|conversation|item|product|customer|message|msg|att|variant|storeConfig|config)\.(?:name|email|text|title|content|description|storeName)|\b(?:content|value|newMemory|partial|lastUser|userContent|storeName|description)\b)/;
+      const preserve = /(?:\b(?:user|conv|conversation|item|product|customer|message|msg|att|variant|storeConfig|config)\.(?:name|email|text|title|content|description|storeName)|^(?:content|value|newMemory|partial|lastUser|userContent|storeName|description)$)/;
       traverse(ast, {
         Function(path) {
           const node = path.node;
@@ -43,7 +43,8 @@ export function localizationPlugin(): Plugin {
           const expression = path.node.expression;
           if (expression.type === 'JSXEmptyExpression' || expression.start == null || expression.end == null) return;
           if (path.parent.type === 'JSXAttribute' && (path.parent.name.type !== 'JSXIdentifier' || !copyAttributes.has(path.parent.name.name))) return;
-          if (['JSXElement', 'JSXFragment', 'ArrowFunctionExpression', 'ObjectExpression', 'CallExpression'].includes(expression.type)) return;
+          if (['JSXElement', 'JSXFragment', 'ArrowFunctionExpression', 'ObjectExpression'].includes(expression.type)) return;
+          if (expression.type === 'CallExpression' && /\.map\(|\.render\(|statCards\[|earningsCards\[/.test(source.slice(expression.start, expression.end))) return;
           const text = source.slice(expression.start, expression.end);
           if (preserve.test(text)) return;
           add(expression, `__zyraTranslate(${text})`);
