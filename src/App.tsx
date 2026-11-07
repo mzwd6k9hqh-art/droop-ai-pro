@@ -24,6 +24,7 @@ import CustomerChat from "@/pages/CustomerChat";
 import Earnings from "@/pages/Earnings";
 import PaymentSuccess from "@/pages/PaymentSuccess";
 import PaymentCanceled from "@/pages/PaymentCanceled";
+import PublishedStore from "@/pages/PublishedStore";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="/voice-call" element={<VoiceCall />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/payment-canceled" element={<PaymentCanceled />} />
+                <Route path="/store/:storeId" element={<PublishedStore />} />
                 {/* Legacy auth routes redirect to onboarding */}
                 <Route path="/login" element={<Navigate to="/onboarding" replace />} />
                 <Route path="/register" element={<Navigate to="/onboarding" replace />} />

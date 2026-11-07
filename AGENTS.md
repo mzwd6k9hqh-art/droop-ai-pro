@@ -8,3 +8,4 @@ Voice calls stream selected-model Responses output and queue sentence-level brow
 Use franc and ISO language metadata for browser speech voice matching; browser recognition starts with the user's locale because browser SpeechRecognition cannot reliably auto-detect arbitrary spoken languages.
 Extend the existing user-owned webhook bridge for AI-service actions; require CORS-readable success and never send private provider keys from the browser.
 Preserve AI gateway failure status and safe upstream messages through tool follow-ups; show failed chat requests as alerts, not invented assistant replies, so billing and access failures remain actionable.
+Publish storefront snapshots only server-side after live Stripe payment verification, binding checkout to a private draft with a hashed browser capability token; public store routes read only activated snapshots so no-login publishing cannot be authorized by localStorage flags.

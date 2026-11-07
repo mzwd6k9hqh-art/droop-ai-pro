@@ -13,6 +13,8 @@ export default function PaymentSuccess() {
   const { t } = useLanguage();
   const [state, setState] = useState<'loading' | 'paid' | 'failed'>('loading');
   const [detail, setDetail] = useState<string>('');
+  const [storeUrl, setStoreUrl] = useState<string | null>(null);
+  const [failure, setFailure] = useState('');
 
   useEffect(() => {
     const sessionId = params.get('session_id');
@@ -33,14 +35,18 @@ export default function PaymentSuccess() {
           setDetail(res.plan);
         }
         if (res.kind === 'domain' && res.domain) {
-          const url = `https://${res.domain}`;
+          setDetail(res.domain);
+        }
+        if (res.kind === 'publish') {
+          if (!res.published || !res.storeId) { setState('failed'); return; }
+          const url = `${window.location.origin}/store/${res.storeId}`;
           localStorage.setItem('droop_store_published', 'true');
           localStorage.setItem('droop_store_published_url', url);
-          setDetail(res.domain);
+          setStoreUrl(url);
         }
         setState('paid');
       })
-      .catch(() => active && setState('failed'));
+      .catch((error: Error) => { if (active) { setFailure(error.message); setState('failed'); } });
     return () => {
       active = false;
     };
@@ -61,7 +67,8 @@ export default function PaymentSuccess() {
             <div className="h-14 w-14 mx-auto rounded-full bg-primary/15 flex items-center justify-center">
               <Check className="h-7 w-7 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">{t('pay.successTitle')}</h1>
+            <h1 className="text-2xl font-bold">{storeUrl ? 'Payment confirmed — your store is live!' : t('pay.successTitle')}</h1>
+            {storeUrl && <Button asChild variant="outline"><a href={storeUrl} target="_blank" rel="noopener noreferrer">Visit your store</a></Button>}
             <p className="text-sm text-muted-foreground">
               {detail ? `${t('pay.successBody')} — ${detail}` : t('pay.successBody')}
             </p>
@@ -82,9 +89,9 @@ export default function PaymentSuccess() {
               <AlertTriangle className="h-7 w-7 text-primary" />
             </div>
             <h1 className="text-2xl font-bold">{t('pay.failedTitle')}</h1>
-            <p className="text-sm text-muted-foreground">{t('pay.failedBody')}</p>
+            <p className="text-sm text-muted-foreground">{failure || t('pay.failedBody')}</p>
             <div className="flex gap-2">
-              <Button className="flex-1" variant="outline" onClick={() => navigate('/upgrade')}>
+              <Button className="flex-1" variant="outline" onClick={() => window.location.reload()}>
                 {t('pay.tryAgain')}
               </Button>
               <Button className="flex-1 gradient-button" onClick={() => navigate('/ai')}>

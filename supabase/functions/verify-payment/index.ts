@@ -1,5 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import Stripe from 'npm:stripe@17';
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { canPublish, tokenHash } from '../_shared/publishing.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -25,7 +27,20 @@ Deno.serve(async (req) => {
     const stripe = new Stripe(key, { apiVersion: '2024-12-18.acacia' });
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    const paid = session.payment_status === 'paid' || session.status === 'complete';
+    const paid = session.payment_status === 'paid' && session.status === 'complete';
+    let storeId: string | null = null;
+    if (session.metadata?.kind === 'publish') {
+      storeId = session.metadata.storeId;
+      if (!storeId || typeof body.publishToken !== 'string') throw new Error('Use the browser where you started publishing to confirm this payment.');
+      const db = createClient(Deno.env.get('SUPABASE_URL') || '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '');
+      const { data: draft, error } = await db.from('store_publish_drafts').select('*').eq('id', storeId).eq('checkout_session_id', session.id).eq('token_hash', await tokenHash(body.publishToken)).maybeSingle();
+      if (error || !draft) throw new Error('This checkout does not belong to your store.');
+      if (!canPublish(session, storeId)) {
+        return new Response(JSON.stringify({ paid: false, published: false, error: 'Payment is not successfully completed in live mode. Your store has not been published.' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      const { error: publishError } = await db.from('published_storefronts').upsert({ id: storeId, html: draft.html, store_name: draft.store_name, checkout_session_id: session.id }, { onConflict: 'id' });
+      if (publishError) throw new Error('Payment confirmed, but publishing failed. Return to this page to retry publishing without paying again.');
+    }
 
     return new Response(
       JSON.stringify({
@@ -35,6 +50,8 @@ Deno.serve(async (req) => {
         plan: session.metadata?.plan ?? null,
         domain: session.metadata?.domain ?? null,
         amountTotal: session.amount_total,
+        published: Boolean(storeId),
+        storeId,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
