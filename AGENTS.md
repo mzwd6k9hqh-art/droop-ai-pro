@@ -7,3 +7,4 @@ Share builder identity and direct-question routing between text and voice functi
 Voice calls stream selected-model Responses output and queue sentence-level browser speech when a matching voice exists; retain hosted TTS as fallback to minimize first-audio delay without request deadlines.
 Use franc and ISO language metadata for browser speech voice matching; browser recognition starts with the user's locale because browser SpeechRecognition cannot reliably auto-detect arbitrary spoken languages.
 Extend the existing user-owned webhook bridge for AI-service actions; require CORS-readable success and never send private provider keys from the browser.
+Preserve AI gateway failure status and safe upstream messages through tool follow-ups; show failed chat requests as alerts, not invented assistant replies, so billing and access failures remain actionable.

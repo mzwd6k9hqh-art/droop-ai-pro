@@ -28,6 +28,7 @@ import { loadPreferences } from '@/lib/preferences';
 import { loadIntegrations, addReminder, triggerIntegration } from '@/lib/integrations';
 import { addMemory, memoryForPrompt } from '@/lib/memory';
 import { selectedAssistantLanguage, translateUiText } from '@/lib/uiLanguage';
+import { aiErrorMessage } from '@/lib/aiError';
 
 const STORE_CONTEXT_KEY = 'droop_store_context';
 const STORE_CONFIG_KEY = 'droop_store_config';
@@ -51,6 +52,7 @@ export default function AIChat() {
   const [input, setInput] = useState('');
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const [showExport, setShowExport] = useState(false);
@@ -172,11 +174,8 @@ Welcome them and present a store design concept with layout, categories, colors,
           designVariants: data.designVariants,
           source: data.source,
         });
-      } catch {
-        const fallback = storeContext.hasStore
-          ? `Hi! I'll help you improve your store **${storeContext.storeUrl}**. What would you like to enhance?`
-          : `Hi! Let's build your store **${storeContext.storeName || storeContext.storeType || ''}** together! Just tell me what you want!`;
-        addMessage(activeId, { role: 'assistant', content: fallback });
+      } catch (error) {
+        setRequestError(await aiErrorMessage(error));
       } finally {
         setIsTyping(false);
       }
@@ -255,6 +254,7 @@ Welcome them and present a store design concept with layout, categories, colors,
     setInput('');
     setAttachments([]);
     setIsTyping(true);
+    setRequestError(null);
 
     try {
       // Build multimodal content for the current message
@@ -344,14 +344,8 @@ Welcome them and present a store design concept with layout, categories, colors,
         designVariants: data.designVariants,
         source: data.source,
       });
-    } catch (err: any) {
-      console.error('AI Chat error:', err);
-      const msg = err?.message?.includes('429')
-        ? 'Too many requests right now. Please wait a moment and try again.'
-        : err?.message?.includes('402')
-        ? 'AI credits exhausted. Please add credits in Settings → Workspace → Usage.'
-        : 'Sorry, something went wrong. Please try again.';
-      addMessage(convId, { role: 'assistant', content: translateUiText(msg) });
+    } catch (err: unknown) {
+      setRequestError(await aiErrorMessage(err));
     } finally {
       setIsTyping(false);
     }
@@ -515,6 +509,12 @@ Welcome them and present a store design concept with layout, categories, colors,
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
+
+        {requestError && (
+          <div role="alert" className="mx-4 mb-2 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-foreground">
+            {requestError}
+          </div>
+        )}
 
         {/* Limit reached banner */}
         {user && !isUnlimitedPlan() && getAiMessagesRemaining() === 0 && (

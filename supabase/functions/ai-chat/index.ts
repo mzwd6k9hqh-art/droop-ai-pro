@@ -2,6 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { languageDirective } from '../_shared/language.ts';
 import { BUILDER_IDENTITY, builderReply } from '../_shared/identity.ts';
+import { gatewayError } from '../_shared/gatewayError.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -435,11 +436,8 @@ async function callAI(messages: any[], useTools: boolean = true, model?: string)
   });
 
   if (!response.ok) {
-    if (response.status === 429) throw { status: 429, message: "تم تجاوز حد الطلبات، يرجى المحاولة لاحقاً." };
-    if (response.status === 402) throw { status: 402, message: "يرجى إضافة رصيد للمتابعة." };
-    const errorText = await response.text();
-    console.error("AI gateway error:", response.status, errorText);
-    throw new Error(`AI gateway returned ${response.status}`);
+    const payload = await response.json().catch(() => null);
+    throw gatewayError(response.status, payload);
   }
 
   return response.json();
@@ -641,6 +639,7 @@ serve(async (req) => {
           textContent = followUpData.choices?.[0]?.message?.content || "";
         } catch (e) {
           console.error("Follow-up call error:", e);
+          throw e;
         }
       }
 
@@ -698,7 +697,7 @@ serve(async (req) => {
     const status = error.status || 500;
     const message = error.message || "حدث خطأ غير متوقع";
     return new Response(
-      JSON.stringify({ error: message }),
+      JSON.stringify({ error: message, ...(error.props ? { props: error.props } : {}) }),
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
