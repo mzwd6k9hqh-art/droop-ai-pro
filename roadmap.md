@@ -15,3 +15,4 @@
 - [x] Make new text and voice requests carry explicit language selection and shared selected-dialect policy; 14 targeted tests pass.
 - [ ] Verify actual selected-language AI replies end to end — Lovable AI returned 402 (insufficient credits), so live AI verification remains blocked.
 - [x] Diagnose chat 402 using logs and credit balance; preserve safe upstream failures and clear loading with a visible error alert.
+- [ ] Gate store activation on server-verified Stripe payment and show publishing success — awaiting the publishing fee.
