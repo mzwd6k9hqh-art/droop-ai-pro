@@ -1,7 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
+import { aiErrorMessage } from './aiError';
 
 export type CheckoutRequest =
   | { kind: 'plan'; plan: 'starter' | 'pro' | 'premium' }
+  | { kind: 'publish'; html: string; storeName: string; publishToken: string }
   | { kind: 'domain'; domain: string };
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
@@ -53,7 +55,7 @@ export async function startCheckout(req: CheckoutRequest): Promise<string> {
       25000,
     );
 
-    if (error) throw new Error(error.message || 'Could not start checkout');
+    if (error) throw new Error(await aiErrorMessage(error));
     const url = data?.url as string | undefined;
     if (!url) throw new Error(data?.error || 'Could not start checkout');
 
@@ -78,17 +80,19 @@ export async function startCheckout(req: CheckoutRequest): Promise<string> {
 export interface VerifiedPayment {
   paid: boolean;
   status: string | null;
-  kind: 'plan' | 'domain' | null;
+  kind: 'plan' | 'domain' | 'publish' | null;
+  published?: boolean;
+  storeId?: string | null;
   plan: string | null;
   domain: string | null;
   amountTotal: number | null;
 }
 
 export async function verifyPayment(sessionId: string): Promise<VerifiedPayment> {
-  const { data, error } = await supabase.functions.invoke('verify-payment', {
-    body: { sessionId },
-  });
-  if (error) throw new Error(error.message || 'Could not verify payment');
+  const { data, error } = await withTimeout(supabase.functions.invoke('verify-payment', {
+    body: { sessionId, publishToken: localStorage.getItem('droop_publish_token') },
+  }), 25000);
+  if (error) throw new Error(await aiErrorMessage(error));
   if (data?.error) throw new Error(data.error);
   return data as VerifiedPayment;
 }

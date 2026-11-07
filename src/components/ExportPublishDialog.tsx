@@ -27,6 +27,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
   const [customDomain, setCustomDomain] = useState('');
   const [selectedTld, setSelectedTld] = useState('.com');
   const [purchasing, setPurchasing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   const baseSlug = (config.storeName || 'my-store')
     .replace(/[^a-zA-Z0-9\s-]/g, '')
@@ -45,13 +46,17 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
     toast.success('Store opened in a new tab');
   };
 
-  const handlePublishFree = () => {
-    // Publishing is free — go straight live, then offer optional domain upsell.
-    setPublishedUrl(freeUrl);
-    localStorage.setItem('droop_store_published', 'true');
-    localStorage.setItem('droop_store_published_url', freeUrl);
-    toast.success('Your store is live!');
-    setStep('domain');
+  const handlePublish = async () => {
+    setPurchasing(true);
+    setPublishError(null);
+    try {
+      const publishToken = localStorage.getItem('droop_publish_token') || crypto.randomUUID();
+      localStorage.setItem('droop_publish_token', publishToken);
+      const url = await startCheckout({ kind: 'publish', html: generateStoreHTML(config), storeName: config.storeName || getStoreName(), publishToken });
+      toast.success('Complete Stripe payment to publish your store.', { action: { label: 'Open checkout', onClick: () => window.open(url, '_blank', 'noopener,noreferrer') } });
+    } catch (error) {
+      setPublishError(error instanceof Error ? error.message : 'Could not start publishing payment.');
+    } finally { setPurchasing(false); }
   };
 
 
@@ -123,7 +128,7 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                 Export & Publish Your Store
               </DialogTitle>
               <DialogDescription>
-                Publish online instantly, download as HTML, or copy the code.
+                Publish after payment confirmation, download as HTML, or copy the code.
               </DialogDescription>
             </DialogHeader>
 
@@ -135,13 +140,14 @@ export function ExportPublishDialog({ open, onOpenChange, config }: Props) {
                     <Globe className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-sm">Publish Online Instantly</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">Get a live, shareable link in seconds</p>
+                    <h3 className="font-semibold text-sm">Publish Your Store — $1</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">One-time payment. Your store goes live only after Stripe confirms payment.</p>
                   </div>
                 </div>
-                <Button onClick={handlePublishFree} className="w-full gradient-button rounded-lg gap-2">
-                  <Rocket className="h-4 w-4" /> Publish Now
+                <Button onClick={handlePublish} disabled={purchasing} className="w-full gradient-button rounded-lg gap-2">
+                  <Rocket className="h-4 w-4" /> {purchasing ? 'Opening checkout…' : 'Pay $1 & Publish'}
                 </Button>
+                {publishError && <p role="alert" className="mt-3 text-sm text-destructive">{publishError}</p>}
               </div>
 
               {/* Download HTML */}
