@@ -235,6 +235,65 @@ export type Database = {
         }
         Relationships: []
       }
+      published_storefronts: {
+        Row: {
+          checkout_session_id: string
+          html: string
+          id: string
+          published_at: string
+          store_name: string
+        }
+        Insert: {
+          checkout_session_id: string
+          html: string
+          id: string
+          published_at?: string
+          store_name: string
+        }
+        Update: {
+          checkout_session_id?: string
+          html?: string
+          id?: string
+          published_at?: string
+          store_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "published_storefronts_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "store_publish_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      store_publish_drafts: {
+        Row: {
+          checkout_session_id: string | null
+          created_at: string
+          html: string
+          id: string
+          store_name: string
+          token_hash: string
+        }
+        Insert: {
+          checkout_session_id?: string | null
+          created_at?: string
+          html: string
+          id?: string
+          store_name: string
+          token_hash: string
+        }
+        Update: {
+          checkout_session_id?: string | null
+          created_at?: string
+          html?: string
+          id?: string
+          store_name?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       user_activity: {
         Row: {
           created_at: string
