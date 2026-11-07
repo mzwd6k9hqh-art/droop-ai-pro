@@ -10,5 +10,7 @@
 - [x] Apply uploaded dark and white-backed light ZYRA logos everywhere and verify automatic theme and favicon switching.
 - [x] Audit app attribution and update shared text/voice builder identity; verify all three requested questions in live chat and routing tests.
 - [x] Improve model-aware streamed voice replies and fluid circular animation; verify all three live model responses with instrumented speech, follow-up listening, phone/desktop layouts, and 12 tests. Physical microphone/audio quality remains device-dependent.
-- [ ] Localize all app chrome with synchronized language switching, Arabic dialects and unchanged ZYRA identity.
-- [ ] Make new text and voice replies follow the selected language; verify live switching and targeted tests.
+- [x] Restore six bundled language packs; verify immediate French/Moroccan settings switching, translated model descriptions, earnings navigation, unchanged ZYRA and RTL.
+- [ ] Complete every page/string and additional languages — full catalog translation remains blocked by exhausted Lovable AI credits; existing packs have partial coverage.
+- [x] Make new text and voice requests carry explicit language selection and shared selected-dialect policy; 14 targeted tests pass.
+- [ ] Verify actual selected-language AI replies end to end — Lovable AI returned 402 (insufficient credits), so live AI verification remains blocked.
